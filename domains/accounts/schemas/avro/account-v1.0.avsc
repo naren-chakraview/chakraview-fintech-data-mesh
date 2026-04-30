@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "Account",
+  "namespace": "com.chakra.accounts",
+  "version": "1.0",
+  "fields": [
+    {"name": "account_id", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "customer_name", "type": "string"},
+    {"name": "account_type", "type": {"type": "enum", "name": "AccountType", "symbols": ["CHECKING", "SAVINGS", "MONEY_MARKET"]}},
+    {"name": "currency", "type": "string"},
+    {"name": "balance", "type": "double"},
+    {"name": "available_balance", "type": "double"},
+    {"name": "status", "type": {"type": "enum", "name": "AccountStatus", "symbols": ["ACTIVE", "INACTIVE", "CLOSED"]}},
+    {"name": "opened_date", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "last_updated", "type": {"type": "long", "logicalType": "timestamp-millis"}}
+  ]
+}

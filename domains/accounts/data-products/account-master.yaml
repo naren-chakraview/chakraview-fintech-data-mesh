@@ -1,0 +1,52 @@
+---
+name: account-master
+version: "1.0"
+owner: accounts-domain
+owner_email: accounts@chakra.fintech
+domain: accounts
+
+description: |
+  Master account data and balances. Core reference for all account-related analytics.
+  Includes account hierarchies, customer information, and real-time balance snapshots.
+  Used for KYC verification, regulatory reporting, balance reconciliation.
+
+tables:
+  - name: accounts
+    iceberg_table: accounts.accounts
+    schema_version: "1.0"
+    partitions: [year, month, day]
+    doc: "Master account records"
+
+  - name: account_balances
+    iceberg_table: accounts.account_balances
+    schema_version: "1.0"
+    partitions: [year, month, day]
+    doc: "Daily account balance snapshots"
+
+sla:
+  freshness:
+    value: 10
+    unit: minutes
+  availability:
+    value: 99.95
+    unit: percent
+  completeness:
+    value: 100
+    unit: percent
+
+access_policy:
+  default: deny
+  approval_required: true
+  approval_sla_hours: 4
+  columns:
+    - name: account_id
+      classification: pii
+    - name: customer_name
+      classification: pii
+    - name: balance
+      classification: sensitive
+
+tags: [reference-data, compliance-critical, sox-relevant]
+retention_policy:
+  value: 3
+  unit: years

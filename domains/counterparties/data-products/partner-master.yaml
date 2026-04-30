@@ -1,0 +1,44 @@
+---
+name: partner-master
+version: "1.0"
+owner: counterparties-domain
+owner_email: counterparties@chakra.fintech
+domain: counterparties
+
+description: |
+  Master data for merchants, banks, and counterparties. Reference data for transaction processing.
+  Includes credit limits, routing information, and relationship details.
+
+tables:
+  - name: merchants
+    iceberg_table: counterparties.merchants
+    schema_version: "1.0"
+    partitions: [year, month]
+    doc: "Merchant master data"
+
+  - name: bank_relationships
+    iceberg_table: counterparties.bank_relationships
+    schema_version: "1.0"
+    partitions: [year, month]
+    doc: "Bank counterparty relationships and limits"
+
+sla:
+  freshness:
+    value: 60
+    unit: minutes
+  availability:
+    value: 99.9
+    unit: percent
+  completeness:
+    value: 100
+    unit: percent
+
+access_policy:
+  default: deny
+  approval_required: true
+  approval_sla_hours: 8
+
+tags: [reference-data, low-velocity]
+retention_policy:
+  value: 2
+  unit: years

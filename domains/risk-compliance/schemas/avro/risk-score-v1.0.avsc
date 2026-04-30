@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "RiskScore",
+  "namespace": "com.chakra.risk",
+  "version": "1.0",
+  "fields": [
+    {"name": "transaction_id", "type": "string"},
+    {"name": "account_id", "type": "string"},
+    {"name": "fraud_score", "type": "double"},
+    {"name": "risk_level", "type": {"type": "enum", "name": "RiskLevel", "symbols": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]}},
+    {"name": "kyc_status", "type": {"type": "enum", "name": "KYCStatus", "symbols": ["APPROVED", "PENDING", "REJECTED"]}},
+    {"name": "sanctions_match", "type": "boolean"},
+    {"name": "aml_flag", "type": "boolean"},
+    {"name": "evaluated_at", "type": {"type": "long", "logicalType": "timestamp-millis"}}
+  ]
+}

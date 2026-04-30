@@ -1,0 +1,48 @@
+---
+name: risk-scores
+version: "1.0"
+owner: risk-compliance-domain
+owner_email: risk@chakra.fintech
+domain: risk-compliance
+
+description: |
+  Fraud, AML, and counterparty risk scores. Primary input for real-time decision engines.
+  Includes KYC verdicts, sanctions matches, and compliance flags.
+
+tables:
+  - name: fraud_scores
+    iceberg_table: risk_compliance.fraud_scores
+    schema_version: "1.0"
+    partitions: [year, month, day]
+    doc: "Real-time fraud risk scores per transaction"
+
+  - name: kyc_verdicts
+    iceberg_table: risk_compliance.kyc_verdicts
+    schema_version: "1.0"
+    partitions: [year, month]
+    doc: "KYC and AML verification results"
+
+sla:
+  freshness:
+    value: 10
+    unit: minutes
+  availability:
+    value: 99.99
+    unit: percent
+  completeness:
+    value: 100
+    unit: percent
+
+access_policy:
+  default: deny
+  approval_required: true
+  approval_sla_hours: 2
+  columns:
+    - name: fraud_score
+      classification: sensitive
+
+tags: [compliance-critical, real-time, regulatory]
+retention_policy:
+  value: 10
+  unit: years
+  rationale: "AML and SOX long-term audit requirements"

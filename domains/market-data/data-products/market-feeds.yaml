@@ -1,0 +1,44 @@
+---
+name: market-feeds
+version: "1.0"
+owner: market-data-domain
+owner_email: marketdata@chakra.fintech
+domain: market-data
+
+description: |
+  Real-time market data feeds: FX rates, bond prices, equity indices.
+  External data integrated for risk calculations and regulatory reporting.
+
+tables:
+  - name: fx_rates
+    iceberg_table: market_data.fx_rates
+    schema_version: "1.0"
+    partitions: [year, month, day, hour]
+    doc: "Foreign exchange rates (high-frequency)"
+
+  - name: bond_prices
+    iceberg_table: market_data.bond_prices
+    schema_version: "1.0"
+    partitions: [year, month, day]
+    doc: "Bond pricing data"
+
+sla:
+  freshness:
+    value: 1
+    unit: minutes
+  availability:
+    value: 99.95
+    unit: percent
+  completeness:
+    value: 99
+    unit: percent
+
+access_policy:
+  default: deny
+  approval_required: false
+  columns: []
+
+tags: [external-feed, real-time, high-frequency]
+retention_policy:
+  value: 1
+  unit: years
