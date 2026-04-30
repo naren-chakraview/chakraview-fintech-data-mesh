@@ -58,7 +58,7 @@ Error: java.lang.OutOfMemoryError: Java heap space
 graph TD
     A["Fix"]
     A --> A1["Increase executor memory"]
-    A --> A2["kubectl set resources deployment transaction-ingest-job--limits=memory=32Gi --requests=memory=16Gi"]
+    A --> A2["kubectl set resources deployment<br/>transaction-ingest-job limits and requests"]
     A --> A3["Restart job"]
 ```
 
@@ -71,9 +71,9 @@ Check: kafka-topics.sh --bootstrap-server kafka:9092 --list
 ```mermaid
 graph TD
     A["If no response"]
-    A --> A1["Check broker status: kubectl get pods kafka-0, kafka-1, kafka-2"]
-    A --> A2["If any pod not running: kubectl logs kafka-0"]
-    A --> A3["Restart: kubectl delete pod kafka-0PVC persists data"]
+    A --> A1["Check broker status:<br/>kubectl get pods kafka-0, kafka-1"]
+    A --> A2["If any pod not running:<br/>kubectl logs kafka-0"]
+    A --> A3["Restart: kubectl delete pod kafka-0<br/>(PVC persists data)"]
     A --> A4["Wait 5 min for recovery"]
 ```
 
@@ -86,14 +86,14 @@ Check: curl http://iceberg-catalog:8181/health
 ```mermaid
 graph TD
     A["If not 200 OK"]
-    A --> A1["Restart catalog: kubectl rollout restart deployment iceberg-catalog"]
-    A --> A2["If still down, check logs: kubectl logs -f pod/iceberg-catalog-xxxxx"]
-    A --> A3["May be: S3/MinIO connectivity, memory, or corruption"]
+    A --> A1["Restart catalog:<br/>kubectl rollout restart deployment<br/>iceberg-catalog"]
+    A --> A2["If still down, check logs:<br/>kubectl logs pod/iceberg-catalog"]
+    A --> A3["May be: S3 connectivity, memory,<br/>or corruption"]
     
     B["Recovery"]
-    B --> B1["Stop ingest job prevent more writes"]
-    B --> B2["kubectl patch deployment transaction-ingest-job-p '{spec:replicas:0}'"]
-    B --> B3["Restart catalog wait for recovery"]
+    B --> B1["Stop ingest job<br/>prevent more writes"]
+    B --> B2["kubectl patch deployment<br/>transaction-ingest-job"]
+    B --> B3["Restart catalog<br/>wait for recovery"]
     B --> B4["Restart ingest job"]
 ```
 
@@ -126,14 +126,14 @@ Check: Kafka lag metric should be < 30 sec normally
 ```mermaid
 graph TD
     A["If lag is increasing"]
-    A --> A1["Verify: ingest_records_total increasing steadily?"]
-    A --> A2["Calculate: messages_per_minute = lag_now - lag_5min_ago / 5"]
-    A --> A3["If > 200K msg/min 2x normal 100K"]
-    A3 --> A3a["This is expected; Spark will catch up"]
-    A3 --> A3b["Monitor lag: should decrease within 30 min"]
-    A3 --> A3c["If lag continues increasing: Scale Spark"]
-    A3 --> A3d["kubectl scale deployment transaction-ingest-job --replicas=2"]
-    A --> A4["Verify SLA still met after scaling"]
+    A --> A1["Verify: ingest_records_total<br/>increasing steadily?"]
+    A --> A2["Calculate: messages per minute<br/>from lag over 5 minutes"]
+    A --> A3["If greater than 200K per min<br/>2x normal load"]
+    A3 --> A3a["This is expected;<br/>Spark will catch up"]
+    A3 --> A3b["Monitor lag: should decrease<br/>within 30 minutes"]
+    A3 --> A3c["If lag continues increasing:<br/>Scale Spark"]
+    A3 --> A3d["kubectl scale deployment<br/>transaction-ingest-job"]
+    A --> A4["Verify SLA still met<br/>after scaling"]
 ```
 
 ### Resolution Steps Priority Order
@@ -141,12 +141,12 @@ graph TD
 ```mermaid
 graph TD
     A["Troubleshooting Flow"]
-    A --> A1["1. Is ingest job running?→ Restart if needed"]
-    A1 --> A2["2. Is Kafka healthy?→ Restart brokers if needed"]
-    A2 --> A3["3. Is catalog healthy?→ Restart catalog"]
-    A3 --> A4["4. Is there network connectivity?→ Check DNS, policies"]
-    A4 --> A5["5. Is Spark slow?→ Check CPU/memory, scale if needed"]
-    A5 --> A6["6. Is there a volume spike?→ Temporarily scale, then analyze"]
+    A --> A1["1. Is ingest job running?<br/>Restart if needed"]
+    A1 --> A2["2. Is Kafka healthy?<br/>Restart brokers if needed"]
+    A2 --> A3["3. Is catalog healthy?<br/>Restart catalog"]
+    A3 --> A4["4. Is there network connectivity?<br/>Check DNS and policies"]
+    A4 --> A5["5. Is Spark slow?<br/>Check CPU and memory"]
+    A5 --> A6["6. Is there a volume spike?<br/>Scale, then analyze"]
 ```
 
 ### Prevention
@@ -156,9 +156,9 @@ graph TD
 ```mermaid
 graph TD
     A["Alert Thresholds"]
-    A --> A1["data_freshness_sla_warningCondition: data_freshness_minutes > 360% of 5-min SLAAction: Page on-call, investigate"]
-    A --> A2["kafka_lag_criticalCondition: kafka_lag_seconds > 60Action: Page on-call"]
-    A --> A3["ingest_errors_highCondition: rate ingest_errors_total[5m] > 0.01>1% errorsAction: Page on-call"]
+    A --> A1["freshness warning:<br/>data age greater than 5 min SLA<br/>Action: Page on-call"]
+    A --> A2["kafka lag critical:<br/>lag greater than 60 seconds<br/>Action: Page on-call"]
+    A --> A3["ingest errors high:<br/>error rate greater than 1 percent<br/>Action: Page on-call"]
 ```
 
 **Health checks** (automated):

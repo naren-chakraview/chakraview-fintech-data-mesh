@@ -26,12 +26,12 @@ Traditional Parquet + Hive metastore struggles with schema changes (requires ful
 ```mermaid
 graph TD
     A["Iceberg provides"]
-    A --> A1["Schema evolution add/drop/rename columns without rewrite"]
-    A --> A2["ACID transactions atomic snapshot commits"]
-    A --> A3["Time-travel query historical snapshots for audits"]
-    A --> A4["Partition pruning cost-optimized scans"]
-    A --> A5["Hidden partitions abstraction over partition scheme"]
-    A --> A6["Compatibility works with Spark, Trino, Flink"]
+    A --> A1["Schema evolution:<br/>add, drop, rename columns"]
+    A --> A2["ACID transactions:<br/>atomic snapshot commits"]
+    A --> A3["Time-travel:<br/>query historical snapshots"]
+    A --> A4["Partition pruning:<br/>cost-optimized scans"]
+    A --> A5["Hidden partitions:<br/>abstraction layer"]
+    A --> A6["Compatibility:<br/>Spark, Trino, Flink"]
 ```
 
 ---
@@ -73,22 +73,22 @@ graph TD
 
 ```mermaid
 graph TD
-    A["7 years of transaction data 1B records/year"]
+    A["7 years of transaction data<br/>1B records per year"]
     
     B["Row-oriented Parquet"]
     A --> B
-    B --> B1["Uncompressed: 350GB 50 bytes per record"]
+    B --> B1["Uncompressed: 350GB<br/>at 50 bytes per record"]
     B --> B2["With compression: 140GB"]
-    B --> B3["S3 cost: $0.023/GB/month = $3.22K/month"]
+    B --> B3["S3 cost: 0.023 per GB per month<br/>= 3.22K per month"]
     
     C["Iceberg columnar"]
     A --> C
-    C --> C1["Uncompressed: 150GB smaller due to column ordering"]
-    C --> C2["With compression: 100GB better compression per column"]
-    C --> C3["S3 cost: $0.023/GB/month = $2.30K/month"]
+    C --> C1["Uncompressed: 150GB<br/>due to column ordering"]
+    C --> C2["With compression: 100GB<br/>better compression"]
+    C --> C3["S3 cost: 0.023 per GB per month<br/>= 2.30K per month"]
     
-    D["Savings: ~$1K/month per domain, $5K/month company-wide"]
-    E["Over 7 years: $420K savings for transactions domain alone"]
+    D["Savings: about 1K per month<br/>per domain"]
+    E["Over 7 years: 420K savings<br/>for transactions domain"]
 ```
 
 ### Time-Travel for Compliance

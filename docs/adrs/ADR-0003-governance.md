@@ -27,14 +27,14 @@ Traditional approaches:
 
 ```mermaid
 graph TD
-    A["User query: SELECT account_id, amount FROM transactions"]
+    A["User query: SELECT account_id, amount<br/>FROM transactions"]
     A --> B["Spark SQL Parser"]
     B --> C["OPA Policy Evaluator"]
-    C --> C1["Load: platform/governance/opa-policies/abac.rego"]
-    C --> C2["Evaluate: Can user access these columns?"]
+    C --> C1["Load: platform/governance/<br/>opa-policies/abac.rego"]
+    C --> C2["Evaluate: Can user access<br/>these columns?"]
     C --> C3["Check: Is masking required?"]
     C --> C4["Check: Should query be audited?"]
-    C --> C5["Decision: ALLOW + MASK account_id +LOG TO ELASTICSEARCH"]
+    C --> C5["Decision: ALLOW, MASK account_id,<br/>LOG TO ELASTICSEARCH"]
     C5 --> D["Spark Execution"]
     D --> D1["Read data"]
     D --> D2["Apply masking via UDF"]

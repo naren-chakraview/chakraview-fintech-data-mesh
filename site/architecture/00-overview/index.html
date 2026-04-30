@@ -1927,20 +1927,20 @@
 <pre class="mermaid"><code>graph TB
     subgraph org["Organization Structure (Decentralized)"]
         direction TB
-        T["&lt;b&gt;Transactions Domain&lt;/b&gt;- transaction_feed- 5-min freshness- 7yr retention"]
-        R["&lt;b&gt;Risk/Compliance Domain&lt;/b&gt;- fraud_scores- 10-min freshness- 10yr retention"]
-        A["&lt;b&gt;Accounts Domain&lt;/b&gt;- account_master- 10-min freshness- 3yr retention"]
-        C["&lt;b&gt;Counterparties Domain&lt;/b&gt;- merchant_master- 60-min freshness- 2yr retention"]
-        M["&lt;b&gt;Market Data Domain&lt;/b&gt;- fx_rates- 1-min freshness- 1yr retention"]
+        T["Transactions Domain (5min/7yr)"]
+        R["Risk/Compliance (10min/10yr)"]
+        A["Accounts Domain (10min/3yr)"]
+        C["Counterparties (60min/2yr)"]
+        M["Market Data (1min/1yr)"]
     end
 
     subgraph plat["Platform Layer (Federated)"]
         direction LR
-        GOV["&lt;b&gt;Governance&lt;/b&gt;OPA policies"]
-        DISC["&lt;b&gt;Discovery&lt;/b&gt;Self-service portal"]
-        ANA["&lt;b&gt;Analytics&lt;/b&gt;Spark SQL"]
-        OBS["&lt;b&gt;Observability&lt;/b&gt;SLO dashboards"]
-        STOR["&lt;b&gt;Storage&lt;/b&gt;Iceberg lakehouse"]
+        GOV["Governance: OPA"]
+        DISC["Discovery: Portal"]
+        ANA["Analytics: Spark SQL"]
+        OBS["Observability: SLOs"]
+        STOR["Storage: Iceberg"]
     end
 
     T --&gt; GOV

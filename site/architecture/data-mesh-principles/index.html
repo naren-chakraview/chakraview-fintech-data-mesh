@@ -2188,16 +2188,16 @@ This reintroduces the waterfall bottleneck data mesh eliminates. Instead, enforc
 <pre class="mermaid"><code>graph TD
     A["OPA Evaluation"]
     A --&gt; A1["User role: external_analyst"]
-    A --&gt; A2["Data classification: pii fraud_score is internal"]
+    A --&gt; A2["Data classification: internal&lt;br/&gt;fraud_score"]
     A --&gt; A3["Action: read"]
-    A --&gt; A4["Result: DENY external analyst + restricted data"]</code></pre>
+    A --&gt; A4["Result: DENY - external analyst&lt;br/&gt;and restricted data"]</code></pre>
 <p>Query 2: "Can I query transactions.merchant_id?"</p>
 <pre class="mermaid"><code>graph TD
     B["OPA Evaluation"]
     B --&gt; B1["User role: external_analyst"]
-    B --&gt; B2["Data classification: pii"]
+    B --&gt; B2["Data classification: PII"]
     B --&gt; B3["Action: read"]
-    B --&gt; B4["Masking rule applies: Show partial first 4 chars"]
+    B --&gt; B4["Masking rule applies:&lt;br/&gt;Show partial first 4 chars"]
     B --&gt; B5["Audit: Log access"]
     B --&gt; B6["Result: ALLOW with masking"]</code></pre>
 <h3 id="benefits_1">Benefits<a class="headerlink" href="#benefits_1" title="Permanent link">&para;</a></h3>

@@ -13,18 +13,18 @@ Production-grade scaling strategies for each domain and component.
 ```mermaid
 graph TD
     A["Domain: Transactions"]
-    A --> A1["Partition key: account_id or transaction_id for ordering"]
+    A --> A1["Partition key: account_id<br/>or transaction_id"]
     A --> A2["Initial: 10 partitions"]
-    A --> A3["Target throughput: 100K tx/min"]
-    A --> A4["Messages per partition: 10K/min"]
-    A --> A5["Scaling: Add partitions if any partition > 20K/min"]
+    A --> A3["Target: 100K tx per minute"]
+    A --> A4["Per partition: 10K per minute"]
+    A --> A5["Scaling: Add partitions if<br/>any exceeds 20K per minute"]
     
     B["Domain: Market Data"]
-    B --> B1["Partition key: currency_pair ensures order per pair"]
+    B --> B1["Partition key: currency_pair<br/>ensures order"]
     B --> B2["Initial: 10 partitions"]
-    B --> B3["Target throughput: 10K rates/min"]
-    B --> B4["Messages per partition: 1K/min"]
-    B --> B5["Scaling: Add partitions if throughput > 15K/min"]
+    B --> B3["Target: 10K rates per minute"]
+    B --> B4["Per partition: 1K per minute"]
+    B --> B5["Scaling: Add partitions if<br/>throughput exceeds 15K per minute"]
 ```
 
 **Increase Partitions**:

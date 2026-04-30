@@ -2026,12 +2026,12 @@
 <h3 id="key-features-used">Key Features Used<a class="headerlink" href="#key-features-used" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD
     A["Iceberg provides"]
-    A --&gt; A1["Schema evolution add/drop/rename columns without rewrite"]
-    A --&gt; A2["ACID transactions atomic snapshot commits"]
-    A --&gt; A3["Time-travel query historical snapshots for audits"]
-    A --&gt; A4["Partition pruning cost-optimized scans"]
-    A --&gt; A5["Hidden partitions abstraction over partition scheme"]
-    A --&gt; A6["Compatibility works with Spark, Trino, Flink"]</code></pre>
+    A --&gt; A1["Schema evolution:&lt;br/&gt;add, drop, rename columns"]
+    A --&gt; A2["ACID transactions:&lt;br/&gt;atomic snapshot commits"]
+    A --&gt; A3["Time-travel:&lt;br/&gt;query historical snapshots"]
+    A --&gt; A4["Partition pruning:&lt;br/&gt;cost-optimized scans"]
+    A --&gt; A5["Hidden partitions:&lt;br/&gt;abstraction layer"]
+    A --&gt; A6["Compatibility:&lt;br/&gt;Spark, Trino, Flink"]</code></pre>
 <hr />
 <h2 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h2>
 <h3 id="schema-evolution-without-rewrites">Schema Evolution Without Rewrites<a class="headerlink" href="#schema-evolution-without-rewrites" title="Permanent link">&para;</a></h3>
@@ -2061,22 +2061,22 @@
 - Result: Duplicates ❌ (need deduplication logic)</p>
 <h3 id="cost-columnar-compression">Cost Columnar Compression<a class="headerlink" href="#cost-columnar-compression" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD
-    A["7 years of transaction data 1B records/year"]
+    A["7 years of transaction data&lt;br/&gt;1B records per year"]
 
     B["Row-oriented Parquet"]
     A --&gt; B
-    B --&gt; B1["Uncompressed: 350GB 50 bytes per record"]
+    B --&gt; B1["Uncompressed: 350GB&lt;br/&gt;at 50 bytes per record"]
     B --&gt; B2["With compression: 140GB"]
-    B --&gt; B3["S3 cost: $0.023/GB/month = $3.22K/month"]
+    B --&gt; B3["S3 cost: 0.023 per GB per month&lt;br/&gt;= 3.22K per month"]
 
     C["Iceberg columnar"]
     A --&gt; C
-    C --&gt; C1["Uncompressed: 150GB smaller due to column ordering"]
-    C --&gt; C2["With compression: 100GB better compression per column"]
-    C --&gt; C3["S3 cost: $0.023/GB/month = $2.30K/month"]
+    C --&gt; C1["Uncompressed: 150GB&lt;br/&gt;due to column ordering"]
+    C --&gt; C2["With compression: 100GB&lt;br/&gt;better compression"]
+    C --&gt; C3["S3 cost: 0.023 per GB per month&lt;br/&gt;= 2.30K per month"]
 
-    D["Savings: ~$1K/month per domain, $5K/month company-wide"]
-    E["Over 7 years: $420K savings for transactions domain alone"]</code></pre>
+    D["Savings: about 1K per month&lt;br/&gt;per domain"]
+    E["Over 7 years: 420K savings&lt;br/&gt;for transactions domain"]</code></pre>
 <h3 id="time-travel-for-compliance">Time-Travel for Compliance<a class="headerlink" href="#time-travel-for-compliance" title="Permanent link">&para;</a></h3>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- Auditors need to reconstruct state from specific date</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>

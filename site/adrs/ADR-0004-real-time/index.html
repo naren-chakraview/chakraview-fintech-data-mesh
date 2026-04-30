@@ -2139,14 +2139,14 @@
 <p><strong>Adopt hybrid strategy: Kafka (hot path) + Iceberg (cold path)</strong></p>
 <pre class="mermaid"><code>graph TD
     A["Events occur"]
-    A --&gt; B["Kafka Topic real-time, 7-day retention"]
-    B --&gt; B1["Consumers: Fraud detection, pricing engineneed &lt; 1-second latency"]
-    B --&gt; B2["Latency: &lt; 100ms"]
-    B --&gt; C["Spark Structured Streamingmicro-batch every 5 minutes"]
-    C --&gt; C1["Checkpoint: Ensures exactly-once delivery"]
-    C --&gt; D["Iceberg Table cold path, 7-year retention"]
-    D --&gt; D1["Consumers: Analysts, compliancecan tolerate 5-minute lag"]
-    D --&gt; D2["Cost: 60% cheaper than Kafka retention"]
+    A --&gt; B["Kafka Topic - real-time&lt;br/&gt;7-day retention"]
+    B --&gt; B1["Consumers: Fraud detection,&lt;br/&gt;pricing engine"]
+    B --&gt; B2["Latency requirement: &amp;lt; 100ms"]
+    B --&gt; C["Spark Structured Streaming&lt;br/&gt;micro-batch every 5 minutes"]
+    C --&gt; C1["Checkpoint: Ensures&lt;br/&gt;exactly-once delivery"]
+    C --&gt; D["Iceberg Table - cold path&lt;br/&gt;7-year retention"]
+    D --&gt; D1["Consumers: Analysts, compliance&lt;br/&gt;can tolerate 5-minute lag"]
+    D --&gt; D2["Cost: 60% cheaper than Kafka"]
     D --&gt; D3["Latency: 5 minutes"]</code></pre>
 <h3 id="trade-off">Trade-Off<a class="headerlink" href="#trade-off" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2188,26 +2188,26 @@
 <h3 id="scenario-1b-transactionsyear-7-year-retention">Scenario: 1B transactions/year × 7-year retention<a class="headerlink" href="#scenario-1b-transactionsyear-7-year-retention" title="Permanent link">&para;</a></h3>
 <p><strong>Option 1: Pure Kafka</strong> (7-day retention, cluster costs)</p>
 <pre class="mermaid"><code>graph TD
-    A["Kafka cluster: 5 brokers × 10TB storage × $2K/month/TB"]
-    A --&gt; B["= 5 × 10 × $2,000 = $100K/month"]
-    B --&gt; C["Over 7 years: $8.4M"]</code></pre>
+    A["Kafka cluster: 5 brokers&lt;br/&gt;10TB storage at 2K per TB/month"]
+    A --&gt; B["5 x 10 x 2000 = 100K per month"]
+    B --&gt; C["Over 7 years: 8.4M total"]</code></pre>
 <p><strong>Option 2: Pure Iceberg</strong> (7-year retention, S3 storage)</p>
 <pre class="mermaid"><code>graph TD
-    A["Data size: 1B tx/yr × 50 bytes = 50GB/yr raw"]
-    A --&gt; B["Iceberg compressed: 60% reduction = 20GB/yr"]
+    A["Data size: 1B tx per year&lt;br/&gt;at 50 bytes each = 50GB raw"]
+    A --&gt; B["Iceberg compressed:&lt;br/&gt;60 percent reduction = 20GB per year"]
     B --&gt; C["7 years: 140GB total"]
-    C --&gt; D["S3 cost: 140GB × $0.023/GB/month = $3.22K/month"]
-    D --&gt; E["Over 7 years: $270K"]</code></pre>
+    C --&gt; D["S3 cost: 140GB at 0.023 per GB&lt;br/&gt;per month = 3.22K per month"]
+    D --&gt; E["Over 7 years: 270K total"]</code></pre>
 <p><strong>Option 3: Hybrid Kafka 7-day + Iceberg 7-year</strong></p>
 <pre class="mermaid"><code>graph TD
-    A["Kafka cluster: 5 brokers × 0.5TB storage 7-day, not years"]
-    A --&gt; B["= 5 × 0.5 × $2,000 = $5K/month"]
+    A["Kafka cluster: 5 brokers&lt;br/&gt;0.5TB storage, 7-day retention"]
+    A --&gt; B["Cost: 5 x 0.5 x 2000&lt;br/&gt;= 5K per month"]
 
     C["Iceberg S3: 140GB"]
-    C --&gt; D["= $3.22K/month"]
+    C --&gt; D["Cost: 3.22K per month"]
 
-    E["Total: $8.22K/month = $98K/year"]
-    E --&gt; F["Over 7 years: $686K"]</code></pre>
+    E["Total: 8.22K per month&lt;br/&gt;= 98K per year"]
+    E --&gt; F["Over 7 years: 686K total"]</code></pre>
 <p><strong>Savings</strong>: Hybrid is 31x cheaper than pure Kafka, 2.5x more expensive than pure Iceberg but 31x faster for fraud detection.</p>
 <h3 id="latency-trade-off">Latency Trade-Off<a class="headerlink" href="#latency-trade-off" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD

@@ -120,7 +120,7 @@ graph TD
     A["Data Freshness per Domain"]
     A --> A1["Transactions: 2.3 min / 5 min SLA GREEN"]
     A --> A2["Accounts: 8.5 min / 10 min SLA YELLOW"]
-    A --> A3["Risk/Compliance: 4.1 min / 10 min SLA GREEN"]
+    A --> A3["Risk - Compliance: 4.1 min / 10 min SLA GREEN"]
     A --> A4["Market Data: 0.8 min / 1 min SLA GREEN"]
     A --> A5["Counterparties: 45 min / 60 min SLA GREEN"]
 ```
@@ -133,7 +133,7 @@ graph TD
     A --> A1["Transactions: 150K records/min steady"]
     A --> A2["Market Data: 10K rates/min spikes during trading hours"]
     A --> A3["Accounts: 100 records/min flat line, low velocity"]
-    A --> A4["Risk/Compliance: 50K scores/min spiky, depends on transaction volume"]
+    A --> A4["Risk - Compliance: 50K scores/min spiky, depends on transaction volume"]
 ```
 
 **3. Query Duration Time Series**
@@ -142,7 +142,7 @@ graph TD
 graph TD
     A["P95 query latency over time"]
     A --> A1["Transactions: 8.5 sec stable"]
-    A --> A2["Risk/Compliance: 12.3 sec slower due to joins"]
+    A --> A2["Risk - Compliance: 12.3 sec slower due to joins"]
     A --> A3["Accounts: 2.1 sec small table"]
     A --> A4["Alert if P95 > 30 sec performance degradation"]
 ```
@@ -154,7 +154,7 @@ graph TD
     A["Percentage of records passing quality rules"]
     A --> A1["Transactions: 99.8% pass"]
     A --> A2["Accounts: 100% pass strict validation"]
-    A --> A3["Risk/Compliance: 99.2% pass some edge cases"]
+    A --> A3["Risk - Compliance: 99.2% pass some edge cases"]
     A --> A4["Counterparties: 99.9% pass"]
     A --> A5["Market Data: 98.5% pass missing rates during gaps"]
 ```
@@ -167,7 +167,7 @@ graph TD
     A --> A1["Transactions: 15 sec under 30 sec SLA"]
     A --> A2["Market Data: 3 sec very tight"]
     A --> A3["Accounts: 45 sec acceptable, lower velocity"]
-    A --> A4["Risk/Compliance: 25 sec acceptable, lower volume"]
+    A --> A4["Risk - Compliance: 25 sec acceptable, lower volume"]
 ```
 
 **6. Ingest Errors Time Series**
@@ -178,7 +178,7 @@ graph TD
     A --> A1["Transactions: 0 errors healthy"]
     A --> A2["Market Data: 2-5 errors/min acceptable, high throughput"]
     A --> A3["Accounts: 0 errors stable reference data"]
-    A --> A4["Risk/Compliance: 1-2 errors/min model retries"]
+    A --> A4["Risk - Compliance: 1-2 errors/min model retries"]
     A --> A5["Counterparties: 0 errors low velocity"]
 ```
 
@@ -253,7 +253,7 @@ Panel 3: Approval SLA Compliance
 
 Panel 4: Retention Policy Enforcement
 ├── Transactions (7-year policy): ✓ Enforced
-├── Risk/Compliance (10-year policy): ✓ Enforced
+├── Risk - Compliance (10-year policy): ✓ Enforced
 ├── Market Data (1-year policy): ✓ Enforced
 ├── Snapshots auto-deleted: 45 (90+ days old)
 └── Status: All policies enforced
