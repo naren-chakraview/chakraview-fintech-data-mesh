@@ -26,24 +26,26 @@ Iceberg separates metadata (schema, snapshots) from data files. This enables:
 
 ## Iceberg Architecture: Metadata + Data
 
-```
-S3 Bucket (or MinIO, GCS, etc.)
-├── metadata/
-│   ├── v1.metadata.json (schema v1, snapshot 1)
-│   ├── v2.metadata.json (schema v2, snapshot 2 - added column)
-│   ├── v3.metadata.json (schema v2, snapshot 3 - new data)
-│   └── version-hint.txt (points to latest v3.metadata.json)
-│
-├── data/
-│   ├── 00000-transactions-2026-04-01.parquet
-│   ├── 00001-transactions-2026-04-02.parquet
-│   ├── 00002-transactions-2026-04-03.parquet
-│   └── ... (immutable files)
-│
-└── manifests/
-    ├── snapshot-1-manifest-list.avro
-    ├── snapshot-2-manifest-list.avro
-    └── snapshot-3-manifest-list.avro
+```mermaid
+graph TD
+    A["S3 Bucket or MinIO, GCS, etc."]
+    
+    A --> B["metadata/"]
+    B --> B1["v1.metadata.json schema v1, snapshot 1"]
+    B --> B2["v2.metadata.json schema v2, snapshot 2 - added column"]
+    B --> B3["v3.metadata.json schema v2, snapshot 3 - new data"]
+    B --> B4["version-hint.txt points to latest v3.metadata.json"]
+    
+    A --> C["data/"]
+    C --> C1["00000-transactions-2026-04-01.parquet"]
+    C --> C2["00001-transactions-2026-04-02.parquet"]
+    C --> C3["00002-transactions-2026-04-03.parquet"]
+    C --> C4["... immutable files"]
+    
+    A --> D["manifests/"]
+    D --> D1["snapshot-1-manifest-list.avro"]
+    D --> D2["snapshot-2-manifest-list.avro"]
+    D --> D3["snapshot-3-manifest-list.avro"]
 ```
 
 **Key insight**: Each snapshot is immutable. New writes don't modify old files; they create new manifest entries pointing to new data files. This enables:
@@ -66,22 +68,24 @@ Action: Read all old files, rewrite with new schema → 8 hours downtime
 ```
 
 **With Iceberg**: Simple metadata update
-```
-Snapshot 1 metadata:
-├── Schema: [transaction_id, account_id, amount, merchant_id, timestamp]
-├── Data files: 00000.parquet, 00001.parquet, ...
-└── Snapshot ID: 1
 
-[New writes with new field]
-
-Snapshot 2 metadata:
-├── Schema: [transaction_id, account_id, amount, merchant_id, timestamp, fraud_risk_score]
-├── Data files: 00000.parquet, 00001.parquet, ..., 00100.parquet (new file)
-└── Snapshot ID: 2
-
-[Existing readers see Snapshot 2 schema automatically]
-[Old data files implicitly project missing column as NULL]
-[No rewrite required → 5 minute update]
+```mermaid
+graph TD
+    A["Snapshot 1 metadata"]
+    A --> A1["Schema: transaction_id, account_id, amount,<br/>merchant_id, timestamp"]
+    A --> A2["Data files: 00000.parquet, 00001.parquet, ..."]
+    A --> A3["Snapshot ID: 1"]
+    
+    B["New writes with new field"]
+    
+    C["Snapshot 2 metadata"]
+    C --> C1["Schema: transaction_id, account_id, amount,<br/>merchant_id, timestamp, fraud_risk_score"]
+    C --> C2["Data files: 00000.parquet, 00001.parquet, ...,<br/>00100.parquet new file"]
+    C --> C3["Snapshot ID: 2"]
+    
+    D["Existing readers see Snapshot 2 schema automatically"]
+    E["Old data files implicitly project missing column as NULL"]
+    F["No rewrite required → 5 minute update"]
 ```
 
 **Implementation** (in this project):
@@ -118,17 +122,18 @@ df.write.format("iceberg").mode("append").toTable("transactions.raw_transactions
 
 ### The Challenge: Kafka + Spark = Duplicates?
 
-```
-[Kafka] → [Spark job reads batch] → [Writes to table]
-
-Risk 1: Job crashes after write starts but before commit
-├── Spark restarts
-├── Rereads batch from Kafka
-├── Writes again (duplicate!)
-
-Risk 2: Kafka offset tracking fails
-├── Job doesn't know which records were already written
-├── Rereads old batch → duplicate
+```mermaid
+graph LR
+    A["Kafka"] --> B["Spark job reads batch"] --> C["Writes to table"]
+    
+    D["Risk 1: Job crashes after write starts but before commit"]
+    D --> D1["Spark restarts"]
+    D --> D2["Rereads batch from Kafka"]
+    D --> D3["Writes again duplicate!"]
+    
+    E["Risk 2: Kafka offset tracking fails"]
+    E --> E1["Job doesn't know which records were already written"]
+    E --> E2["Rereads old batch → duplicate"]
 ```
 
 ### Iceberg Solution: Atomic Snapshots

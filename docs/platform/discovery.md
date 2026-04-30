@@ -13,17 +13,20 @@ The Discovery Portal is a FastAPI service enabling data consumers to:
 4. **Track status** (access request lifecycle)
 
 **Architecture**:
-```
-┌─────────────────────────────────────────────┐
-│   Discovery Portal (FastAPI)                │
-│   ├── /api/products (search, list)         │
-│   ├── /api/products/{id} (details)         │
-│   ├── /api/access-requests (submit, track) │
-│   └── /api/health (liveness)               │
-└─────────────────────────────────────────────┘
-         ↓                    ↓
-[Elasticsearch]         [OPA Policies]
-(product catalog)       (auto-approval logic)
+
+```mermaid
+graph TD
+    A["Discovery Portal FastAPI"]
+    A --> A1["/api/products search, list"]
+    A --> A2["/api/products/{id} details"]
+    A --> A3["/api/access-requests submit, track"]
+    A --> A4["/api/health liveness"]
+    
+    A --> B["Elasticsearch"]
+    B --> B1["product catalog"]
+    
+    A --> C["OPA Policies"]
+    C --> C1["auto-approval logic"]
 ```
 
 ---

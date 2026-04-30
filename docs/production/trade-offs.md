@@ -48,31 +48,32 @@ This project demonstrates fintech data mesh architecture. But when is it the rig
 
 ### Decision Framework
 
-```
-How many events/minute?
-
-< 10K/min:
-├── Use: Amazon Kinesis (managed, cost-effective)
-├── Cost: ~$2K/month
-└── Operational: Minimal
-
-10K - 100K/min:
-├── Use: Kafka (any cloud) or Kinesis (if AWS-only)
-├── Cost: Kafka $15K, Kinesis $5K
-└── Operational: Moderate (Kafka) or Low (Kinesis)
-
-> 100K/min:
-├── Use: Kafka on Kubernetes (scale horizontally)
-├── Cost: $20K+ (cluster size for throughput)
-└── Operational: High (need SRE team)
-
-If organization is 100% AWS:
-├── Use: Kinesis (managed service saves ops)
-└── Accept: Slightly higher latency (~200ms OK)
-
-If organization is multi-cloud:
-├── Use: Kafka (portable across AWS, GCP, Azure, on-prem)
-└── Accept: More operational overhead
+```mermaid
+graph TD
+    A["How many events/minute?"]
+    
+    A --> B["&lt; 10K/min"]
+    B --> B1["Use: Amazon Kinesis managed, cost-effective"]
+    B --> B2["Cost: ~$2K/month"]
+    B --> B3["Operational: Minimal"]
+    
+    A --> C["10K - 100K/min"]
+    C --> C1["Use: Kafka any cloud or Kinesis if AWS-only"]
+    C --> C2["Cost: Kafka $15K, Kinesis $5K"]
+    C --> C3["Operational: Moderate Kafka or Low Kinesis"]
+    
+    A --> D["&gt; 100K/min"]
+    D --> D1["Use: Kafka on Kubernetes scale horizontally"]
+    D --> D2["Cost: $20K+ cluster size for throughput"]
+    D --> D3["Operational: High need SRE team"]
+    
+    E["If organization is 100% AWS"]
+    E --> E1["Use: Kinesis managed service saves ops"]
+    E --> E2["Accept: Slightly higher latency ~200ms OK"]
+    
+    F["If organization is multi-cloud"]
+    F --> F1["Use: Kafka portable across AWS, GCP, Azure, on-prem"]
+    F --> F2["Accept: More operational overhead"]
 ```
 
 ### Recommendation for This Project
@@ -136,41 +137,35 @@ If organization is multi-cloud:
 
 ### Latency vs Cost vs Simplicity
 
-```
-                   LATENCY (milliseconds)
-                   ↓
-                  100ms    Flink (continuous)
-                           ↑ Cost: $$$$
-                           ↑ Complexity: Hard
-           
-           1,000ms    Flink (mini-batch)
-                      ↑ Spark (micro-batch)
-                           
-           5,000ms    Spark (5-min window)  ← This project
-                      ↑ Cost: $
-                      ↑ Complexity: Easy
-                      ↑ Operational: Simple
+```mermaid
+graph TD
+    A["LATENCY milliseconds"]
+    A --> B["100ms Flink continuous<br/>Cost: $$$$<br/>Complexity: Hard"]
+    A --> C["1,000ms Flink mini-batch<br/>Spark micro-batch"]
+    A --> D["5,000ms Spark 5-min window ← This project<br/>Cost: $<br/>Complexity: Easy<br/>Operational: Simple"]
 ```
 
 ### Decision Tree
 
-```
-Do you need < 1 second latency?
-├── YES → Use Flink (continuous processing)
-│   ├── Cost: $20-30K/month (dedicated cluster)
-│   ├── Complexity: Hard (state management, checkpointing)
-│   └── Example: Real-time fraud detection (< 100ms decision)
-│
-└── NO → Use Spark Structured Streaming
-    ├── If latency tolerance: 5-10 minutes
-    │   ├── Cost: $5-10K/month (same as batch)
-    │   ├── Complexity: Easy (standard Spark)
-    │   └── Example: Transaction settlement (5-min window)
-    │
-    └── If latency tolerance: 1-5 minutes
-        ├── Cost: $8-15K/month (more executors)
-        ├── Complexity: Easy (Spark)
-        └── Example: Market data ingestion (1-min window)
+```mermaid
+graph TD
+    A{"Do you need &lt; 1 second latency?"}
+    
+    A -->|YES| B["Use Flink continuous processing"]
+    B --> B1["Cost: $20-30K/month dedicated cluster"]
+    B --> B2["Complexity: Hard state management, checkpointing"]
+    B --> B3["Example: Real-time fraud detection &lt; 100ms decision"]
+    
+    A -->|NO| C["Use Spark Structured Streaming"]
+    C --> C1{"If latency tolerance: 5-10 minutes"}
+    C1 --> C1a["Cost: $5-10K/month same as batch"]
+    C1 --> C1b["Complexity: Easy standard Spark"]
+    C1 --> C1c["Example: Transaction settlement 5-min window"]
+    
+    C --> C2{"If latency tolerance: 1-5 minutes"}
+    C2 --> C2a["Cost: $8-15K/month more executors"]
+    C2 --> C2b["Complexity: Easy Spark"]
+    C2 --> C2c["Example: Market data ingestion 1-min window"]
 ```
 
 ### Recommendation for This Project

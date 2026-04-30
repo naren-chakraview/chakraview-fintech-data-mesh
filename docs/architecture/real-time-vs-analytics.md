@@ -38,27 +38,30 @@ The perennial data architecture question: Do we optimize for real-time freshness
 
 ## Architecture: Hot + Cold Paths
 
-```
-Transactions Domain Ingest:
-├── HOT PATH (Kafka)
-│   ├── Source: Payment processor publishes events
-│   ├── Topic: market-transactions-raw
-│   ├── Frequency: Real-time (events as they occur)
-│   ├── Consumers: Fraud detection (live dashboards)
-│   └── Retention: 7 days (cost-optimized)
-│
-└── COLD PATH (Iceberg)
-    ├── Source: Kafka topic
-    ├── Processor: Spark Structured Streaming job
-    ├── Target: transactions.raw_transactions (Iceberg table)
-    ├── Frequency: Micro-batches every 5 minutes
-    ├── Freshness SLA: 5 minutes
-    ├── Consumers: Analysts, compliance, auditors
-    └── Retention: 7 years (SOX requirement)
+```mermaid
+graph TD
+    A["Transactions Domain Ingest"]
+    
+    A --> B["HOT PATH - Kafka"]
+    B --> B1["Source: Payment processor"]
+    B --> B2["Topic: market-transactions-raw"]
+    B --> B3["Frequency: Real-time events"]
+    B --> B4["Consumers: Fraud detection dashboards"]
+    B --> B5["Retention: 7 days"]
+    
+    A --> C["COLD PATH - Iceberg"]
+    C --> C1["Source: Kafka topic"]
+    C --> C2["Processor: Spark Structured Streaming"]
+    C --> C3["Target: transactions.raw_transactions"]
+    C --> C4["Frequency: Micro-batches every 5 minutes"]
+    C --> C5["Freshness SLA: 5 minutes"]
+    C --> C6["Consumers: Analysts, compliance, auditors"]
+    C --> C7["Retention: 7 years SOX requirement"]
 ```
 
 ### Real-Time Use Case: Fraud Detection Dashboard
-```
+
+```json
 11:35:02 - Transaction event published to Kafka:
 {
   "transaction_id": "tx_42",
@@ -67,17 +70,22 @@ Transactions Domain Ingest:
   "merchant_id": "merch_999",
   "timestamp": "2026-04-30 11:35:00"
 }
+```
 
-11:35:03 - Fraud Detection Service reads Kafka:
-├── Evaluates ML model (real-time)
-├── Score: fraud_probability = 0.92
-├── Action: FLAG transaction (blocks payment, routes to manual review)
-└── Latency: <1 second
-
-11:35:04 - Dashboard shows:
-├── Fraud alert: Transaction tx_42 flagged
-├── Account holder: Alerted via SMS
-└── User refresh: See result immediately
+```mermaid
+graph TD
+    A["11:35:03 - Fraud Detection Service reads Kafka"]
+    A --> B["Evaluates ML model real-time"]
+    A --> C["Score: fraud_probability = 0.92"]
+    A --> D["Action: FLAG transaction"]
+    D --> D1["Blocks payment"]
+    D --> D2["Routes to manual review"]
+    A --> E["Latency: &lt;1 second"]
+    
+    F["11:35:04 - Dashboard shows"]
+    F --> F1["Fraud alert: Transaction tx_42 flagged"]
+    F --> F2["Account holder: Alerted via SMS"]
+    F --> F3["User refresh: See result immediately"]
 ```
 
 **Why Kafka for this?** Iceberg latency (5 min) would delay fraud detection by 5 minutes—unacceptable for preventing fraud.
@@ -97,12 +105,15 @@ WHERE r.fraud_score > 0.90
   AND t.booking_timestamp < '2026-05-01'
 ORDER BY r.evaluated_at DESC;
 
-Query plan:
-├── Partition pruning: Only read April data (1 partition)
-├── Column pruning: Skip columns not in SELECT
-├── Columnar scan: Amount, fraud_score compressed
-├── Join: Hash join on transaction_id
-└── Execution time: 5 seconds (scan 30GB April data, filtered to 2MB results)
+```mermaid
+graph TD
+    A["Query Execution Plan"]
+    A --> B["Partition pruning: Only read April data 1 partition"]
+    A --> C["Column pruning: Skip columns not in SELECT"]
+    A --> D["Columnar scan: Amount, fraud_score compressed"]
+    A --> E["Join: Hash join on transaction_id"]
+    A --> F["Execution time: 5 seconds scan 30GB April, filtered to 2MB"]
+```
 ```
 
 **Why Iceberg for this?** 
@@ -146,43 +157,49 @@ class TransactionIngestJob:
 ```
 
 **What happens internally**:
-```
-Time: 11:35:00
-├── Kafka event 1 arrives
-├── Event 2 arrives
-├── Event 3 arrives
-├── ...
-└── Event 144 arrives (11:35:59)
 
-Micro-batch trigger: Every 5 minutes
-
-Time: 11:40:00 (5 minutes later)
-├── Spark collects events 1-144 (from last checkpoint)
-├── Validates against schema
-├── Deduplicates (if any duplicates from previous batch)
-├── Creates new Iceberg snapshot (144 new rows)
-├── Atomic commit (one transaction per 5-minute batch)
-├── Saves checkpoint (offset = last Kafka offset processed)
-└── Events now queryable in Iceberg
-
-Time: 11:40:01 onwards
-├── New batch starts collecting events
-├── Kafka continues streaming (independent of Spark job)
+```mermaid
+graph TD
+    A["Time: 11:35:00"]
+    A --> A1["Kafka event 1 arrives"]
+    A --> A2["Event 2 arrives"]
+    A --> A3["Event 3 arrives"]
+    A --> A4["... events continue"]
+    A --> A5["Event 144 arrives 11:35:59"]
+    
+    B["Micro-batch trigger: Every 5 minutes"]
+    
+    C["Time: 11:40:00 5 minutes later"]
+    C --> C1["Spark collects events 1-144"]
+    C --> C2["Validates against schema"]
+    C --> C3["Deduplicates duplicates"]
+    C --> C4["Creates new Iceberg snapshot"]
+    C --> C5["Atomic commit per 5-minute batch"]
+    C --> C6["Saves checkpoint Kafka offset"]
+    C --> C7["Events now queryable in Iceberg"]
+    
+    D["Time: 11:40:01 onwards"]
+    D --> D1["New batch starts collecting"]
+    D --> D2["Kafka continues streaming independently"]
 ```
 
 ### Exactly-Once Semantics
 
 **Without checkpoints** (naive approach):
-```
-Spark job: Read 100 events → Write to Iceberg → Crash
-Restart: Read from Kafka offset 0 → Read 100 events again → Duplicate!
+
+```mermaid
+graph LR
+    A["Spark job: Read 100 events"] --> B["Write to Iceberg"] --> C["Crash"]
+    D["Restart: Read from Kafka offset 0"] --> E["Read 100 events again"] --> F["Duplicate!"]
 ```
 
 **With Iceberg + Checkpoints**:
-```
-Spark job: Read 100 events (offset 0-99) → Write to Iceberg → Save checkpoint (offset 99)
-Crash: All atomic (either full batch written or nothing)
-Restart: Read checkpoint (offset 99) → Start from event 100 → No duplicates!
+
+```mermaid
+graph LR
+    A["Spark job: Read 100 events offset 0-99"] --> B["Write to Iceberg"] --> C["Save checkpoint offset 99"]
+    D["Crash: All atomic"] --> E["Full batch written or nothing"]
+    F["Restart: Read checkpoint offset 99"] --> G["Start from event 100"] --> H["No duplicates!"]
 ```
 
 ---
@@ -267,28 +284,28 @@ parsed_df.write.format("iceberg") \
 
 ## Observability: Monitoring Both Paths
 
-### Kafka Lag (Hot Path Health)
+### Kafka Lag Hot Path Health
+
+```mermaid
+graph TD
+    A["Metric: kafka_lag_seconds"]
+    A --> B["Definition: Time since event published<br/>vs. when Spark reads it"]
+    B --> C["Threshold"]
+    C --> C1["&lt; 1 sec: Healthy"]
+    C --> C2["1-5 sec: Acceptable burst traffic"]
+    C --> C3["&gt; 5 sec: Alert fraud detection SLA at risk"]
 ```
-Metric: kafka_lag_seconds
 
-Definition: Time since event published to Kafka vs. when Spark reads it
+### Iceberg Freshness Cold Path Health
 
-Threshold: 
-├── < 1 sec: Healthy
-├── 1-5 sec: Acceptable (burst traffic)
-└── > 5 sec: Alert (fraud detection SLA at risk)
-```
-
-### Iceberg Freshness (Cold Path Health)
-```
-Metric: data_freshness_minutes
-
-Definition: Time since last Iceberg snapshot vs. current time
-
-Threshold:
-├── < 5 min: Healthy (meets SLA)
-├── 5-10 min: Acceptable (Spark job slow)
-└── > 10 min: Alert (SLA violated, check Spark logs)
+```mermaid
+graph TD
+    A["Metric: data_freshness_minutes"]
+    A --> B["Definition: Time since last Iceberg snapshot<br/>vs. current time"]
+    B --> C["Threshold"]
+    C --> C1["&lt; 5 min: Healthy meets SLA"]
+    C --> C2["5-10 min: Acceptable Spark job slow"]
+    C --> C3["&gt; 10 min: Alert SLA violated, check logs"]
 ```
 
 ### Dashboard Queries
@@ -310,37 +327,38 @@ WHERE freshness_minutes > 5;
 
 Market Data publishes FX rates with 1-minute freshness SLA:
 
-```
-FX rates published to market-rates-raw (Kafka)
-├── Frequency: 1 per minute (9 AM - 5 PM ET)
-├── Volume: 10,000 pairs × 1 rate/min = 10k events/min
-├── Consumers: 
-│   ├── Live dashboard (< 1 sec latency requirement)
-│   ├── Risk models (< 5 sec latency requirement)
-│   └── Historical archive (time-travel required)
-
-Kafka topic: market-rates-raw
-├── Retention: 7 days (cost: $50/month)
-├── Partition: rate_pair (ensures order per pair)
-
-Iceberg table: market_data.fx_rates
-├── Schema: [rate_pair, rate, timestamp, source]
-├── Partitions: [year, month, day, hour]
-├── Retention: 1 year (cost: $200/month)
-├── Snapshot: Every 5 minutes
-├── Freshness SLA: 5 minutes
-
-Spark job (MarketDataIngestJob):
-├── Reads market-rates-raw (Kafka)
-├── Micro-batches every 5 minutes
-├── Deduplicates on (rate_pair, timestamp)
-├── Writes to market_data.fx_rates
-└── Checkpoint: Tracks offset (recovery)
-
-Monitoring:
-├── Kafka lag: Should stay < 1 min
-├── Iceberg freshness: Should stay < 5 min
-└── Alert: If either exceeds threshold
+```mermaid
+graph TD
+    A["FX rates published to market-rates-raw Kafka"]
+    A --> A1["Frequency: 1 per minute 9 AM - 5 PM ET"]
+    A --> A2["Volume: 10,000 pairs × 1 rate/min = 10k events/min"]
+    A --> A3["Consumers"]
+    A3 --> A3a["Live dashboard &lt; 1 sec latency"]
+    A3 --> A3b["Risk models &lt; 5 sec latency"]
+    A3 --> A3c["Historical archive time-travel required"]
+    
+    B["Kafka topic: market-rates-raw"]
+    B --> B1["Retention: 7 days cost: $50/month"]
+    B --> B2["Partition: rate_pair ensures order per pair"]
+    
+    C["Iceberg table: market_data.fx_rates"]
+    C --> C1["Schema: rate_pair, rate, timestamp, source"]
+    C --> C2["Partitions: year, month, day, hour"]
+    C --> C3["Retention: 1 year cost: $200/month"]
+    C --> C4["Snapshot: Every 5 minutes"]
+    C --> C5["Freshness SLA: 5 minutes"]
+    
+    D["Spark job MarketDataIngestJob"]
+    D --> D1["Reads market-rates-raw Kafka"]
+    D --> D2["Micro-batches every 5 minutes"]
+    D --> D3["Deduplicates on rate_pair, timestamp"]
+    D --> D4["Writes to market_data.fx_rates"]
+    D --> D5["Checkpoint: Tracks offset recovery"]
+    
+    E["Monitoring"]
+    E --> E1["Kafka lag: Should stay &lt; 1 min"]
+    E --> E2["Iceberg freshness: Should stay &lt; 5 min"]
+    E --> E3["Alert: If either exceeds threshold"]
 ```
 
 ---

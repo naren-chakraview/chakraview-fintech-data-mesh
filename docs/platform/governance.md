@@ -54,23 +54,27 @@ allow {
 ```
 
 **Decision flow**:
+
+Query 1: Can analyst_42 read transactions.raw_transactions?
+
+```mermaid
+graph TD
+    A["OPA Evaluation"]
+    A --> A1["default allow = false"]
+    A --> A2["Check rule 1:<br/>analyst_42 role is analyst ✓<br/>action is read ✓<br/>classification is public ✓"]
+    A --> A3["Result: ALLOW rule 1 matches"]
 ```
-Query: Can analyst_42 read transactions.raw_transactions?
 
-OPA Evaluation:
-├── default allow = false
-├── Check rule 1: analyst_42 role is "analyst" ✓, action is "read" ✓, 
-│   transactions.raw_transactions classification is "public" ✓
-├── Result: ALLOW (rule 1 matches)
+Query 2: Can contractor_5 write to market_data.fx_rates?
 
-Query: Can contractor_5 write to market_data.fx_rates?
-
-OPA Evaluation:
-├── default allow = false
-├── Check rule 1: contractor_5 role is "contractor" ✗ (rule requires "analyst")
-├── Check rule 2: contractor_5 role is "contractor" ✗ (rule requires "data_owner")
-├── Check rule 3: contractor_5 role is "contractor" ✗ (rule requires "admin")
-├── Result: DENY (no rules match, default deny)
+```mermaid
+graph TD
+    B["OPA Evaluation"]
+    B --> B1["default allow = false"]
+    B --> B2["Check rule 1: contractor_5 role = contractor ✗<br/>rule requires analyst"]
+    B --> B3["Check rule 2: contractor_5 role = contractor ✗<br/>rule requires data_owner"]
+    B --> B4["Check rule 3: contractor_5 role = contractor ✗<br/>rule requires admin"]
+    B --> B5["Result: DENY no rules match"]
 ```
 
 ### 2. PII Masking Rules
@@ -98,26 +102,28 @@ FROM transactions.raw_transactions;
 ```
 
 **OPA intercepts**:
-```
-For column: transaction_id
-├── Classification: pii
-├── User role: external_analyst
-├── Applies mask_pii rule? ✓
-├── Masking strategy: full_hash
-└── Result: Hash value returned
 
-For column: amount
-├── Classification: public
-├── User role: external_analyst
-├── Applies mask_pii rule? ✗ (public != pii)
-└── Result: Raw value returned
-
-For column: account_holder_name
-├── Classification: pii
-├── User role: external_analyst
-├── Applies mask_pii rule? ✓
-├── Masking strategy: full_hash
-└── Result: Hash value returned
+```mermaid
+graph TD
+    A["Column: transaction_id"]
+    A --> A1["Classification: pii"]
+    A --> A2["User role: external_analyst"]
+    A --> A3["Applies mask_pii rule? ✓"]
+    A --> A4["Masking strategy: full_hash"]
+    A --> A5["Result: Hash value returned"]
+    
+    B["Column: amount"]
+    B --> B1["Classification: public"]
+    B --> B2["User role: external_analyst"]
+    B --> B3["Applies mask_pii rule? ✗<br/>public != pii"]
+    B --> B4["Result: Raw value returned"]
+    
+    C["Column: account_holder_name"]
+    C --> C1["Classification: pii"]
+    C --> C2["User role: external_analyst"]
+    C --> C3["Applies mask_pii rule? ✓"]
+    C --> C4["Masking strategy: full_hash"]
+    C --> C5["Result: Hash value returned"]
 ```
 
 ### 3. Approval Workflows
@@ -148,20 +154,21 @@ requires_escalation {
 ```
 
 **Workflow**:
-```
-User: analyst_42 wants to read risk_compliance.fraud_scores
 
-OPA Evaluation:
-├── Check: allows read? ✗
-├── Check: requires_approval? ✓
-├── Result: APPROVAL_REQUIRED (2-hour SLA)
-
-Approval process:
-├── Send email to risk_compliance@chakra.fintech
-├── Owner reviews: Purpose? Risk level?
-├── Owner grants: access_request_id = req_9999
-├── Analyst notified: Access granted or denied
-└── Audit: Log decision + reasoning
+```mermaid
+graph TD
+    A["User: analyst_42 wants to read risk_compliance.fraud_scores"]
+    A --> B["OPA Evaluation"]
+    B --> B1["Check: allows read? ✗"]
+    B --> B2["Check: requires_approval? ✓"]
+    B --> B3["Result: APPROVAL_REQUIRED 2-hour SLA"]
+    
+    C["Approval Process"]
+    C --> C1["Send email to risk_compliance@chakra.fintech"]
+    C --> C2["Owner reviews: Purpose? Risk level?"]
+    C --> C3["Owner grants: access_request_id = req_9999"]
+    C --> C4["Analyst notified: Access granted or denied"]
+    C --> C5["Audit: Log decision + reasoning"]
 ```
 
 ### 4. Retention Enforcement
@@ -298,38 +305,33 @@ opa test platform/governance/opa-policies/policy_test.rego -v
 
 ### Query Execution Flow
 
-```
-Analyst submits query:
-SELECT transaction_id, account_id, amount 
-FROM transactions.raw_transactions 
-WHERE booking_date = '2026-04-30';
-
-     ↓
-
-[Spark SQL Parser]
-├── Parse query
-├── Identify columns: transaction_id, account_id, amount
-├── Identify table: transactions.raw_transactions
-└── Identify action: read
-
-     ↓
-
-[OPA Policy Evaluator]
-├── Fetch policy: abac.rego, masking.rego
-├── Evaluate for each column:
-│   ├── transaction_id (pii): Mask for external_analyst? → YES → apply hash_mask
-│   ├── account_id (pii): Mask for external_analyst? → YES → apply hash_mask
-│   └── amount (public): Mask? → NO → raw value
-├── Evaluate for audit: Log query? → YES (pii columns read)
-└── Decision: ALLOW with masking
-
-     ↓
-
-[Spark Execution]
-├── Read Iceberg table
-├── Apply masking via Spark UDF
-├── Log to Elasticsearch (audit trail)
-└── Return results to analyst
+```mermaid
+graph TD
+    A["Analyst submits query:<br/>SELECT transaction_id, account_id, amount<br/>FROM transactions.raw_transactions<br/>WHERE booking_date = '2026-04-30'"]
+    
+    B["Spark SQL Parser"]
+    A --> B
+    B --> B1["Parse query"]
+    B --> B2["Identify columns:<br/>transaction_id, account_id, amount"]
+    B --> B3["Identify table:<br/>transactions.raw_transactions"]
+    B --> B4["Identify action: read"]
+    
+    C["OPA Policy Evaluator"]
+    B --> C
+    C --> C1["Fetch policy: abac.rego, masking.rego"]
+    C --> C2["Evaluate for each column:"]
+    C2 --> C2a["transaction_id pii:<br/>Mask for external_analyst? YES<br/>apply hash_mask"]
+    C2 --> C2b["account_id pii:<br/>Mask for external_analyst? YES<br/>apply hash_mask"]
+    C2 --> C2c["amount public:<br/>Mask? NO → raw value"]
+    C --> C3["Evaluate for audit:<br/>Log query? YES pii columns read"]
+    C --> C4["Decision: ALLOW with masking"]
+    
+    D["Spark Execution"]
+    C --> D
+    D --> D1["Read Iceberg table"]
+    D --> D2["Apply masking via Spark UDF"]
+    D --> D3["Log to Elasticsearch audit trail"]
+    D --> D4["Return results to analyst"]
 ```
 
 ### Code Implementation

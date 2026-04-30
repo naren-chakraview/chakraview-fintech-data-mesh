@@ -113,91 +113,104 @@ domain: market_data
 
 6 panels showing system health:
 
-**1. Data Freshness (Gauge)**
-```
-Shows current freshness for each domain:
-├── Transactions: 2.3 min / 5 min SLA (GREEN)
-├── Accounts: 8.5 min / 10 min SLA (YELLOW)
-├── Risk/Compliance: 4.1 min / 10 min SLA (GREEN)
-├── Market Data: 0.8 min / 1 min SLA (GREEN)
-└── Counterparties: 45 min / 60 min SLA (GREEN)
+**1. Data Freshness Gauge**
+
+```mermaid
+graph TD
+    A["Data Freshness per Domain"]
+    A --> A1["Transactions: 2.3 min / 5 min SLA GREEN"]
+    A --> A2["Accounts: 8.5 min / 10 min SLA YELLOW"]
+    A --> A3["Risk/Compliance: 4.1 min / 10 min SLA GREEN"]
+    A --> A4["Market Data: 0.8 min / 1 min SLA GREEN"]
+    A --> A5["Counterparties: 45 min / 60 min SLA GREEN"]
 ```
 
-**2. Ingest Record Rate (Time Series)**
-```
-Records ingested per minute, last 24 hours:
-├── Transactions: 150K records/min (steady)
-├── Market Data: 10K rates/min (spikes during trading hours)
-├── Accounts: 100 records/min (flat line, low velocity)
-└── Risk/Compliance: 50K scores/min (spiky, depends on transaction volume)
+**2. Ingest Record Rate Time Series**
+
+```mermaid
+graph TD
+    A["Records ingested per minute, last 24 hours"]
+    A --> A1["Transactions: 150K records/min steady"]
+    A --> A2["Market Data: 10K rates/min spikes during trading hours"]
+    A --> A3["Accounts: 100 records/min flat line, low velocity"]
+    A --> A4["Risk/Compliance: 50K scores/min spiky, depends on transaction volume"]
 ```
 
-**3. Query Duration (Time Series)**
-```
-P95 query latency over time:
-├── Transactions: 8.5 sec (stable)
-├── Risk/Compliance: 12.3 sec (slower due to joins)
-└── Accounts: 2.1 sec (small table)
+**3. Query Duration Time Series**
 
-Alert if P95 > 30 sec (performance degradation)
-```
-
-**4. Quality Check Pass Rate (Gauge)**
-```
-Percentage of records passing quality rules:
-├── Transactions: 99.8% pass
-├── Accounts: 100% pass (strict validation)
-├── Risk/Compliance: 99.2% pass (some edge cases)
-├── Counterparties: 99.9% pass
-└── Market Data: 98.5% pass (missing rates during gaps)
+```mermaid
+graph TD
+    A["P95 query latency over time"]
+    A --> A1["Transactions: 8.5 sec stable"]
+    A --> A2["Risk/Compliance: 12.3 sec slower due to joins"]
+    A --> A3["Accounts: 2.1 sec small table"]
+    A --> A4["Alert if P95 &gt; 30 sec performance degradation"]
 ```
 
-**5. Kafka Lag (Time Series)**
-```
-Lag between Kafka publish and Spark read:
-├── Transactions: 15 sec (under 30 sec SLA)
-├── Market Data: 3 sec (very tight)
-├── Accounts: 45 sec (acceptable, lower velocity)
-└── Risk/Compliance: 25 sec (acceptable, lower volume)
+**4. Quality Check Pass Rate Gauge**
+
+```mermaid
+graph TD
+    A["Percentage of records passing quality rules"]
+    A --> A1["Transactions: 99.8% pass"]
+    A --> A2["Accounts: 100% pass strict validation"]
+    A --> A3["Risk/Compliance: 99.2% pass some edge cases"]
+    A --> A4["Counterparties: 99.9% pass"]
+    A --> A5["Market Data: 98.5% pass missing rates during gaps"]
 ```
 
-**6. Ingest Errors (Time Series)**
+**5. Kafka Lag Time Series**
+
+```mermaid
+graph TD
+    A["Lag between Kafka publish and Spark read"]
+    A --> A1["Transactions: 15 sec under 30 sec SLA"]
+    A --> A2["Market Data: 3 sec very tight"]
+    A --> A3["Accounts: 45 sec acceptable, lower velocity"]
+    A --> A4["Risk/Compliance: 25 sec acceptable, lower volume"]
 ```
-Errors per minute:
-├── Transactions: 0 errors (healthy)
-├── Market Data: 2-5 errors/min (acceptable, high throughput)
-├── Accounts: 0 errors (stable reference data)
-├── Risk/Compliance: 1-2 errors/min (model retries)
-└── Counterparties: 0 errors (low velocity)
+
+**6. Ingest Errors Time Series**
+
+```mermaid
+graph TD
+    A["Errors per minute"]
+    A --> A1["Transactions: 0 errors healthy"]
+    A --> A2["Market Data: 2-5 errors/min acceptable, high throughput"]
+    A --> A3["Accounts: 0 errors stable reference data"]
+    A --> A4["Risk/Compliance: 1-2 errors/min model retries"]
+    A --> A5["Counterparties: 0 errors low velocity"]
 ```
 
 ### Dashboard 2: Transactions Domain Deep-Dive
 
 Drill-down for transactions domain:
 
+```mermaid
+graph TD
+    A["Panel 1: Raw Transactions Freshness"]
+    A --> A1["Current: 2.3 minutes"]
+    A --> A2["SLA: 5 minutes"]
+    A --> A3["Status: GREEN"]
+    A --> A4["Trend: Stable last 24 hours"]
+    
+    B["Panel 2: Micro-Batch Success Rate"]
+    B --> B1["Last 24 hours: 287 batches"]
+    B --> B2["Successful: 286 99.7%"]
+    B --> B3["Failed: 1 0.3% retried and succeeded"]
+    B --> B4["Average batch size: 500K records"]
+    
+    C["Panel 3: Iceberg Write Latency"]
+    C --> C1["P50: 5.2 sec"]
+    C --> C2["P95: 18.3 sec"]
+    C --> C3["P99: 32.1 sec"]
+    C --> C4["Max: 47.5 sec normal variance"]
+    
+    D["Panel 4: Partition Statistics"]
+    D --> D1["Partitions per day: 4 year, month, day, account_id"]
+    D --> D2["Files per partition: avg 3.2"]
+    D --> D3["Size per partition: avg 500MB"]
 ```
-Panel 1: Raw Transactions Freshness
-├── Current: 2.3 minutes
-├── SLA: 5 minutes
-├── Status: GREEN
-└── Trend: Stable (last 24 hours)
-
-Panel 2: Micro-Batch Success Rate
-├── Last 24 hours: 287 batches
-├── Successful: 286 (99.7%)
-├── Failed: 1 (0.3%) [retried and succeeded]
-└── Average batch size: 500K records
-
-Panel 3: Iceberg Write Latency
-├── P50: 5.2 sec
-├── P95: 18.3 sec
-├── P99: 32.1 sec
-└── Max: 47.5 sec (normal variance)
-
-Panel 4: Partition Statistics
-├── Partitions per day: 4 (year, month, day, account_id)
-├── Files per partition: avg 3.2
-├── Size per partition: avg 500MB
 └── Scan efficiency: 85% (partition pruning working)
 
 Panel 5: Data Volume Growth

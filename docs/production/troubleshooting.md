@@ -48,106 +48,129 @@ kubectl exec -it pod/spark-driver -- spark-sql
 ### Common Causes & Fixes
 
 **Cause 1: Spark Job Crashed**
-```
+
+```bash
 Check: kubectl logs -f pod/transaction-ingest-job
 Error: java.lang.OutOfMemoryError: Java heap space
+```
 
-Fix:
-├── Increase executor memory
-├── kubectl set resources deployment transaction-ingest-job \
-│   --limits=memory=32Gi --requests=memory=16Gi
-└── Restart job
+```mermaid
+graph TD
+    A["Fix"]
+    A --> A1["Increase executor memory"]
+    A --> A2["kubectl set resources deployment transaction-ingest-job<br/>--limits=memory=32Gi --requests=memory=16Gi"]
+    A --> A3["Restart job"]
 ```
 
 **Cause 2: Kafka Broker Down**
-```
-Check: kafka-topics.sh --bootstrap-server kafka:9092 --list
 
-If no response:
-├── Check broker status: kubectl get pods kafka-0, kafka-1, kafka-2
-├── If any pod not running: kubectl logs kafka-0
-├── Restart: kubectl delete pod kafka-0 (PVC persists data)
-└── Wait 5 min for recovery
+```bash
+Check: kafka-topics.sh --bootstrap-server kafka:9092 --list
+```
+
+```mermaid
+graph TD
+    A["If no response"]
+    A --> A1["Check broker status: kubectl get pods kafka-0, kafka-1, kafka-2"]
+    A --> A2["If any pod not running: kubectl logs kafka-0"]
+    A --> A3["Restart: kubectl delete pod kafka-0<br/>PVC persists data"]
+    A --> A4["Wait 5 min for recovery"]
 ```
 
 **Cause 3: Iceberg Catalog Slow**
-```
+
+```bash
 Check: curl http://iceberg-catalog:8181/health
+```
 
-If not 200 OK:
-├── Restart catalog: kubectl rollout restart deployment iceberg-catalog
-├── If still down, check logs: kubectl logs -f pod/iceberg-catalog-xxxxx
-└── May be: S3/MinIO connectivity, memory, or corruption
-
-Recovery:
-├── Stop ingest job (prevent more writes)
-├── kubectl patch deployment transaction-ingest-job -p '{"spec":{"replicas":0}}'
-├── Restart catalog (wait for recovery)
-├── Restart ingest job
+```mermaid
+graph TD
+    A["If not 200 OK"]
+    A --> A1["Restart catalog: kubectl rollout restart deployment iceberg-catalog"]
+    A --> A2["If still down, check logs: kubectl logs -f pod/iceberg-catalog-xxxxx"]
+    A --> A3["May be: S3/MinIO connectivity, memory, or corruption"]
+    
+    B["Recovery"]
+    B --> B1["Stop ingest job prevent more writes"]
+    B --> B2["kubectl patch deployment transaction-ingest-job<br/>-p '{spec:replicas:0}'"]
+    B --> B3["Restart catalog wait for recovery"]
+    B --> B4["Restart ingest job"]
 ```
 
 **Cause 4: Network Connectivity**
-```
+
+```bash
 Check network connectivity between services:
 kubectl run -it debug-pod --image=busybox -- sh
 
 # Inside debug pod:
-nc -zv kafka 9092       # Kafka
-nc -zv iceberg-catalog 8181  # Catalog
-nc -zv minio 9000       # MinIO
+nc -zv kafka 9092              # Kafka
+nc -zv iceberg-catalog 8181    # Catalog
+nc -zv minio 9000              # MinIO
+```
 
-If any fail:
-├── Check network policies: kubectl get networkpolicies -n fintech-mesh
-├── Verify DNS: nslookup kafka.fintech-mesh
-└── Check service: kubectl get svc kafka -n fintech-mesh
+```mermaid
+graph TD
+    A["If any fail"]
+    A --> A1["Check network policies: kubectl get networkpolicies -n fintech-mesh"]
+    A --> A2["Verify DNS: nslookup kafka.fintech-mesh"]
+    A --> A3["Check service: kubectl get svc kafka -n fintech-mesh"]
 ```
 
 **Cause 5: High Volume Spike**
-```
-Check: Kafka lag metric (should be < 30 sec normally)
 
-If lag is increasing:
-├── Verify: ingest_records_total (increasing steadily?)
-├── Calculate: messages_per_minute = (lag_now - lag_5min_ago) / 5
-├── If > 200K msg/min (2x normal 100K):
-│   ├── This is expected; Spark will catch up
-│   ├── Monitor lag: should decrease within 30 min
-│   ├── If lag continues increasing: Scale Spark
-│   └── kubectl scale deployment transaction-ingest-job --replicas=2
-└── Verify SLA still met after scaling
+```bash
+Check: Kafka lag metric should be &lt; 30 sec normally
 ```
 
-### Resolution Steps (Priority Order)
+```mermaid
+graph TD
+    A["If lag is increasing"]
+    A --> A1["Verify: ingest_records_total increasing steadily?"]
+    A --> A2["Calculate: messages_per_minute = lag_now - lag_5min_ago / 5"]
+    A --> A3["If &gt; 200K msg/min 2x normal 100K"]
+    A3 --> A3a["This is expected; Spark will catch up"]
+    A3 --> A3b["Monitor lag: should decrease within 30 min"]
+    A3 --> A3c["If lag continues increasing: Scale Spark"]
+    A3 --> A3d["kubectl scale deployment transaction-ingest-job --replicas=2"]
+    A --> A4["Verify SLA still met after scaling"]
+```
 
-1. **Is ingest job running?** → Restart if needed
-2. **Is Kafka healthy?** → Restart brokers if needed
-3. **Is catalog healthy?** → Restart catalog
-4. **Is there network connectivity?** → Check DNS, policies
-5. **Is Spark slow?** → Check CPU/memory, scale if needed
-6. **Is there a volume spike?** → Temporarily scale, then analyze
+### Resolution Steps Priority Order
+
+```mermaid
+graph TD
+    A["Troubleshooting Flow"]
+    A --> A1["1. Is ingest job running?<br/>→ Restart if needed"]
+    A1 --> A2["2. Is Kafka healthy?<br/>→ Restart brokers if needed"]
+    A2 --> A3["3. Is catalog healthy?<br/>→ Restart catalog"]
+    A3 --> A4["4. Is there network connectivity?<br/>→ Check DNS, policies"]
+    A4 --> A5["5. Is Spark slow?<br/>→ Check CPU/memory, scale if needed"]
+    A5 --> A6["6. Is there a volume spike?<br/>→ Temporarily scale, then analyze"]
+```
 
 ### Prevention
 
-```yaml
-# Alerting thresholds (set in Prometheus)
-alerts:
-  - name: data_freshness_sla_warning
-    condition: data_freshness_minutes > 3  (60% of 5-min SLA)
-    action: Page on-call, investigate
-  
-  - name: kafka_lag_critical
-    condition: kafka_lag_seconds > 60
-    action: Page on-call
-  
-  - name: ingest_errors_high
-    condition: rate(ingest_errors_total[5m]) > 0.01  (>1% errors)
-    action: Page on-call
+**Alerting thresholds** (set in Prometheus):
 
-# Health checks (automated)
-├── Every 1 minute: Check ingest job running
-├── Every 5 minutes: Check Kafka lag < 30 sec
-├── Every 10 minutes: Check Iceberg write latency < 500ms
-└── Alert if any fail 2 consecutive checks
+```mermaid
+graph TD
+    A["Alert Thresholds"]
+    A --> A1["data_freshness_sla_warning<br/>Condition: data_freshness_minutes &gt; 3<br/>60% of 5-min SLA<br/>Action: Page on-call, investigate"]
+    A --> A2["kafka_lag_critical<br/>Condition: kafka_lag_seconds &gt; 60<br/>Action: Page on-call"]
+    A --> A3["ingest_errors_high<br/>Condition: rate ingest_errors_total[5m] &gt; 0.01<br/>&gt;1% errors<br/>Action: Page on-call"]
+```
+
+**Health checks** (automated):
+
+```mermaid
+graph TD
+    A["Automated Health Checks"]
+    A --> A1["Every 1 minute: Check ingest job running"]
+    A --> A2["Every 5 minutes: Check Kafka lag &lt; 30 sec"]
+    A --> A3["Every 10 minutes: Check Iceberg write latency &lt; 500ms"]
+    A --> A4["Alert if any fail 2 consecutive checks"]
+```
 ```
 
 ---

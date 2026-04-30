@@ -8,28 +8,46 @@ Traditional data warehouses centralize ownership: one platform, one catalog, one
 
 The result: **decentralized speed with centralized compliance**.
 
-```
-Organization Structure (Decentralized Ownership)
-├── Transactions Domain
-│   ├── Owns: transaction_feed data product
-│   ├── Manages: Schema, ingest (Spark), SLAs (5-min freshness)
-│   ├── Publishes: Iceberg tables, Kafka topics, access requests
-│   └── Governed by: OPA policies (federated)
-│
-├── Risk/Compliance Domain
-│   ├── Owns: fraud_scores, risk_scores data products
-│   ├── Manages: 10-year retention, PII masking, AML compliance
-│   ├── Publishes: Iceberg tables with audit trails
-│   └── Governed by: OPA policies (federated)
-│
-└── (Accounts, Counterparties, Market Data follow same pattern)
-
-Platform Layer (Federated)
-├── Governance: OPA policies for ABAC, masking, compliance
-├── Discovery: Self-service portal for data products
-├── Analytics: Unified Spark SQL across all domains
-├── Observability: Metrics, SLO dashboards, quality alerts
-└── Storage: Iceberg lakehouse on S3/MinIO
+```mermaid
+graph TB
+    subgraph org["Organization Structure (Decentralized)"]
+        direction TB
+        T["<b>Transactions Domain</b><br/>- transaction_feed<br/>- 5-min freshness<br/>- 7yr retention"]
+        R["<b>Risk/Compliance Domain</b><br/>- fraud_scores<br/>- 10-min freshness<br/>- 10yr retention"]
+        A["<b>Accounts Domain</b><br/>- account_master<br/>- 10-min freshness<br/>- 3yr retention"]
+        C["<b>Counterparties Domain</b><br/>- merchant_master<br/>- 60-min freshness<br/>- 2yr retention"]
+        M["<b>Market Data Domain</b><br/>- fx_rates<br/>- 1-min freshness<br/>- 1yr retention"]
+    end
+    
+    subgraph plat["Platform Layer (Federated)"]
+        direction LR
+        GOV["<b>Governance</b><br/>OPA policies"]
+        DISC["<b>Discovery</b><br/>Self-service portal"]
+        ANA["<b>Analytics</b><br/>Spark SQL"]
+        OBS["<b>Observability</b><br/>SLO dashboards"]
+        STOR["<b>Storage</b><br/>Iceberg lakehouse"]
+    end
+    
+    T --> GOV
+    R --> GOV
+    A --> GOV
+    C --> GOV
+    M --> GOV
+    
+    T --> DISC
+    R --> DISC
+    A --> DISC
+    C --> DISC
+    M --> DISC
+    
+    T --> ANA
+    R --> ANA
+    A --> ANA
+    C --> ANA
+    M --> ANA
+    
+    ANA --> OBS
+    GOV --> STOR
 ```
 
 ---

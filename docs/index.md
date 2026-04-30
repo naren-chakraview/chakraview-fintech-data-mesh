@@ -20,22 +20,25 @@ Traditional centralized data warehouses create bottlenecks:
 
 ## ✨ The Solution: Data Mesh Lakehouse
 
-```
-┌─────────────────────────────────────────────────────────┐
-│           Unified Spark SQL Analytics Engine             │
-│  (Time-travel queries, compliance-aware masking, SLOs)  │
-└─────────────────────────────────────────────────────────┘
-                          ▲
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-┌───────▼────┐    ┌───────▼────┐    ┌───────▼────┐
-│Transactions│    │  Accounts   │    │Risk/Compl. │
-│Iceberg     │    │Iceberg      │    │Iceberg     │
-│ACID, 7-yr  │    │ACID, 3-yr   │    │ACID, 10-yr │
-└────────────┘    └─────────────┘    └────────────┘
-   ▲ Kafka          ▲ Kafka             ▲ Kafka
-   │ Real-time      │ Real-time         │ Real-time
-   │ 5-min SLA      │ 10-min SLA        │ 10-min SLA
+```mermaid
+graph TD
+    A["Unified Spark SQL Analytics Engine<br/>(Time-travel, masking, SLOs)"]
+    
+    B["Transactions<br/>Iceberg<br/>ACID, 7yr retention"]
+    C["Accounts<br/>Iceberg<br/>ACID, 3yr retention"]
+    D["Risk/Compliance<br/>Iceberg<br/>ACID, 10yr retention"]
+    
+    E["Kafka<br/>Real-time<br/>5-min SLA"]
+    F["Kafka<br/>Real-time<br/>10-min SLA"]
+    G["Kafka<br/>Real-time<br/>10-min SLA"]
+    
+    B --> A
+    C --> A
+    D --> A
+    
+    E --> B
+    F --> C
+    G --> D
 ```
 
 **Key Principles:**

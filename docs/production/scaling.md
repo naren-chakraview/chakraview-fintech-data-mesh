@@ -9,20 +9,22 @@ Production-grade scaling strategies for each domain and component.
 ### 1. Kafka Partitioning (Hot Path Scale)
 
 **Partition Key**: Should distribute evenly across partitions
-```
-Domain: Transactions
-├── Partition key: account_id (or transaction_id for ordering)
-├── Initial: 10 partitions
-├── Target throughput: 100K tx/min
-├── Messages per partition: 10K/min
-└── Scaling: Add partitions if any partition > 20K/min
 
-Domain: Market Data
-├── Partition key: currency_pair (ensures order per pair)
-├── Initial: 10 partitions
-├── Target throughput: 10K rates/min
-├── Messages per partition: 1K/min
-└── Scaling: Add partitions if throughput > 15K/min
+```mermaid
+graph TD
+    A["Domain: Transactions"]
+    A --> A1["Partition key: account_id or transaction_id for ordering"]
+    A --> A2["Initial: 10 partitions"]
+    A --> A3["Target throughput: 100K tx/min"]
+    A --> A4["Messages per partition: 10K/min"]
+    A --> A5["Scaling: Add partitions if any partition &gt; 20K/min"]
+    
+    B["Domain: Market Data"]
+    B --> B1["Partition key: currency_pair ensures order per pair"]
+    B --> B2["Initial: 10 partitions"]
+    B --> B3["Target throughput: 10K rates/min"]
+    B --> B4["Messages per partition: 1K/min"]
+    B --> B5["Scaling: Add partitions if throughput &gt; 15K/min"]
 ```
 
 **Increase Partitions**:
@@ -36,11 +38,13 @@ kafka-topics.sh --bootstrap-server kafka:9092 \
 ### 2. Spark Executor Scaling (Cold Path Scale)
 
 **Scaling Decision Tree**:
-```
-Is batch_duration > 5 minutes?
-├── YES → Increase executors (more parallelism)
-├── NO → Batch is fast; look elsewhere
-└── Check: CPU, memory, I/O contention
+
+```mermaid
+graph TD
+    A{"Is batch_duration &gt; 5 minutes?"}
+    A -->|YES| B["Increase executors for more parallelism"]
+    A -->|NO| C["Batch is fast; look elsewhere"]
+    C --> D["Check: CPU, memory, I/O contention"]
 ```
 
 **Executor Configuration**:
@@ -74,26 +78,26 @@ helm upgrade fintech-mesh ./helm \
 ### 3. Iceberg Table Scaling (Storage Scale)
 
 **Partition Count Impact**:
-```
-Table: transactions.raw_transactions
-Partition spec: [year, month, day, account_id]
 
-Data volume: 1B tx/year × 50 bytes = 50GB/year
-7-year retention: 350GB uncompressed
-
-With Iceberg compression: 100GB total
-
-Partitions per day:
-├── year: 1 (same for all data)
-├── month: 12 (1-12)
-├── day: 30 (avg, 1-31)
-├── account_id: 10M (unique accounts)
-└── Total: 1 × 12 × 30 × 10M = 3.6B partitions
-
-But Iceberg uses "hidden partitions" (efficient):
-├── Only create partitions with data
-├── Typical: 360K partitions/year (1 per day-account combo with data)
-└── File count per partition: 2-5 files (daily Spark batch)
+```mermaid
+graph TD
+    A["Table: transactions.raw_transactions"]
+    A --> A1["Partition spec: year, month, day, account_id"]
+    A --> A2["Data volume: 1B tx/year × 50 bytes = 50GB/year"]
+    A --> A3["7-year retention: 350GB uncompressed"]
+    A --> A4["With Iceberg compression: 100GB total"]
+    
+    B["Partitions per day"]
+    B --> B1["year: 1 same for all data"]
+    B --> B2["month: 12 1-12"]
+    B --> B3["day: 30 avg, 1-31"]
+    B --> B4["account_id: 10M unique accounts"]
+    B --> B5["Total: 1 × 12 × 30 × 10M = 3.6B partitions"]
+    
+    C["But Iceberg uses hidden partitions efficient"]
+    C --> C1["Only create partitions with data"]
+    C --> C2["Typical: 360K partitions/year 1 per day-account combo with data"]
+    C --> C3["File count per partition: 2-5 files daily Spark batch"]
 ```
 
 **Optimize Partitions**:

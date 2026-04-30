@@ -133,24 +133,26 @@ columns:
 ```
 
 **Downstream Consumers**:
-```
-fraud-detection-service (Real-time)
-├── Consumes: Kafka topic market-transactions-raw
-├── SLA required: < 1 second latency
-├── Fields: transaction_id, amount, merchant_id, account_id
-└── Purpose: Fraud detection ML model
 
-account-reconciliation (Batch)
-├── Consumes: Iceberg table transactions.raw_transactions
-├── SLA required: < 1 hour from settlement
-├── Fields: account_id, amount, status, settlement_timestamp
-└── Purpose: Daily account balance verification
-
-compliance-reporting (Quarterly)
-├── Consumes: Iceberg table + time-travel for audit
-├── SLA required: Within 30 days of quarter end
-├── Fields: All fields (PII masked for external auditors)
-└── Purpose: Regulatory reporting (FinCEN, AML)
+```mermaid
+graph TD
+    A["fraud-detection-service Real-time"]
+    A --> A1["Consumes: Kafka topic market-transactions-raw"]
+    A --> A2["SLA required: &lt; 1 second latency"]
+    A --> A3["Fields: transaction_id, amount, merchant_id, account_id"]
+    A --> A4["Purpose: Fraud detection ML model"]
+    
+    B["account-reconciliation Batch"]
+    B --> B1["Consumes: Iceberg table transactions.raw_transactions"]
+    B --> B2["SLA required: &lt; 1 hour from settlement"]
+    B --> B3["Fields: account_id, amount, status, settlement_timestamp"]
+    B --> B4["Purpose: Daily account balance verification"]
+    
+    C["compliance-reporting Quarterly"]
+    C --> C1["Consumes: Iceberg table + time-travel for audit"]
+    C --> C2["SLA required: Within 30 days of quarter end"]
+    C --> C3["Fields: All fields PII masked for external auditors"]
+    C --> C4["Purpose: Regulatory reporting FinCEN, AML"]
 ```
 
 ---
@@ -185,19 +187,18 @@ Settled transactions with post-settlement confirmation.
 
 ### Architecture
 
+```mermaid
+graph TD
+    A["Transactions occur Payment Processor"]
+    A --> B["Market-transactions-raw Kafka Topic"]
+    B --> C["TransactionIngestJob - Spark Structured Streaming"]
+    C --> C1["Read from Kafka stream"]
+    C --> C2["Parse JSON schema validate"]
+    C --> C3["Deduplicate transaction_id"]
+    C --> C4["Partition for Iceberg"]
+    C --> C5["Micro-batch every 5 minutes"]
+    C5 --> D["Transactions.raw_transactions Iceberg Table"]
 ```
-Transactions occur (Payment Processor)
-         ↓
-Market-transactions-raw (Kafka Topic)
-         ↓
-[TransactionIngestJob - Spark Structured Streaming]
-├── Read from Kafka (stream)
-├── Parse JSON schema (validate)
-├── Deduplicate (transaction_id)
-├── Partition for Iceberg
-└── Micro-batch every 5 minutes
-         ↓
-Transactions.raw_transactions (Iceberg Table)
          ↓
 Unified Analytics (Spark SQL + OPA policies)
 ```
