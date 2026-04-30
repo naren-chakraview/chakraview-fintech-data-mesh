@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Fintech Data Mesh - Overview",
+    "description": "Real-time monitoring of data products, ingest pipelines, and query performance",
+    "tags": ["data-mesh", "fintech", "observability"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Data Product Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "data_product_availability_percent",
+            "legendFormat": "{{data_product}}"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Ingest Records (5min)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(ingest_records_total[5m])",
+            "legendFormat": "{{domain}}.{{table}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Data Freshness (minutes)",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "data_freshness_minutes",
+            "legendFormat": "{{domain}}.{{table}}"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Query Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, query_duration_seconds)",
+            "legendFormat": "{{data_product}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Ingest Errors",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(ingest_errors_total[5m])",
+            "legendFormat": "{{domain}}.{{error_type}}"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Data Quality Tests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "quality_checks_passed_total",
+            "legendFormat": "Passed - {{data_product}}"
+          },
+          {
+            "expr": "quality_checks_failed_total",
+            "legendFormat": "Failed - {{data_product}}"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "style": "dark",
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "datasource": "Prometheus"
+        }
+      ]
+    },
+    "version": 1
+  }
+}

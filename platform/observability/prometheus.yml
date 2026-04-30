@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'chakra-fintech-mesh'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'data-mesh-ingest'
+    static_configs:
+      - targets: ['localhost:8001']
+    metrics_path: '/metrics'
+
+  - job_name: 'data-mesh-query'
+    static_configs:
+      - targets: ['localhost:8002']
+    metrics_path: '/metrics'
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+
+  - job_name: 'iceberg-catalog'
+    static_configs:
+      - targets: ['iceberg-catalog:8181']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
