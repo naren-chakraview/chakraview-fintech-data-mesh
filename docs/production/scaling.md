@@ -41,7 +41,7 @@ kafka-topics.sh --bootstrap-server kafka:9092 \
 
 ```mermaid
 graph TD
-    A{"Is batch_duration > 5 minutes?"}
+    A{"Is batch_duration &gt; 5 minutes?"}
     A -->|YES| B["Increase executors for more parallelism"]
     A -->|NO| C["Batch is fast; look elsewhere"]
     C --> D["Check: CPU, memory, I/O contention"]

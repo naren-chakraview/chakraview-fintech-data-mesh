@@ -52,7 +52,7 @@ This project demonstrates fintech data mesh architecture. But when is it the rig
 graph TD
     A["How many events/minute?"]
     
-    A --> B["< 10K/min"]
+    A --> B["&lt; 10K/min"]
     B --> B1["Use: Amazon Kinesis managed, cost-effective"]
     B --> B2["Cost: ~$2K/month"]
     B --> B3["Operational: Minimal"]
@@ -62,7 +62,7 @@ graph TD
     C --> C2["Cost: Kafka $15K, Kinesis $5K"]
     C --> C3["Operational: Moderate Kafka or Low Kinesis"]
     
-    A --> D["> 100K/min"]
+    A --> D["&gt; 100K/min"]
     D --> D1["Use: Kafka on Kubernetes scale horizontally"]
     D --> D2["Cost: $20K+ cluster size for throughput"]
     D --> D3["Operational: High need SRE team"]
@@ -156,12 +156,12 @@ graph TD
 
 ```mermaid
 graph TD
-    A{"Do you need < 1 second latency?"}
+    A{"Do you need &lt; 1 second latency?"}
     
     A -->|YES| B["Use Flink continuous processing"]
     B --> B1["Cost: $20-30K/month dedicated cluster"]
     B --> B2["Complexity: Hard state management, checkpointing"]
-    B --> B3["Example: Real-time fraud detection < 100ms decision"]
+    B --> B3["Example: Real-time fraud detection &lt; 100ms decision"]
     
     A -->|NO| C["Use Spark Structured Streaming"]
     C --> C1{"If latency tolerance: 5-10 minutes"}

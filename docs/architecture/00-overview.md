@@ -12,20 +12,20 @@ The result: **decentralized speed with centralized compliance**.
 graph TB
     subgraph org["Organization Structure (Decentralized)"]
         direction TB
-        T["<b>Transactions Domain</b>- transaction_feed- 5-min freshness- 7yr retention"]
-        R["<b>Risk/Compliance Domain</b>- fraud_scores- 10-min freshness- 10yr retention"]
-        A["<b>Accounts Domain</b>- account_master- 10-min freshness- 3yr retention"]
-        C["<b>Counterparties Domain</b>- merchant_master- 60-min freshness- 2yr retention"]
-        M["<b>Market Data Domain</b>- fx_rates- 1-min freshness- 1yr retention"]
+        T["Transactions Domain (5min/7yr)"]
+        R["Risk/Compliance (10min/10yr)"]
+        A["Accounts Domain (10min/3yr)"]
+        C["Counterparties (60min/2yr)"]
+        M["Market Data (1min/1yr)"]
     end
     
     subgraph plat["Platform Layer (Federated)"]
         direction LR
-        GOV["<b>Governance</b>OPA policies"]
-        DISC["<b>Discovery</b>Self-service portal"]
-        ANA["<b>Analytics</b>Spark SQL"]
-        OBS["<b>Observability</b>SLO dashboards"]
-        STOR["<b>Storage</b>Iceberg lakehouse"]
+        GOV["Governance: OPA"]
+        DISC["Discovery: Portal"]
+        ANA["Analytics: Spark SQL"]
+        OBS["Observability: SLOs"]
+        STOR["Storage: Iceberg"]
     end
     
     T --> GOV
