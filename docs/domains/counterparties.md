@@ -111,21 +111,23 @@ columns:
 ```
 
 **Downstream Consumers**:
-```
-transaction-processing (Real-time)
-├── Consumes: Kafka topic counterparties-raw (hot path)
-├── Purpose: Route transactions to correct processor
-└── SLA: < 100ms lookup
 
-settlement-engine (Batch)
-├── Consumes: Iceberg table counterparties.merchants
-├── Purpose: Apply correct settlement terms and fees
-└── Frequency: Daily
-
-analytics-reporting (Batch)
-├── Consumes: Iceberg table
-├── Purpose: Counterparty performance analysis
-└── Frequency: Weekly/monthly
+```mermaid
+graph TD
+    A["transaction-processing Real-time"]
+    A --> A1["Consumes: Kafka topic counterparties-raw hot path"]
+    A --> A2["Purpose: Route transactions to correct processor"]
+    A --> A3["SLA: &lt; 100ms lookup"]
+    
+    B["settlement-engine Batch"]
+    B --> B1["Consumes: Iceberg table counterparties.merchants"]
+    B --> B2["Purpose: Apply correct settlement terms and fees"]
+    B --> B3["Frequency: Daily"]
+    
+    C["analytics-reporting Batch"]
+    C --> C1["Consumes: Iceberg table"]
+    C --> C2["Purpose: Counterparty performance analysis"]
+    C --> C3["Frequency: Weekly/monthly"]
 ```
 
 ---
@@ -184,29 +186,29 @@ class CounterpartyIngestJob:
 
 ### Retention Policy
 
-```
-Counterparty Master: 2 years
-├── Rationale: Reference data, inactive counterparties archive
-├── Retention starts: From last transaction (3-year rule: if no activity, mark inactive)
-└── Deletion process: Hard delete after 2 years of inactivity
+```mermaid
+graph TD
+    A["Counterparty Master: 2 years"]
+    A --> A1["Rationale: Reference data, inactive counterparties archive"]
+    A --> A2["Retention starts: From last transaction<br/>3-year rule: if no activity, mark inactive"]
+    A --> A3["Deletion process: Hard delete after 2 years of inactivity"]
 ```
 
 ### Approval Workflow for Commercial Data
 
-```
-User: "I need counterparty credit limits to audit exposure"
-
-OPA Evaluation:
-├── User role: auditor
-├── Data classification: confidential (credit_limit)
-├── Auto-approve? NO
-├── Route to: Counterparty Domain Owner (transactions@chakra.fintech)
-├── SLA: 4 hours
-
-Owner decision:
-├── Context review: Purpose? Justification?
-├── Accept: Grant access (masking rules may still apply)
-└── Reject: Deny (explain why)
+```mermaid
+graph TD
+    A["User: I need counterparty credit limits<br/>to audit exposure"]
+    A --> B["OPA Evaluation"]
+    B --> B1["User role: auditor"]
+    B --> B2["Data classification: confidential credit_limit"]
+    B --> B3["Auto-approve? NO"]
+    B --> B4["Route to: Counterparty Domain Owner<br/>transactions@chakra.fintech"]
+    B --> B5["SLA: 4 hours"]
+    B --> C["Owner decision"]
+    C --> C1["Context review: Purpose? Justification?"]
+    C --> C2["Accept: Grant access masking rules may still apply"]
+    C --> C3["Reject: Deny explain why"]
 ```
 
 ---
