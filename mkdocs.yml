@@ -1,0 +1,115 @@
+site_name: Chakra Commerce — Fintech Data Mesh
+site_description: >
+  Production-grade data mesh reference implementation for fintech: Apache Iceberg lakehouse,
+  decentralized domain ownership, unified analytics, federated governance, enterprise observability.
+site_url: https://naren-chakraview.github.io/chakraview-fintech-data-mesh/
+repo_name: naren-chakraview/chakraview-fintech-data-mesh
+repo_url: https://github.com/naren-chakraview/chakraview-fintech-data-mesh
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      title: On this page
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search:
+      lang: en
+  - tags
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/naren-chakraview
+  generator: false
+
+nav:
+  - Home: index.md
+  - Architecture:
+      - Overview: architecture/00-overview.md
+      - Data Mesh Principles: architecture/data-mesh-principles.md
+      - Iceberg Design: architecture/iceberg-design.md
+      - Real-Time vs Analytics: architecture/real-time-vs-analytics.md
+  - Domains:
+      - Transactions: domains/transactions.md
+      - Accounts: domains/accounts.md
+      - Risk & Compliance: domains/risk-compliance.md
+      - Counterparties: domains/counterparties.md
+      - Market Data: domains/market-data.md
+  - Platform:
+      - Governance: platform/governance.md
+      - Discovery Portal: platform/discovery.md
+      - Observability: platform/observability.md
+  - Production:
+      - Deployment: production/deployment.md
+      - Scaling: production/scaling.md
+      - Troubleshooting: production/troubleshooting.md
+      - Trade-offs: production/trade-offs.md
+  - ADRs:
+      - adrs/README.md
+      - ADR-0001 Data Mesh Pattern: adrs/ADR-0001-data-mesh.md
+      - ADR-0002 Iceberg Choice: adrs/ADR-0002-iceberg.md
+      - ADR-0003 Governance Model: adrs/ADR-0003-governance.md
+      - ADR-0004 Real-Time Strategy: adrs/ADR-0004-real-time.md
