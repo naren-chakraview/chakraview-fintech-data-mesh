@@ -79,6 +79,10 @@ plugins:
       lang: en
   - tags
 
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
+
 extra:
   social:
     - icon: fontawesome/brands/github
