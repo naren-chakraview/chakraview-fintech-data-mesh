@@ -2146,7 +2146,7 @@
     C --&gt; C2["Evaluate: Can user access these columns?"]
     C --&gt; C3["Check: Is masking required?"]
     C --&gt; C4["Check: Should query be audited?"]
-    C --&gt; C5["Decision: ALLOW + MASK account_id +&lt;br/&gt;LOG TO ELASTICSEARCH"]
+    C --&gt; C5["Decision: ALLOW + MASK account_id +LOG TO ELASTICSEARCH"]
     C5 --&gt; D["Spark Execution"]
     D --&gt; D1["Read data"]
     D --&gt; D2["Apply masking via UDF"]

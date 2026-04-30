@@ -1927,20 +1927,20 @@
 <pre class="mermaid"><code>graph TB
     subgraph org["Organization Structure (Decentralized)"]
         direction TB
-        T["&lt;b&gt;Transactions Domain&lt;/b&gt;&lt;br/&gt;- transaction_feed&lt;br/&gt;- 5-min freshness&lt;br/&gt;- 7yr retention"]
-        R["&lt;b&gt;Risk/Compliance Domain&lt;/b&gt;&lt;br/&gt;- fraud_scores&lt;br/&gt;- 10-min freshness&lt;br/&gt;- 10yr retention"]
-        A["&lt;b&gt;Accounts Domain&lt;/b&gt;&lt;br/&gt;- account_master&lt;br/&gt;- 10-min freshness&lt;br/&gt;- 3yr retention"]
-        C["&lt;b&gt;Counterparties Domain&lt;/b&gt;&lt;br/&gt;- merchant_master&lt;br/&gt;- 60-min freshness&lt;br/&gt;- 2yr retention"]
-        M["&lt;b&gt;Market Data Domain&lt;/b&gt;&lt;br/&gt;- fx_rates&lt;br/&gt;- 1-min freshness&lt;br/&gt;- 1yr retention"]
+        T["&lt;b&gt;Transactions Domain&lt;/b&gt;- transaction_feed- 5-min freshness- 7yr retention"]
+        R["&lt;b&gt;Risk/Compliance Domain&lt;/b&gt;- fraud_scores- 10-min freshness- 10yr retention"]
+        A["&lt;b&gt;Accounts Domain&lt;/b&gt;- account_master- 10-min freshness- 3yr retention"]
+        C["&lt;b&gt;Counterparties Domain&lt;/b&gt;- merchant_master- 60-min freshness- 2yr retention"]
+        M["&lt;b&gt;Market Data Domain&lt;/b&gt;- fx_rates- 1-min freshness- 1yr retention"]
     end
 
     subgraph plat["Platform Layer (Federated)"]
         direction LR
-        GOV["&lt;b&gt;Governance&lt;/b&gt;&lt;br/&gt;OPA policies"]
-        DISC["&lt;b&gt;Discovery&lt;/b&gt;&lt;br/&gt;Self-service portal"]
-        ANA["&lt;b&gt;Analytics&lt;/b&gt;&lt;br/&gt;Spark SQL"]
-        OBS["&lt;b&gt;Observability&lt;/b&gt;&lt;br/&gt;SLO dashboards"]
-        STOR["&lt;b&gt;Storage&lt;/b&gt;&lt;br/&gt;Iceberg lakehouse"]
+        GOV["&lt;b&gt;Governance&lt;/b&gt;OPA policies"]
+        DISC["&lt;b&gt;Discovery&lt;/b&gt;Self-service portal"]
+        ANA["&lt;b&gt;Analytics&lt;/b&gt;Spark SQL"]
+        OBS["&lt;b&gt;Observability&lt;/b&gt;SLO dashboards"]
+        STOR["&lt;b&gt;Storage&lt;/b&gt;Iceberg lakehouse"]
     end
 
     T --&gt; GOV

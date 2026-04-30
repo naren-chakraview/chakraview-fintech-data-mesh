@@ -2264,15 +2264,15 @@
 <pre class="mermaid"><code>graph TD
     A["OPA Evaluation"]
     A --&gt; A1["default allow = false"]
-    A --&gt; A2["Check rule 1:&lt;br/&gt;analyst_42 role is analyst ✓&lt;br/&gt;action is read ✓&lt;br/&gt;classification is public ✓"]
+    A --&gt; A2["Check rule 1:analyst_42 role is analyst ✓action is read ✓classification is public ✓"]
     A --&gt; A3["Result: ALLOW rule 1 matches"]</code></pre>
 <p>Query 2: Can contractor_5 write to market_data.fx_rates?</p>
 <pre class="mermaid"><code>graph TD
     B["OPA Evaluation"]
     B --&gt; B1["default allow = false"]
-    B --&gt; B2["Check rule 1: contractor_5 role = contractor ✗&lt;br/&gt;rule requires analyst"]
-    B --&gt; B3["Check rule 2: contractor_5 role = contractor ✗&lt;br/&gt;rule requires data_owner"]
-    B --&gt; B4["Check rule 3: contractor_5 role = contractor ✗&lt;br/&gt;rule requires admin"]
+    B --&gt; B2["Check rule 1: contractor_5 role = contractor ✗rule requires analyst"]
+    B --&gt; B3["Check rule 2: contractor_5 role = contractor ✗rule requires data_owner"]
+    B --&gt; B4["Check rule 3: contractor_5 role = contractor ✗rule requires admin"]
     B --&gt; B5["Result: DENY no rules match"]</code></pre>
 <h3 id="2-pii-masking-rules">2. PII Masking Rules<a class="headerlink" href="#2-pii-masking-rules" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a># Mask PII columns for external users
@@ -2305,7 +2305,7 @@
     B["Column: amount"]
     B --&gt; B1["Classification: public"]
     B --&gt; B2["User role: external_analyst"]
-    B --&gt; B3["Applies mask_pii rule? ✗&lt;br/&gt;public != pii"]
+    B --&gt; B3["Applies mask_pii rule? ✗public != pii"]
     B --&gt; B4["Result: Raw value returned"]
 
     C["Column: account_holder_name"]
@@ -2474,23 +2474,23 @@
 <h2 id="integration-how-spark-reads-opa-policies">Integration: How Spark Reads OPA Policies<a class="headerlink" href="#integration-how-spark-reads-opa-policies" title="Permanent link">&para;</a></h2>
 <h3 id="query-execution-flow">Query Execution Flow<a class="headerlink" href="#query-execution-flow" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD
-    A["Analyst submits query:&lt;br/&gt;SELECT transaction_id, account_id, amount&lt;br/&gt;FROM transactions.raw_transactions&lt;br/&gt;WHERE booking_date = '2026-04-30'"]
+    A["Analyst submits query:SELECT transaction_id, account_id, amountFROM transactions.raw_transactionsWHERE booking_date = '2026-04-30'"]
 
     B["Spark SQL Parser"]
     A --&gt; B
     B --&gt; B1["Parse query"]
-    B --&gt; B2["Identify columns:&lt;br/&gt;transaction_id, account_id, amount"]
-    B --&gt; B3["Identify table:&lt;br/&gt;transactions.raw_transactions"]
+    B --&gt; B2["Identify columns:transaction_id, account_id, amount"]
+    B --&gt; B3["Identify table:transactions.raw_transactions"]
     B --&gt; B4["Identify action: read"]
 
     C["OPA Policy Evaluator"]
     B --&gt; C
     C --&gt; C1["Fetch policy: abac.rego, masking.rego"]
     C --&gt; C2["Evaluate for each column:"]
-    C2 --&gt; C2a["transaction_id pii:&lt;br/&gt;Mask for external_analyst? YES&lt;br/&gt;apply hash_mask"]
-    C2 --&gt; C2b["account_id pii:&lt;br/&gt;Mask for external_analyst? YES&lt;br/&gt;apply hash_mask"]
-    C2 --&gt; C2c["amount public:&lt;br/&gt;Mask? NO → raw value"]
-    C --&gt; C3["Evaluate for audit:&lt;br/&gt;Log query? YES pii columns read"]
+    C2 --&gt; C2a["transaction_id pii:Mask for external_analyst? YESapply hash_mask"]
+    C2 --&gt; C2b["account_id pii:Mask for external_analyst? YESapply hash_mask"]
+    C2 --&gt; C2c["amount public:Mask? NO → raw value"]
+    C --&gt; C3["Evaluate for audit:Log query? YES pii columns read"]
     C --&gt; C4["Decision: ALLOW with masking"]
 
     D["Spark Execution"]

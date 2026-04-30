@@ -2198,13 +2198,13 @@
 <pre class="mermaid"><code>graph TD
     A["fraud-detection-service Real-time"]
     A --&gt; A1["Consumes: Kafka topic market-transactions-raw"]
-    A --&gt; A2["SLA required: &amp;lt; 1 second latency"]
+    A --&gt; A2["SLA required: &lt; 1 second latency"]
     A --&gt; A3["Fields: transaction_id, amount, merchant_id, account_id"]
     A --&gt; A4["Purpose: Fraud detection ML model"]
 
     B["account-reconciliation Batch"]
     B --&gt; B1["Consumes: Iceberg table transactions.raw_transactions"]
-    B --&gt; B2["SLA required: &amp;lt; 1 hour from settlement"]
+    B --&gt; B2["SLA required: &lt; 1 hour from settlement"]
     B --&gt; B3["Fields: account_id, amount, status, settlement_timestamp"]
     B --&gt; B4["Purpose: Daily account balance verification"]
 

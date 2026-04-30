@@ -1905,7 +1905,7 @@
     A["transaction-processing Real-time"]
     A --&gt; A1["Consumes: Kafka topic counterparties-raw hot path"]
     A --&gt; A2["Purpose: Route transactions to correct processor"]
-    A --&gt; A3["SLA: &amp;lt; 100ms lookup"]
+    A --&gt; A3["SLA: &lt; 100ms lookup"]
 
     B["settlement-engine Batch"]
     B --&gt; B1["Consumes: Iceberg table counterparties.merchants"]
@@ -1968,16 +1968,16 @@
 <pre class="mermaid"><code>graph TD
     A["Counterparty Master: 2 years"]
     A --&gt; A1["Rationale: Reference data, inactive counterparties archive"]
-    A --&gt; A2["Retention starts: From last transaction&lt;br/&gt;3-year rule: if no activity, mark inactive"]
+    A --&gt; A2["Retention starts: From last transaction3-year rule: if no activity, mark inactive"]
     A --&gt; A3["Deletion process: Hard delete after 2 years of inactivity"]</code></pre>
 <h3 id="approval-workflow-for-commercial-data">Approval Workflow for Commercial Data<a class="headerlink" href="#approval-workflow-for-commercial-data" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD
-    A["User: I need counterparty credit limits&lt;br/&gt;to audit exposure"]
+    A["User: I need counterparty credit limitsto audit exposure"]
     A --&gt; B["OPA Evaluation"]
     B --&gt; B1["User role: auditor"]
     B --&gt; B2["Data classification: confidential credit_limit"]
     B --&gt; B3["Auto-approve? NO"]
-    B --&gt; B4["Route to: Counterparty Domain Owner&lt;br/&gt;transactions@chakra.fintech"]
+    B --&gt; B4["Route to: Counterparty Domain Ownertransactions@chakra.fintech"]
     B --&gt; B5["SLA: 4 hours"]
     B --&gt; C["Owner decision"]
     C --&gt; C1["Context review: Purpose? Justification?"]

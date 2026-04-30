@@ -2022,15 +2022,15 @@
 <p><strong>With Iceberg</strong>: Simple metadata update</p>
 <pre class="mermaid"><code>graph TD
     A["Snapshot 1 metadata"]
-    A --&gt; A1["Schema: transaction_id, account_id, amount,&lt;br/&gt;merchant_id, timestamp"]
+    A --&gt; A1["Schema: transaction_id, account_id, amount,merchant_id, timestamp"]
     A --&gt; A2["Data files: 00000.parquet, 00001.parquet, ..."]
     A --&gt; A3["Snapshot ID: 1"]
 
     B["New writes with new field"]
 
     C["Snapshot 2 metadata"]
-    C --&gt; C1["Schema: transaction_id, account_id, amount,&lt;br/&gt;merchant_id, timestamp, fraud_risk_score"]
-    C --&gt; C2["Data files: 00000.parquet, 00001.parquet, ...,&lt;br/&gt;00100.parquet new file"]
+    C --&gt; C1["Schema: transaction_id, account_id, amount,merchant_id, timestamp, fraud_risk_score"]
+    C --&gt; C2["Data files: 00000.parquet, 00001.parquet, ...,00100.parquet new file"]
     C --&gt; C3["Snapshot ID: 2"]
 
     D["Existing readers see Snapshot 2 schema automatically"]

@@ -2029,7 +2029,7 @@
     A --&gt; D["Action: FLAG transaction"]
     D --&gt; D1["Blocks payment"]
     D --&gt; D2["Routes to manual review"]
-    A --&gt; E["Latency: &amp;lt;1 second"]
+    A --&gt; E["Latency: &lt;1 second"]
 
     F["11:35:04 - Dashboard shows"]
     F --&gt; F1["Fraud alert: Transaction tx_42 flagged"]
@@ -2234,19 +2234,19 @@ Inefficient for large streams.</p>
 <h3 id="kafka-lag-hot-path-health">Kafka Lag Hot Path Health<a class="headerlink" href="#kafka-lag-hot-path-health" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD
     A["Metric: kafka_lag_seconds"]
-    A --&gt; B["Definition: Time since event published&lt;br/&gt;vs. when Spark reads it"]
+    A --&gt; B["Definition: Time since event publishedvs. when Spark reads it"]
     B --&gt; C["Threshold"]
-    C --&gt; C1["&amp;lt; 1 sec: Healthy"]
+    C --&gt; C1["&lt; 1 sec: Healthy"]
     C --&gt; C2["1-5 sec: Acceptable burst traffic"]
-    C --&gt; C3["&amp;gt; 5 sec: Alert fraud detection SLA at risk"]</code></pre>
+    C --&gt; C3["&gt; 5 sec: Alert fraud detection SLA at risk"]</code></pre>
 <h3 id="iceberg-freshness-cold-path-health">Iceberg Freshness Cold Path Health<a class="headerlink" href="#iceberg-freshness-cold-path-health" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph TD
     A["Metric: data_freshness_minutes"]
-    A --&gt; B["Definition: Time since last Iceberg snapshot&lt;br/&gt;vs. current time"]
+    A --&gt; B["Definition: Time since last Iceberg snapshotvs. current time"]
     B --&gt; C["Threshold"]
-    C --&gt; C1["&amp;lt; 5 min: Healthy meets SLA"]
+    C --&gt; C1["&lt; 5 min: Healthy meets SLA"]
     C --&gt; C2["5-10 min: Acceptable Spark job slow"]
-    C --&gt; C3["&amp;gt; 10 min: Alert SLA violated, check logs"]</code></pre>
+    C --&gt; C3["&gt; 10 min: Alert SLA violated, check logs"]</code></pre>
 <h3 id="dashboard-queries">Dashboard Queries<a class="headerlink" href="#dashboard-queries" title="Permanent link">&para;</a></h3>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">-- Kafka lag per domain</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">domain</span><span class="p">,</span><span class="w"> </span><span class="n">consumer_group</span><span class="p">,</span><span class="w"> </span><span class="n">lag_seconds</span><span class="p">,</span><span class="w"> </span><span class="n">last_update</span>
@@ -2266,8 +2266,8 @@ Inefficient for large streams.</p>
     A --&gt; A1["Frequency: 1 per minute 9 AM - 5 PM ET"]
     A --&gt; A2["Volume: 10,000 pairs × 1 rate/min = 10k events/min"]
     A --&gt; A3["Consumers"]
-    A3 --&gt; A3a["Live dashboard &amp;lt; 1 sec latency"]
-    A3 --&gt; A3b["Risk models &amp;lt; 5 sec latency"]
+    A3 --&gt; A3a["Live dashboard &lt; 1 sec latency"]
+    A3 --&gt; A3b["Risk models &lt; 5 sec latency"]
     A3 --&gt; A3c["Historical archive time-travel required"]
 
     B["Kafka topic: market-rates-raw"]
@@ -2289,8 +2289,8 @@ Inefficient for large streams.</p>
     D --&gt; D5["Checkpoint: Tracks offset recovery"]
 
     E["Monitoring"]
-    E --&gt; E1["Kafka lag: Should stay &amp;lt; 1 min"]
-    E --&gt; E2["Iceberg freshness: Should stay &amp;lt; 5 min"]
+    E --&gt; E1["Kafka lag: Should stay &lt; 1 min"]
+    E --&gt; E2["Iceberg freshness: Should stay &lt; 5 min"]
     E --&gt; E3["Alert: If either exceeds threshold"]</code></pre>
 <hr />
 <h2 id="next-explore-more">Next: Explore More<a class="headerlink" href="#next-explore-more" title="Permanent link">&para;</a></h2>

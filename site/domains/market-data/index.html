@@ -2136,12 +2136,12 @@
     A["risk-models Real-time"]
     A --&gt; A1["Consumes: Kafka topic market-rates-raw hot path"]
     A --&gt; A2["Purpose: Real-time risk valuation"]
-    A --&gt; A3["SLA: &amp;lt; 10 seconds to decision"]
+    A --&gt; A3["SLA: &lt; 10 seconds to decision"]
 
     B["pricing-engine Real-time"]
     B --&gt; B1["Consumes: Kafka topic market-prices-raw"]
     B --&gt; B2["Purpose: Dynamic pricing based on market moves"]
-    B --&gt; B3["SLA: &amp;lt; 5 seconds to adjust price"]
+    B --&gt; B3["SLA: &lt; 5 seconds to adjust price"]
 
     C["analytics-dashboard Near-real-time"]
     C --&gt; C1["Consumes: Iceberg table market_data.fx_rates"]
@@ -2153,7 +2153,7 @@
 <pre class="mermaid"><code>graph TD
     A["Market Data Providers External APIs"]
     A --&gt; B["market-rates-raw, market-prices-raw Kafka Topics"]
-    B --&gt; B1["Hot path: Real-time streaming &amp;lt; 1 second latency"]
+    B --&gt; B1["Hot path: Real-time streaming &lt; 1 second latency"]
     B --&gt; B2["Partitions: currency_pair for FX, bond_isin for bonds"]
     B --&gt; B3["Retention: 7 days"]
     B --&gt; C["MarketDataIngestJob - Spark Structured Streaming"]
@@ -2226,7 +2226,7 @@
     A["Critical metrics alert if violated"]
     A --&gt; A1["Completeness: Min 95% of expected rates present"]
     A --&gt; A2["Freshness: Max 5 minutes old warn at 3 min, alert at 5"]
-    A --&gt; A3["Accuracy: Cross-check against external benchmark &amp;lt; 0.1% deviation"]
+    A --&gt; A3["Accuracy: Cross-check against external benchmark &lt; 0.1% deviation"]
     A --&gt; A4["Gaps: Identify missing data windows non-trading hours OK"]</code></pre>
 <hr />
 <h2 id="queries">Queries<a class="headerlink" href="#queries" title="Permanent link">&para;</a></h2>

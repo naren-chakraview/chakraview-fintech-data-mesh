@@ -2046,7 +2046,7 @@
     A["fraud-detection-service Real-time, hot path"]
     A --&gt; A1["Consumes: Kafka topic risk-scores-raw"]
     A --&gt; A2["Purpose: Block or approve transactions in real-time"]
-    A --&gt; A3["SLA: &amp;lt; 500ms decision time"]
+    A --&gt; A3["SLA: &lt; 500ms decision time"]
 
     B["transaction-settlement Batch"]
     B --&gt; B1["Consumes: Iceberg table risk_compliance.fraud_scores"]

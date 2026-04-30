@@ -2140,12 +2140,12 @@
 <pre class="mermaid"><code>graph TD
     A["Events occur"]
     A --&gt; B["Kafka Topic real-time, 7-day retention"]
-    B --&gt; B1["Consumers: Fraud detection, pricing engine&lt;br/&gt;need &amp;lt; 1-second latency"]
-    B --&gt; B2["Latency: &amp;lt; 100ms"]
-    B --&gt; C["Spark Structured Streaming&lt;br/&gt;micro-batch every 5 minutes"]
+    B --&gt; B1["Consumers: Fraud detection, pricing engineneed &lt; 1-second latency"]
+    B --&gt; B2["Latency: &lt; 100ms"]
+    B --&gt; C["Spark Structured Streamingmicro-batch every 5 minutes"]
     C --&gt; C1["Checkpoint: Ensures exactly-once delivery"]
     C --&gt; D["Iceberg Table cold path, 7-year retention"]
-    D --&gt; D1["Consumers: Analysts, compliance&lt;br/&gt;can tolerate 5-minute lag"]
+    D --&gt; D1["Consumers: Analysts, compliancecan tolerate 5-minute lag"]
     D --&gt; D2["Cost: 60% cheaper than Kafka retention"]
     D --&gt; D3["Latency: 5 minutes"]</code></pre>
 <h3 id="trade-off">Trade-Off<a class="headerlink" href="#trade-off" title="Permanent link">&para;</a></h3>
