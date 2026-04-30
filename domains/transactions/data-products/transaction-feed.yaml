@@ -1,0 +1,87 @@
+---
+name: transaction-feed
+version: "1.0"
+owner: transactions-domain
+owner_email: transactions@chakra.fintech
+domain: transactions
+
+description: |
+  Real-time transaction feed for all payment and settlement events.
+  Includes T+0 settlement tracking, reversals, and clearing status.
+  Primary source for fraud detection, settlement reconciliation, regulatory reporting.
+
+tables:
+  - name: raw_transactions
+    iceberg_table: transactions.raw_transactions
+    schema_version: "2.1"
+    partitions: [year, month, day, account_id]
+    doc: "Raw transaction events as received from core banking system"
+
+  - name: settlement_status
+    iceberg_table: transactions.settlement_status
+    schema_version: "1.0"
+    partitions: [year, month, day]
+    doc: "Settlement status per transaction (pending, cleared, failed)"
+
+sla:
+  freshness:
+    value: 5
+    unit: minutes
+    measured_as: "max(current_time - kafka_ingest_timestamp)"
+
+  availability:
+    value: 99.9
+    unit: percent
+    measured_as: "successful_ingest_jobs / total_ingest_jobs"
+
+  completeness:
+    value: 100
+    unit: percent
+    measured_as: "row_count matches banking_system +/- 10 within 10 min"
+
+access_policy:
+  default: deny
+  approval_required: true
+  approval_sla_hours: 4
+  self_approve_roles: [internal-fraud-team, settlements-ops]
+  columns:
+    - name: account_id
+      classification: pii
+      masked_for_roles: [external-analysts]
+    - name: account_holder_name
+      classification: pii
+      masked_for_roles: [external-analysts]
+    - name: amount
+      classification: public
+    - name: merchant_id
+      classification: public
+    - name: merchant_category_code
+      classification: public
+
+tags: [real-time, settlement-critical, pci-dss, sox-relevant]
+use_cases:
+  - fraud_detection_real_time
+  - settlement_reconciliation
+  - regulatory_reporting_daily
+  - compliance_audits
+
+upstream_lineage:
+  - kafka.transactions-raw (external: core banking)
+  - kafka.settlement-messages (external: clearing house)
+
+downstream_lineage:
+  - risk_compliance.fraud-scores (consumes raw_transactions)
+  - accounts.account-balance-materialized (uses settlement_status)
+
+quality_rules:
+  - rule: "amount > 0"
+    description: "All transaction amounts must be positive"
+  - rule: "booking_date <= settlement_date"
+    description: "Settlement cannot precede booking"
+  - rule: "null_count(account_id) == 0"
+    description: "No missing account IDs"
+
+retention_policy:
+  value: 7
+  unit: years
+  rationale: "SOX & regulatory requirement for transaction audit trail"
