@@ -80,7 +80,7 @@ graph TD
     A --> D["Action: FLAG transaction"]
     D --> D1["Blocks payment"]
     D --> D2["Routes to manual review"]
-    A --> E["Latency: &lt;1 second"]
+    A --> E["Latency: <1 second"]
     
     F["11:35:04 - Dashboard shows"]
     F --> F1["Fraud alert: Transaction tx_42 flagged"]
@@ -291,9 +291,9 @@ graph TD
     A["Metric: kafka_lag_seconds"]
     A --> B["Definition: Time since event published<br/>vs. when Spark reads it"]
     B --> C["Threshold"]
-    C --> C1["&lt; 1 sec: Healthy"]
+    C --> C1["< 1 sec: Healthy"]
     C --> C2["1-5 sec: Acceptable burst traffic"]
-    C --> C3["&gt; 5 sec: Alert fraud detection SLA at risk"]
+    C --> C3["> 5 sec: Alert fraud detection SLA at risk"]
 ```
 
 ### Iceberg Freshness Cold Path Health
@@ -303,9 +303,9 @@ graph TD
     A["Metric: data_freshness_minutes"]
     A --> B["Definition: Time since last Iceberg snapshot<br/>vs. current time"]
     B --> C["Threshold"]
-    C --> C1["&lt; 5 min: Healthy meets SLA"]
+    C --> C1["< 5 min: Healthy meets SLA"]
     C --> C2["5-10 min: Acceptable Spark job slow"]
-    C --> C3["&gt; 10 min: Alert SLA violated, check logs"]
+    C --> C3["> 10 min: Alert SLA violated, check logs"]
 ```
 
 ### Dashboard Queries
@@ -333,8 +333,8 @@ graph TD
     A --> A1["Frequency: 1 per minute 9 AM - 5 PM ET"]
     A --> A2["Volume: 10,000 pairs × 1 rate/min = 10k events/min"]
     A --> A3["Consumers"]
-    A3 --> A3a["Live dashboard &lt; 1 sec latency"]
-    A3 --> A3b["Risk models &lt; 5 sec latency"]
+    A3 --> A3a["Live dashboard < 1 sec latency"]
+    A3 --> A3b["Risk models < 5 sec latency"]
     A3 --> A3c["Historical archive time-travel required"]
     
     B["Kafka topic: market-rates-raw"]
@@ -356,8 +356,8 @@ graph TD
     D --> D5["Checkpoint: Tracks offset recovery"]
     
     E["Monitoring"]
-    E --> E1["Kafka lag: Should stay &lt; 1 min"]
-    E --> E2["Iceberg freshness: Should stay &lt; 5 min"]
+    E --> E1["Kafka lag: Should stay < 1 min"]
+    E --> E2["Iceberg freshness: Should stay < 5 min"]
     E --> E3["Alert: If either exceeds threshold"]
 ```
 

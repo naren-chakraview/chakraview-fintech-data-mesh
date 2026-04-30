@@ -120,7 +120,7 @@ graph TD
 **Cause 5: High Volume Spike**
 
 ```bash
-Check: Kafka lag metric should be &lt; 30 sec normally
+Check: Kafka lag metric should be < 30 sec normally
 ```
 
 ```mermaid
@@ -128,7 +128,7 @@ graph TD
     A["If lag is increasing"]
     A --> A1["Verify: ingest_records_total increasing steadily?"]
     A --> A2["Calculate: messages_per_minute = lag_now - lag_5min_ago / 5"]
-    A --> A3["If &gt; 200K msg/min 2x normal 100K"]
+    A --> A3["If > 200K msg/min 2x normal 100K"]
     A3 --> A3a["This is expected; Spark will catch up"]
     A3 --> A3b["Monitor lag: should decrease within 30 min"]
     A3 --> A3c["If lag continues increasing: Scale Spark"]
@@ -156,9 +156,9 @@ graph TD
 ```mermaid
 graph TD
     A["Alert Thresholds"]
-    A --> A1["data_freshness_sla_warning<br/>Condition: data_freshness_minutes &gt; 3<br/>60% of 5-min SLA<br/>Action: Page on-call, investigate"]
-    A --> A2["kafka_lag_critical<br/>Condition: kafka_lag_seconds &gt; 60<br/>Action: Page on-call"]
-    A --> A3["ingest_errors_high<br/>Condition: rate ingest_errors_total[5m] &gt; 0.01<br/>&gt;1% errors<br/>Action: Page on-call"]
+    A --> A1["data_freshness_sla_warning<br/>Condition: data_freshness_minutes > 3<br/>60% of 5-min SLA<br/>Action: Page on-call, investigate"]
+    A --> A2["kafka_lag_critical<br/>Condition: kafka_lag_seconds > 60<br/>Action: Page on-call"]
+    A --> A3["ingest_errors_high<br/>Condition: rate ingest_errors_total[5m] > 0.01<br/>>1% errors<br/>Action: Page on-call"]
 ```
 
 **Health checks** (automated):
@@ -167,8 +167,8 @@ graph TD
 graph TD
     A["Automated Health Checks"]
     A --> A1["Every 1 minute: Check ingest job running"]
-    A --> A2["Every 5 minutes: Check Kafka lag &lt; 30 sec"]
-    A --> A3["Every 10 minutes: Check Iceberg write latency &lt; 500ms"]
+    A --> A2["Every 5 minutes: Check Kafka lag < 30 sec"]
+    A --> A3["Every 10 minutes: Check Iceberg write latency < 500ms"]
     A --> A4["Alert if any fail 2 consecutive checks"]
 ```
 ```

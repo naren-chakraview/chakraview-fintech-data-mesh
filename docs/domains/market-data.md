@@ -129,12 +129,12 @@ graph TD
     A["risk-models Real-time"]
     A --> A1["Consumes: Kafka topic market-rates-raw hot path"]
     A --> A2["Purpose: Real-time risk valuation"]
-    A --> A3["SLA: &lt; 10 seconds to decision"]
+    A --> A3["SLA: < 10 seconds to decision"]
     
     B["pricing-engine Real-time"]
     B --> B1["Consumes: Kafka topic market-prices-raw"]
     B --> B2["Purpose: Dynamic pricing based on market moves"]
-    B --> B3["SLA: &lt; 5 seconds to adjust price"]
+    B --> B3["SLA: < 5 seconds to adjust price"]
     
     C["analytics-dashboard Near-real-time"]
     C --> C1["Consumes: Iceberg table market_data.fx_rates"]
@@ -152,7 +152,7 @@ graph TD
 graph TD
     A["Market Data Providers External APIs"]
     A --> B["market-rates-raw, market-prices-raw Kafka Topics"]
-    B --> B1["Hot path: Real-time streaming &lt; 1 second latency"]
+    B --> B1["Hot path: Real-time streaming < 1 second latency"]
     B --> B2["Partitions: currency_pair for FX, bond_isin for bonds"]
     B --> B3["Retention: 7 days"]
     B --> C["MarketDataIngestJob - Spark Structured Streaming"]
@@ -238,7 +238,7 @@ graph TD
     A["Critical metrics alert if violated"]
     A --> A1["Completeness: Min 95% of expected rates present"]
     A --> A2["Freshness: Max 5 minutes old warn at 3 min, alert at 5"]
-    A --> A3["Accuracy: Cross-check against external benchmark &lt; 0.1% deviation"]
+    A --> A3["Accuracy: Cross-check against external benchmark < 0.1% deviation"]
     A --> A4["Gaps: Identify missing data windows non-trading hours OK"]
 ```
 

@@ -117,7 +117,7 @@ graph TD
     A["transaction-processing Real-time"]
     A --> A1["Consumes: Kafka topic counterparties-raw hot path"]
     A --> A2["Purpose: Route transactions to correct processor"]
-    A --> A3["SLA: &lt; 100ms lookup"]
+    A --> A3["SLA: < 100ms lookup"]
     
     B["settlement-engine Batch"]
     B --> B1["Consumes: Iceberg table counterparties.merchants"]

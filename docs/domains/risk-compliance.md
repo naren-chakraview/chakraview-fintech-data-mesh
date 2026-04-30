@@ -99,7 +99,7 @@ graph TD
     A["fraud-detection-service Real-time, hot path"]
     A --> A1["Consumes: Kafka topic risk-scores-raw"]
     A --> A2["Purpose: Block or approve transactions in real-time"]
-    A --> A3["SLA: &lt; 500ms decision time"]
+    A --> A3["SLA: < 500ms decision time"]
     
     B["transaction-settlement Batch"]
     B --> B1["Consumes: Iceberg table risk_compliance.fraud_scores"]

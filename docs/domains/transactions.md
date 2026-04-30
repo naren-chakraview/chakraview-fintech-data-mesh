@@ -138,13 +138,13 @@ columns:
 graph TD
     A["fraud-detection-service Real-time"]
     A --> A1["Consumes: Kafka topic market-transactions-raw"]
-    A --> A2["SLA required: &lt; 1 second latency"]
+    A --> A2["SLA required: < 1 second latency"]
     A --> A3["Fields: transaction_id, amount, merchant_id, account_id"]
     A --> A4["Purpose: Fraud detection ML model"]
     
     B["account-reconciliation Batch"]
     B --> B1["Consumes: Iceberg table transactions.raw_transactions"]
-    B --> B2["SLA required: &lt; 1 hour from settlement"]
+    B --> B2["SLA required: < 1 hour from settlement"]
     B --> B3["Fields: account_id, amount, status, settlement_timestamp"]
     B --> B4["Purpose: Daily account balance verification"]
     

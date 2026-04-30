@@ -17,14 +17,14 @@ graph TD
     A --> A2["Initial: 10 partitions"]
     A --> A3["Target throughput: 100K tx/min"]
     A --> A4["Messages per partition: 10K/min"]
-    A --> A5["Scaling: Add partitions if any partition &gt; 20K/min"]
+    A --> A5["Scaling: Add partitions if any partition > 20K/min"]
     
     B["Domain: Market Data"]
     B --> B1["Partition key: currency_pair ensures order per pair"]
     B --> B2["Initial: 10 partitions"]
     B --> B3["Target throughput: 10K rates/min"]
     B --> B4["Messages per partition: 1K/min"]
-    B --> B5["Scaling: Add partitions if throughput &gt; 15K/min"]
+    B --> B5["Scaling: Add partitions if throughput > 15K/min"]
 ```
 
 **Increase Partitions**:
@@ -41,7 +41,7 @@ kafka-topics.sh --bootstrap-server kafka:9092 \
 
 ```mermaid
 graph TD
-    A{"Is batch_duration &gt; 5 minutes?"}
+    A{"Is batch_duration > 5 minutes?"}
     A -->|YES| B["Increase executors for more parallelism"]
     A -->|NO| C["Batch is fast; look elsewhere"]
     C --> D["Check: CPU, memory, I/O contention"]

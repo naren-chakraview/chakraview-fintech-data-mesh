@@ -144,7 +144,7 @@ graph TD
     A --> A1["Transactions: 8.5 sec stable"]
     A --> A2["Risk/Compliance: 12.3 sec slower due to joins"]
     A --> A3["Accounts: 2.1 sec small table"]
-    A --> A4["Alert if P95 &gt; 30 sec performance degradation"]
+    A --> A4["Alert if P95 > 30 sec performance degradation"]
 ```
 
 **4. Quality Check Pass Rate Gauge**
