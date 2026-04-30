@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://naren-chakraview.github.io/chakraview-fintech-data-mesh/">
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/">
       
       
       
@@ -1337,7 +1337,7 @@
   
   
     <li class="md-nav__item">
-      <a href="production/scaling.md" class="md-nav__link">
+      <a href="production/scaling/" class="md-nav__link">
         
   
   
@@ -1365,7 +1365,7 @@
   
   
     <li class="md-nav__item">
-      <a href="production/troubleshooting.md" class="md-nav__link">
+      <a href="production/troubleshooting/" class="md-nav__link">
         
   
   
@@ -1393,7 +1393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="production/trade-offs.md" class="md-nav__link">
+      <a href="production/trade-offs/" class="md-nav__link">
         
   
   
@@ -1903,22 +1903,24 @@
 - <strong>Scale limits</strong>: One catalog, one security model, one SLA for all domains</p>
 <hr />
 <h2 id="the-solution-data-mesh-lakehouse">✨ The Solution: Data Mesh Lakehouse<a class="headerlink" href="#the-solution-data-mesh-lakehouse" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│           Unified Spark SQL Analytics Engine             │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  (Time-travel queries, compliance-aware masking, SLOs)  │
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└─────────────────────────────────────────────────────────┘
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                          ▲
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        ┌─────────────────┼─────────────────┐
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        │                 │                 │
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>┌───────▼────┐    ┌───────▼────┐    ┌───────▼────┐
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│Transactions│    │  Accounts   │    │Risk/Compl. │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│Iceberg     │    │Iceberg      │    │Iceberg     │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│ACID, 7-yr  │    │ACID, 3-yr   │    │ACID, 10-yr │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>└────────────┘    └─────────────┘    └────────────┘
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>   ▲ Kafka          ▲ Kafka             ▲ Kafka
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>   │ Real-time      │ Real-time         │ Real-time
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>   │ 5-min SLA      │ 10-min SLA        │ 10-min SLA
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["Unified Spark SQL Analytics Engine&lt;br/&gt;(Time-travel, masking, SLOs)"]
+
+    B["Transactions&lt;br/&gt;Iceberg&lt;br/&gt;ACID, 7yr retention"]
+    C["Accounts&lt;br/&gt;Iceberg&lt;br/&gt;ACID, 3yr retention"]
+    D["Risk/Compliance&lt;br/&gt;Iceberg&lt;br/&gt;ACID, 10yr retention"]
+
+    E["Kafka&lt;br/&gt;Real-time&lt;br/&gt;5-min SLA"]
+    F["Kafka&lt;br/&gt;Real-time&lt;br/&gt;10-min SLA"]
+    G["Kafka&lt;br/&gt;Real-time&lt;br/&gt;10-min SLA"]
+
+    B --&gt; A
+    C --&gt; A
+    D --&gt; A
+
+    E --&gt; B
+    F --&gt; C
+    G --&gt; D</code></pre>
 <p><strong>Key Principles:</strong>
 - <strong>Decentralized ownership</strong>: Each domain manages its own data, schema, SLAs
 - <strong>Federated governance</strong>: OPA policies (not roles) enforce compliance across domains
@@ -1988,48 +1990,48 @@
 <hr />
 <h2 id="quick-start">🚀 Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <h3 id="1-local-setup-5-minutes">1. Local Setup (5 minutes)<a class="headerlink" href="#1-local-setup-5-minutes" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>chakraview-fintech-data-mesh
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Install dependencies</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>make<span class="w"> </span>install
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Start services (Kafka, Iceberg, Postgres, MinIO, Prometheus, Grafana, OPA)</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>make<span class="w"> </span>docker-up
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Run tests</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>make<span class="w"> </span><span class="nb">test</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Start ingest jobs</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>python<span class="w"> </span>-m<span class="w"> </span>domains.transactions.ingest.ingest_job
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>python<span class="w"> </span>-m<span class="w"> </span>domains.risk_compliance.ingest.ingest_job
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>chakraview-fintech-data-mesh
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Install dependencies</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>make<span class="w"> </span>install
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># Start services (Kafka, Iceberg, Postgres, MinIO, Prometheus, Grafana, OPA)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>make<span class="w"> </span>docker-up
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Run tests</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>make<span class="w"> </span><span class="nb">test</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># Start ingest jobs</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>python<span class="w"> </span>-m<span class="w"> </span>domains.transactions.ingest.ingest_job
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>python<span class="w"> </span>-m<span class="w"> </span>domains.risk_compliance.ingest.ingest_job
 </span></code></pre></div>
 <h3 id="2-query-across-domains">2. Query Across Domains<a class="headerlink" href="#2-query-across-domains" title="Permanent link">&para;</a></h3>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- Unified Spark SQL across decentralized domains</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="n">t</span><span class="p">.</span><span class="n">transaction_id</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="n">t</span><span class="p">.</span><span class="n">merchant_id</span><span class="p">,</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="n">r</span><span class="p">.</span><span class="n">fraud_score</span><span class="p">,</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">risk_level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;CRITICAL&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;BLOCK&#39;</span><span class="w"> </span><span class="k">ELSE</span><span class="w"> </span><span class="s1">&#39;ALLOW&#39;</span><span class="w"> </span><span class="k">END</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">decision</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="w"> </span><span class="n">t</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">risk_compliance</span><span class="p">.</span><span class="n">fraud_scores</span><span class="w"> </span><span class="n">r</span><span class="w"> </span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="k">ON</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">transaction_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">transaction_id</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">evaluated_at</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="s1">&#39;2026-04-30 00:00:00&#39;</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">booking_timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="k">current_date</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="n">days</span><span class="p">;</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- Unified Spark SQL across decentralized domains</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="n">t</span><span class="p">.</span><span class="n">transaction_id</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="n">t</span><span class="p">.</span><span class="n">merchant_id</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="n">r</span><span class="p">.</span><span class="n">fraud_score</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">risk_level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;CRITICAL&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;BLOCK&#39;</span><span class="w"> </span><span class="k">ELSE</span><span class="w"> </span><span class="s1">&#39;ALLOW&#39;</span><span class="w"> </span><span class="k">END</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">decision</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="w"> </span><span class="n">t</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">risk_compliance</span><span class="p">.</span><span class="n">fraud_scores</span><span class="w"> </span><span class="n">r</span><span class="w"> </span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="k">ON</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">transaction_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">transaction_id</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">evaluated_at</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="s1">&#39;2026-04-30 00:00:00&#39;</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">booking_timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="k">current_date</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="n">days</span><span class="p">;</span>
 </span></code></pre></div>
 <h3 id="3-access-data-product">3. Access Data Product<a class="headerlink" href="#3-access-data-product" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Self-service discovery</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>curl<span class="w"> </span>http://localhost:8000/api/products?query<span class="o">=</span>fraud_scores
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Request access (with justification)</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/api/access-requests<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="s1">    &quot;user_id&quot;: &quot;analyst_42&quot;,</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="s1">    &quot;user_role&quot;: &quot;risk_analyst&quot;,</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="s1">    &quot;data_product_id&quot;: &quot;fraud-scoring&quot;,</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="s1">    &quot;action&quot;: &quot;read&quot;,</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="s1">    &quot;justification&quot;: &quot;Weekly fraud analysis for executive report&quot;</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="s1">  }&#39;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Self-service discovery</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>http://localhost:8000/api/products?query<span class="o">=</span>fraud_scores
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Request access (with justification)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/api/access-requests<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="s1">    &quot;user_id&quot;: &quot;analyst_42&quot;,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="s1">    &quot;user_role&quot;: &quot;risk_analyst&quot;,</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="s1">    &quot;data_product_id&quot;: &quot;fraud-scoring&quot;,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="s1">    &quot;action&quot;: &quot;read&quot;,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="s1">    &quot;justification&quot;: &quot;Weekly fraud analysis for executive report&quot;</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="s1">  }&#39;</span>
 </span></code></pre></div>
 <hr />
 <h2 id="documentation-map">📚 Documentation Map<a class="headerlink" href="#documentation-map" title="Permanent link">&para;</a></h2>
@@ -2042,16 +2044,16 @@
 <li><strong><a href="platform/discovery/">Discovery Portal</a></strong> — Self-service data product catalog and access requests</li>
 <li><strong><a href="platform/observability/">Observability</a></strong> — SLO dashboards, freshness metrics, quality alerts</li>
 <li><strong><a href="production/deployment/">Production Deployment</a></strong> — Kubernetes, Helm charts, scaling guidance</li>
-<li><strong><a href="production/trade-offs.md">Trade-offs Guide</a></strong> — When to use data mesh, micro-batches vs streaming, Iceberg vs Delta</li>
+<li><strong><a href="production/trade-offs/">Trade-offs Guide</a></strong> — When to use data mesh, micro-batches vs streaming, Iceberg vs Delta</li>
 <li><strong><a href="adrs/">Architecture Decision Records</a></strong> — Why we chose data mesh, Iceberg, OPA, and hybrid real-time strategy</li>
 </ul>
 <hr />
 <h2 id="learning-path">🎓 Learning Path<a class="headerlink" href="#learning-path" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Architects</strong>: Start with <a href="architecture/00-overview/">Architecture Overview</a> + <a href="production/trade-offs.md">Trade-offs Guide</a></li>
+<li><strong>Architects</strong>: Start with <a href="architecture/00-overview/">Architecture Overview</a> + <a href="production/trade-offs/">Trade-offs Guide</a></li>
 <li><strong>Engineers</strong>: Quick Start above → <a href="domains/transactions/">Domain Walkthroughs</a> → <a href="production/deployment/">Production Deployment</a></li>
 <li><strong>Data Product Owners</strong>: <a href="platform/governance/">Governance &amp; OPA</a> → <a href="platform/discovery/">Discovery Portal</a></li>
-<li><strong>Decision Makers</strong>: <a href="production/trade-offs.md">Trade-offs Guide</a> → <a href="adrs/">ADRs</a></li>
+<li><strong>Decision Makers</strong>: <a href="production/trade-offs/">Trade-offs Guide</a> → <a href="adrs/">ADRs</a></li>
 </ol>
 <hr />
 <h2 id="key-insights">💡 Key Insights<a class="headerlink" href="#key-insights" title="Permanent link">&para;</a></h2>
@@ -2159,6 +2161,10 @@
     
     
       <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="javascripts/mermaid-init.js"></script>
       
     
   </body>

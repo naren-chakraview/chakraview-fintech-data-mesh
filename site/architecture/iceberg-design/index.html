@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://naren-chakraview.github.io/chakraview-fintech-data-mesh/architecture/iceberg-design/">
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/architecture/iceberg-design/">
       
       
         <link rel="prev" href="../data-mesh-principles/">
@@ -1379,7 +1379,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/scaling.md" class="md-nav__link">
+      <a href="../../production/scaling/" class="md-nav__link">
         
   
   
@@ -1407,7 +1407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/troubleshooting.md" class="md-nav__link">
+      <a href="../../production/troubleshooting/" class="md-nav__link">
         
   
   
@@ -1435,7 +1435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/trade-offs.md" class="md-nav__link">
+      <a href="../../production/trade-offs/" class="md-nav__link">
         
   
   
@@ -1987,24 +1987,25 @@
 - <strong>Compliance</strong>: Full transaction history, immutable snapshots</p>
 <hr />
 <h2 id="iceberg-architecture-metadata-data">Iceberg Architecture: Metadata + Data<a class="headerlink" href="#iceberg-architecture-metadata-data" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>S3 Bucket (or MinIO, GCS, etc.)
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── metadata/
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── v1.metadata.json (schema v1, snapshot 1)
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   ├── v2.metadata.json (schema v2, snapshot 2 - added column)
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   ├── v3.metadata.json (schema v2, snapshot 3 - new data)
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   └── version-hint.txt (points to latest v3.metadata.json)
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>├── data/
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   ├── 00000-transactions-2026-04-01.parquet
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│   ├── 00001-transactions-2026-04-02.parquet
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│   ├── 00002-transactions-2026-04-03.parquet
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   └── ... (immutable files)
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>└── manifests/
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    ├── snapshot-1-manifest-list.avro
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    ├── snapshot-2-manifest-list.avro
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    └── snapshot-3-manifest-list.avro
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["S3 Bucket or MinIO, GCS, etc."]
+
+    A --&gt; B["metadata/"]
+    B --&gt; B1["v1.metadata.json schema v1, snapshot 1"]
+    B --&gt; B2["v2.metadata.json schema v2, snapshot 2 - added column"]
+    B --&gt; B3["v3.metadata.json schema v2, snapshot 3 - new data"]
+    B --&gt; B4["version-hint.txt points to latest v3.metadata.json"]
+
+    A --&gt; C["data/"]
+    C --&gt; C1["00000-transactions-2026-04-01.parquet"]
+    C --&gt; C2["00001-transactions-2026-04-02.parquet"]
+    C --&gt; C3["00002-transactions-2026-04-03.parquet"]
+    C --&gt; C4["... immutable files"]
+
+    A --&gt; D["manifests/"]
+    D --&gt; D1["snapshot-1-manifest-list.avro"]
+    D --&gt; D2["snapshot-2-manifest-list.avro"]
+    D --&gt; D3["snapshot-3-manifest-list.avro"]</code></pre>
 <p><strong>Key insight</strong>: Each snapshot is immutable. New writes don't modify old files; they create new manifest entries pointing to new data files. This enables:
 1. <strong>Time-travel</strong>: Query snapshot 2 (state from 2 hours ago)
 2. <strong>Concurrent writes</strong>: Different transactions write different files
@@ -2013,76 +2014,76 @@
 <h2 id="schema-evolution-without-rewrites">Schema Evolution Without Rewrites<a class="headerlink" href="#schema-evolution-without-rewrites" title="Permanent link">&para;</a></h2>
 <h3 id="scenario-transactions-domain-adds-a-new-field">Scenario: Transactions Domain Adds a New Field<a class="headerlink" href="#scenario-transactions-domain-adds-a-new-field" title="Permanent link">&para;</a></h3>
 <p><strong>Before (Parquet + Hive)</strong>: Full rewrite of billions of rows
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Old schema: [transaction_id, account_id, amount, merchant_id, timestamp]
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>New schema: [transaction_id, account_id, amount, merchant_id, timestamp, fraud_risk_score]
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Action: Read all old files, rewrite with new schema → 8 hours downtime
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Old schema: [transaction_id, account_id, amount, merchant_id, timestamp]
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>New schema: [transaction_id, account_id, amount, merchant_id, timestamp, fraud_risk_score]
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Action: Read all old files, rewrite with new schema → 8 hours downtime
 </span></code></pre></div></p>
-<p><strong>With Iceberg</strong>: Simple metadata update
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Snapshot 1 metadata:
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── Schema: [transaction_id, account_id, amount, merchant_id, timestamp]
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── Data files: 00000.parquet, 00001.parquet, ...
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>└── Snapshot ID: 1
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>[New writes with new field]
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>Snapshot 2 metadata:
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>├── Schema: [transaction_id, account_id, amount, merchant_id, timestamp, fraud_risk_score]
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>├── Data files: 00000.parquet, 00001.parquet, ..., 00100.parquet (new file)
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>└── Snapshot ID: 2
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>[Existing readers see Snapshot 2 schema automatically]
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>[Old data files implicitly project missing column as NULL]
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>[No rewrite required → 5 minute update]
-</span></code></pre></div></p>
+<p><strong>With Iceberg</strong>: Simple metadata update</p>
+<pre class="mermaid"><code>graph TD
+    A["Snapshot 1 metadata"]
+    A --&gt; A1["Schema: transaction_id, account_id, amount,&lt;br/&gt;merchant_id, timestamp"]
+    A --&gt; A2["Data files: 00000.parquet, 00001.parquet, ..."]
+    A --&gt; A3["Snapshot ID: 1"]
+
+    B["New writes with new field"]
+
+    C["Snapshot 2 metadata"]
+    C --&gt; C1["Schema: transaction_id, account_id, amount,&lt;br/&gt;merchant_id, timestamp, fraud_risk_score"]
+    C --&gt; C2["Data files: 00000.parquet, 00001.parquet, ...,&lt;br/&gt;00100.parquet new file"]
+    C --&gt; C3["Snapshot ID: 2"]
+
+    D["Existing readers see Snapshot 2 schema automatically"]
+    E["Old data files implicitly project missing column as NULL"]
+    F["No rewrite required → 5 minute update"]</code></pre>
 <p><strong>Implementation</strong> (in this project):
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># From shared/schemas/iceberg_schemas.py</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span> <span class="nn">pyiceberg.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">from</span> <span class="nn">pyiceberg.types</span> <span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">NestedField</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">class</span> <span class="nc">IcebergSchemaBuilder</span><span class="p">:</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="nd">@staticmethod</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="k">def</span> <span class="nf">transaction_schema_v2_1</span><span class="p">():</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Schema with fraud_risk_score added (v2.0 -&gt; v2.1)&quot;&quot;&quot;</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;transaction_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;account_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;merchant_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;fraud_risk_score&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>  <span class="c1"># NEW in v2.1</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="p">)</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="c1"># Ingest job uses schema v2.1</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="n">ingest_job</span> <span class="o">=</span> <span class="n">TransactionIngestJob</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="n">df</span> <span class="o">=</span> <span class="n">ingest_job</span><span class="o">.</span><span class="n">read_kafka</span><span class="p">()</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;fraud_risk_score&quot;</span><span class="p">,</span> <span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>  <span class="c1"># Placeholder for now</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># From shared/schemas/iceberg_schemas.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span> <span class="nn">pyiceberg.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span> <span class="nn">pyiceberg.types</span> <span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">NestedField</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">class</span> <span class="nc">IcebergSchemaBuilder</span><span class="p">:</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="nd">@staticmethod</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="k">def</span> <span class="nf">transaction_schema_v2_1</span><span class="p">():</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Schema with fraud_risk_score added (v2.0 -&gt; v2.1)&quot;&quot;&quot;</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;transaction_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;account_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;merchant_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;fraud_risk_score&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>  <span class="c1"># NEW in v2.1</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="p">)</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="c1"># Ingest job uses schema v2.1</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="n">ingest_job</span> <span class="o">=</span> <span class="n">TransactionIngestJob</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="n">df</span> <span class="o">=</span> <span class="n">ingest_job</span><span class="o">.</span><span class="n">read_kafka</span><span class="p">()</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;fraud_risk_score&quot;</span><span class="p">,</span> <span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>  <span class="c1"># Placeholder for now</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
 </span></code></pre></div></p>
 <p><strong>Result</strong>: Existing queries automatically handle the new column (NULL for old data).</p>
 <hr />
 <h2 id="acid-transactions-exactly-once-semantics">ACID Transactions &amp; Exactly-Once Semantics<a class="headerlink" href="#acid-transactions-exactly-once-semantics" title="Permanent link">&para;</a></h2>
 <h3 id="the-challenge-kafka-spark-duplicates">The Challenge: Kafka + Spark = Duplicates?<a class="headerlink" href="#the-challenge-kafka-spark-duplicates" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[Kafka] → [Spark job reads batch] → [Writes to table]
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Risk 1: Job crashes after write starts but before commit
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>├── Spark restarts
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>├── Rereads batch from Kafka
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├── Writes again (duplicate!)
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>Risk 2: Kafka offset tracking fails
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>├── Job doesn&#39;t know which records were already written
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>├── Rereads old batch → duplicate
-</span></code></pre></div>
+<pre class="mermaid"><code>graph LR
+    A["Kafka"] --&gt; B["Spark job reads batch"] --&gt; C["Writes to table"]
+
+    D["Risk 1: Job crashes after write starts but before commit"]
+    D --&gt; D1["Spark restarts"]
+    D --&gt; D2["Rereads batch from Kafka"]
+    D --&gt; D3["Writes again duplicate!"]
+
+    E["Risk 2: Kafka offset tracking fails"]
+    E --&gt; E1["Job doesn't know which records were already written"]
+    E --&gt; E2["Rereads old batch → duplicate"]</code></pre>
 <h3 id="iceberg-solution-atomic-snapshots">Iceberg Solution: Atomic Snapshots<a class="headerlink" href="#iceberg-solution-atomic-snapshots" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># From domains/transactions/ingest/ingest_job.py</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">query</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">writeStream</span> \
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;checkpointLocation&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/checkpoint/transactions&quot;</span><span class="p">)</span> \
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">query</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># From domains/transactions/ingest/ingest_job.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">query</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">writeStream</span> \
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;checkpointLocation&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/checkpoint/transactions&quot;</span><span class="p">)</span> \
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">query</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">()</span>
 </span></code></pre></div>
 <p><strong>How it works</strong>:
 1. <strong>Spark reads micro-batch</strong> from Kafka (offset = X)
@@ -2100,59 +2101,59 @@
 <hr />
 <h2 id="time-travel-for-compliance-audits">Time-Travel for Compliance Audits<a class="headerlink" href="#time-travel-for-compliance-audits" title="Permanent link">&para;</a></h2>
 <h3 id="scenario-did-we-overcharge-customer-42-on-2026-04-28">Scenario: "Did we overcharge customer 42 on 2026-04-28?"<a class="headerlink" href="#scenario-did-we-overcharge-customer-42-on-2026-04-28" title="Permanent link">&para;</a></h3>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">-- Current data (might have been corrected)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">account_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;42&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">booking_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2026-04-28&#39;</span><span class="p">;</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">-- Result: [150.00, 200.00]</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1">-- Historical snapshot from that day</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span><span class="k">FOR</span><span class="w"> </span><span class="n">SYSTEM_TIME</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">OF</span><span class="w"> </span><span class="s1">&#39;2026-04-28 23:59:59&#39;</span>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">account_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;42&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">booking_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2026-04-28&#39;</span><span class="p">;</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1">-- Result: [150.00, 150.00]  (Original state)</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="c1">-- Who changed it?</span>
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">snapshot_id</span><span class="p">,</span><span class="w"> </span><span class="n">committed_at</span><span class="p">,</span><span class="w"> </span><span class="n">summary</span><span class="w"> </span>
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="p">.</span><span class="n">history</span>
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">committed_at</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="s1">&#39;2026-04-29 00:00:00&#39;</span><span class="p">;</span>
-</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="c1">-- Result: Snapshot 1234 changed 1 row on 2026-04-29 10:30:00 (batch correction)</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">-- Current data (might have been corrected)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">account_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;42&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">booking_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2026-04-28&#39;</span><span class="p">;</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">-- Result: [150.00, 200.00]</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1">-- Historical snapshot from that day</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="k">FOR</span><span class="w"> </span><span class="n">SYSTEM_TIME</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">OF</span><span class="w"> </span><span class="s1">&#39;2026-04-28 23:59:59&#39;</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">account_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;42&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">booking_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2026-04-28&#39;</span><span class="p">;</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1">-- Result: [150.00, 150.00]  (Original state)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1">-- Who changed it?</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">snapshot_id</span><span class="p">,</span><span class="w"> </span><span class="n">committed_at</span><span class="p">,</span><span class="w"> </span><span class="n">summary</span><span class="w"> </span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="p">.</span><span class="n">history</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">committed_at</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="s1">&#39;2026-04-29 00:00:00&#39;</span><span class="p">;</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="c1">-- Result: Snapshot 1234 changed 1 row on 2026-04-29 10:30:00 (batch correction)</span>
 </span></code></pre></div>
 <p><strong>Iceberg implementation</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Ingest jobs write with snapshot metadata</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">df</span><span class="o">.</span><span class="n">write</span> \
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;snapshot-property-ingest-batch-id&quot;</span><span class="p">,</span> <span class="n">batch_id</span><span class="p">)</span> \
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;snapshot-property-corrected-amount&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1"># Metadata stored per snapshot</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># &quot;corrected-amount&quot;: True means this was a correction, not a live transaction</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Ingest jobs write with snapshot metadata</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">df</span><span class="o">.</span><span class="n">write</span> \
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;snapshot-property-ingest-batch-id&quot;</span><span class="p">,</span> <span class="n">batch_id</span><span class="p">)</span> \
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;snapshot-property-corrected-amount&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span> \
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Metadata stored per snapshot</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1"># &quot;corrected-amount&quot;: True means this was a correction, not a live transaction</span>
 </span></code></pre></div></p>
 <p><strong>Compliance benefit</strong>: Auditors can reconstruct the exact state of data at any point in time, identifying corrections and anomalies.</p>
 <hr />
 <h2 id="partitioning-strategy-cost-query-performance">Partitioning Strategy: Cost + Query Performance<a class="headerlink" href="#partitioning-strategy-cost-query-performance" title="Permanent link">&para;</a></h2>
 <h3 id="iceberg-hidden-partitions">Iceberg Hidden Partitions<a class="headerlink" href="#iceberg-hidden-partitions" title="Permanent link">&para;</a></h3>
 <p>Traditional Hive tables require explicit partition columns (year, month, day):
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2026</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span><span class="w">  </span><span class="c1">-- Must specify all partition columns</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2026</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span><span class="w">  </span><span class="c1">-- Must specify all partition columns</span>
 </span></code></pre></div></p>
 <p>Iceberg hidden partitions are implicit:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Define hidden partition spec in schema</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">partitions</span> <span class="o">=</span> <span class="n">PartitionSpec</span><span class="p">()</span> \
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="s2">&quot;booking_year&quot;</span><span class="p">)</span> \
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="s2">&quot;booking_month&quot;</span><span class="p">)</span> \
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="s2">&quot;account_id&quot;</span><span class="p">)</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Spark automatically partitions on write</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="c1"># Queries don&#39;t need to specify partition columns</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>    <span class="o">.</span><span class="n">partitionedBy</span><span class="p">(</span><span class="s2">&quot;booking_year&quot;</span><span class="p">,</span> <span class="s2">&quot;booking_month&quot;</span><span class="p">,</span> <span class="s2">&quot;account_id&quot;</span><span class="p">)</span> \
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="c1"># Query works without explicit partition filter (but partition pruning still applies)</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="n">SELECT</span> <span class="o">*</span> <span class="n">FROM</span> <span class="n">transactions</span><span class="o">.</span><span class="n">raw_transactions</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="n">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="s1">&#39;42&#39;</span> <span class="n">AND</span> <span class="n">booking_timestamp</span> <span class="o">&gt;</span> <span class="s1">&#39;2026-04-01&#39;</span><span class="p">;</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Define hidden partition spec in schema</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">partitions</span> <span class="o">=</span> <span class="n">PartitionSpec</span><span class="p">()</span> \
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="s2">&quot;booking_year&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="s2">&quot;booking_month&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="s2">&quot;account_id&quot;</span><span class="p">)</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Spark automatically partitions on write</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1"># Queries don&#39;t need to specify partition columns</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="o">.</span><span class="n">partitionedBy</span><span class="p">(</span><span class="s2">&quot;booking_year&quot;</span><span class="p">,</span> <span class="s2">&quot;booking_month&quot;</span><span class="p">,</span> <span class="s2">&quot;account_id&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="c1"># Query works without explicit partition filter (but partition pruning still applies)</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="n">SELECT</span> <span class="o">*</span> <span class="n">FROM</span> <span class="n">transactions</span><span class="o">.</span><span class="n">raw_transactions</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="n">WHERE</span> <span class="n">account_id</span> <span class="o">=</span> <span class="s1">&#39;42&#39;</span> <span class="n">AND</span> <span class="n">booking_timestamp</span> <span class="o">&gt;</span> <span class="s1">&#39;2026-04-01&#39;</span><span class="p">;</span>
 </span></code></pre></div></p>
 <p><strong>Partition Strategy</strong> (in this project):
 | Table | Partitions | Reason |
@@ -2169,42 +2170,42 @@
 <h2 id="schema-versioning-avoiding-compatibility-issues">Schema Versioning: Avoiding Compatibility Issues<a class="headerlink" href="#schema-versioning-avoiding-compatibility-issues" title="Permanent link">&para;</a></h2>
 <h3 id="problem-multiple-versions-of-same-table">Problem: Multiple Versions of Same Table<a class="headerlink" href="#problem-multiple-versions-of-same-table" title="Permanent link">&para;</a></h3>
 <p>Services might depend on different schema versions:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Fraud Detection Service expects:
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>├── transaction_id (string)
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>├── account_id (string)
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>├── fraud_risk_score (double)  // NEW field from Risk domain
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>Transaction Settlement Service expects:
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>├── transaction_id (string)
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>├── account_id (string)
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>├── amount (double)
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>└── settlement_date (date)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Fraud Detection Service expects:
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── transaction_id (string)
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>├── account_id (string)
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>├── fraud_risk_score (double)  // NEW field from Risk domain
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>Transaction Settlement Service expects:
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>├── transaction_id (string)
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>├── account_id (string)
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>├── amount (double)
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>└── settlement_date (date)
 </span></code></pre></div></p>
 <p>If Risk domain adds <code>fraud_risk_score</code> to the main table, Settlement Service might break (unexpected column).</p>
 <h3 id="iceberg-solution-column-pruning-default-values">Iceberg Solution: Column Pruning + Default Values<a class="headerlink" href="#iceberg-solution-column-pruning-default-values" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># domains/transactions/schemas/iceberg/schemas.py</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="k">class</span> <span class="nc">TransactionSchemas</span><span class="p">:</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="nd">@staticmethod</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="k">def</span> <span class="nf">raw_transactions_schema_v2_1</span><span class="p">():</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Version 2.1: Added fraud_risk_score&quot;&quot;&quot;</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;transaction_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;account_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;merchant_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;fraud_risk_score&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>  <span class="c1"># NEW</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>        <span class="p">)</span>
-</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>
-</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="c1"># Settlement Service queries only columns it needs (Iceberg doesn&#39;t read extra columns)</span>
-</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="n">SELECT</span> <span class="n">transaction_id</span><span class="p">,</span> <span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">settlement_date</span>
-</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="n">FROM</span> <span class="n">transactions</span><span class="o">.</span><span class="n">raw_transactions</span><span class="p">;</span>
-</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="c1"># fraud_risk_score never loaded into memory</span>
-</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>
-</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="c1"># Fraud Detection Service queries with new column</span>
-</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="n">SELECT</span> <span class="n">transaction_id</span><span class="p">,</span> <span class="n">account_id</span><span class="p">,</span> <span class="n">fraud_risk_score</span>
-</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="n">FROM</span> <span class="n">transactions</span><span class="o">.</span><span class="n">raw_transactions</span><span class="p">;</span>
-</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="c1"># For old data where fraud_risk_score is missing, returns NULL</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># domains/transactions/schemas/iceberg/schemas.py</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">class</span> <span class="nc">TransactionSchemas</span><span class="p">:</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="nd">@staticmethod</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">def</span> <span class="nf">raw_transactions_schema_v2_1</span><span class="p">():</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Version 2.1: Added fraud_risk_score&quot;&quot;&quot;</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;transaction_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;account_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;merchant_id&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>            <span class="n">NestedField</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;fraud_risk_score&quot;</span><span class="p">,</span> <span class="n">double</span><span class="p">(),</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>  <span class="c1"># NEW</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>        <span class="p">)</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="c1"># Settlement Service queries only columns it needs (Iceberg doesn&#39;t read extra columns)</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="n">SELECT</span> <span class="n">transaction_id</span><span class="p">,</span> <span class="n">account_id</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">settlement_date</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="n">FROM</span> <span class="n">transactions</span><span class="o">.</span><span class="n">raw_transactions</span><span class="p">;</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="c1"># fraud_risk_score never loaded into memory</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="c1"># Fraud Detection Service queries with new column</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="n">SELECT</span> <span class="n">transaction_id</span><span class="p">,</span> <span class="n">account_id</span><span class="p">,</span> <span class="n">fraud_risk_score</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="n">FROM</span> <span class="n">transactions</span><span class="o">.</span><span class="n">raw_transactions</span><span class="p">;</span>
+</span><span id="__span-8-23"><a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="c1"># For old data where fraud_risk_score is missing, returns NULL</span>
 </span></code></pre></div>
 <p><strong>Best Practice</strong>:
 1. Always add new columns as <code>required=False</code> (nullable)
@@ -2213,22 +2214,22 @@
 <hr />
 <h2 id="cost-optimization-columnar-compression-partitioning">Cost Optimization: Columnar Compression + Partitioning<a class="headerlink" href="#cost-optimization-columnar-compression-partitioning" title="Permanent link">&para;</a></h2>
 <h3 id="data-layout">Data Layout<a class="headerlink" href="#data-layout" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Traditional row-oriented table:
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>┌──────────────────────────────────────────────────────────┐
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>│ tx1: [tx_id1, acc1, 150.00, merch1, 2026-04-30 10:00]   │
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>│ tx2: [tx_id2, acc2, 200.00, merch2, 2026-04-30 10:05]   │
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>│ tx3: [tx_id3, acc3, 180.00, merch3, 2026-04-30 10:10]   │
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>│ ... millions of rows ...                                 │
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>└──────────────────────────────────────────────────────────┘
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>Size: 50 MB for 1 million transactions
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>Iceberg columnar layout:
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>transaction_id: [tx_id1, tx_id2, tx_id3, ...] → 8 MB (string compression)
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>amount:         [150.00, 200.00, 180.00, ...] → 2 MB (double compression)
-</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>merchant_id:    [merch1, merch2, merch3, ...] → 5 MB (string compression)
-</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>timestamp:      [10:00, 10:05, 10:10, ...] → 1 MB (temporal compression)
-</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>account_id:     [acc1, acc2, acc3, ...] → 4 MB (string compression)
-</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>Total: ~20 MB for same 1 million transactions (60% reduction)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Traditional row-oriented table:
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>┌──────────────────────────────────────────────────────────┐
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│ tx1: [tx_id1, acc1, 150.00, merch1, 2026-04-30 10:00]   │
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│ tx2: [tx_id2, acc2, 200.00, merch2, 2026-04-30 10:05]   │
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>│ tx3: [tx_id3, acc3, 180.00, merch3, 2026-04-30 10:10]   │
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│ ... millions of rows ...                                 │
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>└──────────────────────────────────────────────────────────┘
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>Size: 50 MB for 1 million transactions
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>Iceberg columnar layout:
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>transaction_id: [tx_id1, tx_id2, tx_id3, ...] → 8 MB (string compression)
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>amount:         [150.00, 200.00, 180.00, ...] → 2 MB (double compression)
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>merchant_id:    [merch1, merch2, merch3, ...] → 5 MB (string compression)
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>timestamp:      [10:00, 10:05, 10:10, ...] → 1 MB (temporal compression)
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>account_id:     [acc1, acc2, acc3, ...] → 4 MB (string compression)
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>Total: ~20 MB for same 1 million transactions (60% reduction)
 </span></code></pre></div>
 <p><strong>Query</strong>: "SELECT amount WHERE account_id = '42'"
 - Row-oriented: Read 50 MB, filter in memory
@@ -2239,38 +2240,38 @@
 - Cost savings: ~$6K/year on S3 (at $0.023/GB/month)</p>
 <hr />
 <h2 id="manifests-and-snapshots-how-it-works-internally">Manifests and Snapshots: How It Works Internally<a class="headerlink" href="#manifests-and-snapshots-how-it-works-internally" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Snapshot 1 (Initial load, Day 1):
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── Snapshot ID: 1
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>├── Committed: 2026-04-01 09:00:00
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>├── Manifest file: snap-1-manifest.avro
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>│   ├── Data file: 00000-Apr01.parquet (rows 0-999999)
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>│   ├── Data file: 00001-Apr01.parquet (rows 1000000-1999999)
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>│   └── Partition summary:
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>│       ├── booking_year: [2026]
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>│       ├── booking_month: [4]
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>│       ├── booking_day: [1]
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>│
-</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>Snapshot 2 (New micro-batch, Day 2):
-</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>├── Snapshot ID: 2
-</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>├── Committed: 2026-04-02 09:00:00
-</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>├── Manifest file: snap-2-manifest.avro
-</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>│   ├── Data file: 00000-Apr01.parquet (unchanged, reuse)
-</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>│   ├── Data file: 00001-Apr01.parquet (unchanged, reuse)
-</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>│   ├── Data file: 00002-Apr02.parquet (NEW, rows 2000000-2999999)
-</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>│   └── Partition summary:
-</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>│       ├── booking_year: [2026]
-</span><span id="__span-13-21"><a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a>│       ├── booking_month: [4]
-</span><span id="__span-13-22"><a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a>│       ├── booking_day: [1, 2]  (updated)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Snapshot 1 (Initial load, Day 1):
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>├── Snapshot ID: 1
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>├── Committed: 2026-04-01 09:00:00
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>├── Manifest file: snap-1-manifest.avro
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>│   ├── Data file: 00000-Apr01.parquet (rows 0-999999)
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│   ├── Data file: 00001-Apr01.parquet (rows 1000000-1999999)
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>│   └── Partition summary:
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>│       ├── booking_year: [2026]
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>│       ├── booking_month: [4]
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>│       ├── booking_day: [1]
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>│
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>Snapshot 2 (New micro-batch, Day 2):
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>├── Snapshot ID: 2
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>├── Committed: 2026-04-02 09:00:00
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>├── Manifest file: snap-2-manifest.avro
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>│   ├── Data file: 00000-Apr01.parquet (unchanged, reuse)
+</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>│   ├── Data file: 00001-Apr01.parquet (unchanged, reuse)
+</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>│   ├── Data file: 00002-Apr02.parquet (NEW, rows 2000000-2999999)
+</span><span id="__span-10-19"><a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>│   └── Partition summary:
+</span><span id="__span-10-20"><a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>│       ├── booking_year: [2026]
+</span><span id="__span-10-21"><a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>│       ├── booking_month: [4]
+</span><span id="__span-10-22"><a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>│       ├── booking_day: [1, 2]  (updated)
 </span></code></pre></div>
 <p><strong>Time-travel query</strong>:
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="n">SYSTEM_TIME</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">OF</span><span class="w"> </span><span class="s1">&#39;2026-04-01 23:59:59&#39;</span><span class="p">;</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="c1">-- Reads Snapshot 1 manifest → loads files 00000, 00001 → returns data from Day 1 only</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="n">SYSTEM_TIME</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">OF</span><span class="w"> </span><span class="s1">&#39;2026-04-01 23:59:59&#39;</span><span class="p">;</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="c1">-- Reads Snapshot 1 manifest → loads files 00000, 00001 → returns data from Day 1 only</span>
 </span></code></pre></div></p>
 <p><strong>Snapshot compaction</strong> (optional, for cost):
-<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># After 90 days, compact old snapshots</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">catalog</span><span class="o">.</span><span class="n">compact_table</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">,</span> <span class="n">min_age_days</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="c1"># Merges old files (00000, 00001) into single file, deletes originals</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># Same data, fewer files, faster queries</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># After 90 days, compact old snapshots</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">catalog</span><span class="o">.</span><span class="n">compact_table</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">,</span> <span class="n">min_age_days</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="c1"># Merges old files (00000, 00001) into single file, deletes originals</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Same data, fewer files, faster queries</span>
 </span></code></pre></div></p>
 <hr />
 <h2 id="next-govern-observe">Next: Govern &amp; Observe<a class="headerlink" href="#next-govern-observe" title="Permanent link">&para;</a></h2>
@@ -2278,7 +2279,7 @@
 <li><strong><a href="../real-time-vs-analytics/">Real-Time vs Analytics</a></strong> — How Kafka + Iceberg work together</li>
 <li><strong><a href="../../platform/governance/">Governance &amp; OPA</a></strong> — Enforce masking and retention at the data layer</li>
 <li><strong><a href="../../production/deployment/">Production Deployment</a></strong> — Iceberg catalog setup, scaling considerations</li>
-<li><strong><a href="../production/trade-offs.md">Trade-offs</a></strong> — Iceberg vs Delta Lake comparison</li>
+<li><strong><a href="../../production/trade-offs/">Trade-offs</a></strong> — Iceberg vs Delta Lake comparison</li>
 </ul>
 
 
@@ -2352,6 +2353,10 @@
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid-init.js"></script>
       
     
   </body>

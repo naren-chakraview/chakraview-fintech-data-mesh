@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://naren-chakraview.github.io/chakraview-fintech-data-mesh/platform/observability/">
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/platform/observability/">
       
       
         <link rel="prev" href="../discovery/">
@@ -1111,45 +1111,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dashboard-3-governance-compliance" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dashboard 3: Governance &amp; Compliance
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#alert-rules-prometheus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Alert Rules (Prometheus)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Alert Rules (Prometheus)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#critical-alerts-page-on-call" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Critical Alerts (Page On-Call)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#warning-alerts-email" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1356,7 +1317,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/scaling.md" class="md-nav__link">
+      <a href="../../production/scaling/" class="md-nav__link">
         
   
   
@@ -1384,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/troubleshooting.md" class="md-nav__link">
+      <a href="../../production/troubleshooting/" class="md-nav__link">
         
   
   
@@ -1412,7 +1373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/trade-offs.md" class="md-nav__link">
+      <a href="../../production/trade-offs/" class="md-nav__link">
         
   
   
@@ -1769,45 +1730,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dashboard-3-governance-compliance" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dashboard 3: Governance &amp; Compliance
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#alert-rules-prometheus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Alert Rules (Prometheus)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Alert Rules (Prometheus)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#critical-alerts-page-on-call" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Critical Alerts (Page On-Call)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#warning-alerts-email" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1998,294 +1920,293 @@
 <h2 id="grafana-dashboards">Grafana Dashboards<a class="headerlink" href="#grafana-dashboards" title="Permanent link">&para;</a></h2>
 <h3 id="dashboard-1-data-mesh-health-overview">Dashboard 1: Data Mesh Health Overview<a class="headerlink" href="#dashboard-1-data-mesh-health-overview" title="Permanent link">&para;</a></h3>
 <p>6 panels showing system health:</p>
-<p><strong>1. Data Freshness (Gauge)</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Shows current freshness for each domain:
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>├── Transactions: 2.3 min / 5 min SLA (GREEN)
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>├── Accounts: 8.5 min / 10 min SLA (YELLOW)
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>├── Risk/Compliance: 4.1 min / 10 min SLA (GREEN)
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>├── Market Data: 0.8 min / 1 min SLA (GREEN)
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>└── Counterparties: 45 min / 60 min SLA (GREEN)
-</span></code></pre></div></p>
-<p><strong>2. Ingest Record Rate (Time Series)</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Records ingested per minute, last 24 hours:
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├── Transactions: 150K records/min (steady)
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>├── Market Data: 10K rates/min (spikes during trading hours)
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>├── Accounts: 100 records/min (flat line, low velocity)
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>└── Risk/Compliance: 50K scores/min (spiky, depends on transaction volume)
-</span></code></pre></div></p>
-<p><strong>3. Query Duration (Time Series)</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>P95 query latency over time:
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── Transactions: 8.5 sec (stable)
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>├── Risk/Compliance: 12.3 sec (slower due to joins)
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>└── Accounts: 2.1 sec (small table)
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>Alert if P95 &gt; 30 sec (performance degradation)
-</span></code></pre></div></p>
-<p><strong>4. Quality Check Pass Rate (Gauge)</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Percentage of records passing quality rules:
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>├── Transactions: 99.8% pass
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>├── Accounts: 100% pass (strict validation)
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>├── Risk/Compliance: 99.2% pass (some edge cases)
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>├── Counterparties: 99.9% pass
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>└── Market Data: 98.5% pass (missing rates during gaps)
-</span></code></pre></div></p>
-<p><strong>5. Kafka Lag (Time Series)</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Lag between Kafka publish and Spark read:
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>├── Transactions: 15 sec (under 30 sec SLA)
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>├── Market Data: 3 sec (very tight)
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>├── Accounts: 45 sec (acceptable, lower velocity)
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>└── Risk/Compliance: 25 sec (acceptable, lower volume)
-</span></code></pre></div></p>
-<p><strong>6. Ingest Errors (Time Series)</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Errors per minute:
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>├── Transactions: 0 errors (healthy)
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>├── Market Data: 2-5 errors/min (acceptable, high throughput)
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>├── Accounts: 0 errors (stable reference data)
-</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>├── Risk/Compliance: 1-2 errors/min (model retries)
-</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>└── Counterparties: 0 errors (low velocity)
-</span></code></pre></div></p>
+<p><strong>1. Data Freshness Gauge</strong></p>
+<pre class="mermaid"><code>graph TD
+    A["Data Freshness per Domain"]
+    A --&gt; A1["Transactions: 2.3 min / 5 min SLA GREEN"]
+    A --&gt; A2["Accounts: 8.5 min / 10 min SLA YELLOW"]
+    A --&gt; A3["Risk/Compliance: 4.1 min / 10 min SLA GREEN"]
+    A --&gt; A4["Market Data: 0.8 min / 1 min SLA GREEN"]
+    A --&gt; A5["Counterparties: 45 min / 60 min SLA GREEN"]</code></pre>
+<p><strong>2. Ingest Record Rate Time Series</strong></p>
+<pre class="mermaid"><code>graph TD
+    A["Records ingested per minute, last 24 hours"]
+    A --&gt; A1["Transactions: 150K records/min steady"]
+    A --&gt; A2["Market Data: 10K rates/min spikes during trading hours"]
+    A --&gt; A3["Accounts: 100 records/min flat line, low velocity"]
+    A --&gt; A4["Risk/Compliance: 50K scores/min spiky, depends on transaction volume"]</code></pre>
+<p><strong>3. Query Duration Time Series</strong></p>
+<pre class="mermaid"><code>graph TD
+    A["P95 query latency over time"]
+    A --&gt; A1["Transactions: 8.5 sec stable"]
+    A --&gt; A2["Risk/Compliance: 12.3 sec slower due to joins"]
+    A --&gt; A3["Accounts: 2.1 sec small table"]
+    A --&gt; A4["Alert if P95 &amp;gt; 30 sec performance degradation"]</code></pre>
+<p><strong>4. Quality Check Pass Rate Gauge</strong></p>
+<pre class="mermaid"><code>graph TD
+    A["Percentage of records passing quality rules"]
+    A --&gt; A1["Transactions: 99.8% pass"]
+    A --&gt; A2["Accounts: 100% pass strict validation"]
+    A --&gt; A3["Risk/Compliance: 99.2% pass some edge cases"]
+    A --&gt; A4["Counterparties: 99.9% pass"]
+    A --&gt; A5["Market Data: 98.5% pass missing rates during gaps"]</code></pre>
+<p><strong>5. Kafka Lag Time Series</strong></p>
+<pre class="mermaid"><code>graph TD
+    A["Lag between Kafka publish and Spark read"]
+    A --&gt; A1["Transactions: 15 sec under 30 sec SLA"]
+    A --&gt; A2["Market Data: 3 sec very tight"]
+    A --&gt; A3["Accounts: 45 sec acceptable, lower velocity"]
+    A --&gt; A4["Risk/Compliance: 25 sec acceptable, lower volume"]</code></pre>
+<p><strong>6. Ingest Errors Time Series</strong></p>
+<pre class="mermaid"><code>graph TD
+    A["Errors per minute"]
+    A --&gt; A1["Transactions: 0 errors healthy"]
+    A --&gt; A2["Market Data: 2-5 errors/min acceptable, high throughput"]
+    A --&gt; A3["Accounts: 0 errors stable reference data"]
+    A --&gt; A4["Risk/Compliance: 1-2 errors/min model retries"]
+    A --&gt; A5["Counterparties: 0 errors low velocity"]</code></pre>
 <h3 id="dashboard-2-transactions-domain-deep-dive">Dashboard 2: Transactions Domain Deep-Dive<a class="headerlink" href="#dashboard-2-transactions-domain-deep-dive" title="Permanent link">&para;</a></h3>
 <p>Drill-down for transactions domain:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>Panel 1: Raw Transactions Freshness
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>├── Current: 2.3 minutes
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>├── SLA: 5 minutes
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>├── Status: GREEN
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>└── Trend: Stable (last 24 hours)
-</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
-</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>Panel 2: Micro-Batch Success Rate
-</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>├── Last 24 hours: 287 batches
-</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>├── Successful: 286 (99.7%)
-</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>├── Failed: 1 (0.3%) [retried and succeeded]
-</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>└── Average batch size: 500K records
-</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
-</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>Panel 3: Iceberg Write Latency
-</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>├── P50: 5.2 sec
-</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>├── P95: 18.3 sec
-</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>├── P99: 32.1 sec
-</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>└── Max: 47.5 sec (normal variance)
-</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>
-</span><span id="__span-17-19"><a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>Panel 4: Partition Statistics
-</span><span id="__span-17-20"><a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>├── Partitions per day: 4 (year, month, day, account_id)
-</span><span id="__span-17-21"><a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>├── Files per partition: avg 3.2
-</span><span id="__span-17-22"><a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>├── Size per partition: avg 500MB
-</span><span id="__span-17-23"><a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>└── Scan efficiency: 85% (partition pruning working)
-</span><span id="__span-17-24"><a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>
-</span><span id="__span-17-25"><a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>Panel 5: Data Volume Growth
-</span><span id="__span-17-26"><a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>├── Daily growth: 42GB/day
-</span><span id="__span-17-27"><a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a>├── 7-year retention: 10.7TB
-</span><span id="__span-17-28"><a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>├── Compression ratio: 60% (150GB uncompressed → 100GB Iceberg)
-</span><span id="__span-17-29"><a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>└── Cost/year: ~$2.3K (S3 storage at $0.023/GB/month)
-</span><span id="__span-17-30"><a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>
-</span><span id="__span-17-31"><a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a>Panel 6: Access Requests (24h)
-</span><span id="__span-17-32"><a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>├── Submitted: 15
-</span><span id="__span-17-33"><a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a>├── Auto-approved: 12
-</span><span id="__span-17-34"><a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a>├── Pending approval: 2
-</span><span id="__span-17-35"><a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a>├── Denied: 1
-</span><span id="__span-17-36"><a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a>└── Average approval time: 45 minutes
+<p><pre class="mermaid"><code>graph TD
+    A["Panel 1: Raw Transactions Freshness"]
+    A --&gt; A1["Current: 2.3 minutes"]
+    A --&gt; A2["SLA: 5 minutes"]
+    A --&gt; A3["Status: GREEN"]
+    A --&gt; A4["Trend: Stable last 24 hours"]
+
+    B["Panel 2: Micro-Batch Success Rate"]
+    B --&gt; B1["Last 24 hours: 287 batches"]
+    B --&gt; B2["Successful: 286 99.7%"]
+    B --&gt; B3["Failed: 1 0.3% retried and succeeded"]
+    B --&gt; B4["Average batch size: 500K records"]
+
+    C["Panel 3: Iceberg Write Latency"]
+    C --&gt; C1["P50: 5.2 sec"]
+    C --&gt; C2["P95: 18.3 sec"]
+    C --&gt; C3["P99: 32.1 sec"]
+    C --&gt; C4["Max: 47.5 sec normal variance"]
+
+    D["Panel 4: Partition Statistics"]
+    D --&gt; D1["Partitions per day: 4 year, month, day, account_id"]
+    D --&gt; D2["Files per partition: avg 3.2"]
+    D --&gt; D3["Size per partition: avg 500MB"]</code></pre>
+└── Scan efficiency: 85% (partition pruning working)</p>
+<p>Panel 5: Data Volume Growth
+├── Daily growth: 42GB/day
+├── 7-year retention: 10.7TB
+├── Compression ratio: 60% (150GB uncompressed → 100GB Iceberg)
+└── Cost/year: ~$2.3K (S3 storage at $0.023/GB/month)</p>
+<p>Panel 6: Access Requests (24h)
+├── Submitted: 15
+├── Auto-approved: 12
+├── Pending approval: 2
+├── Denied: 1
+└── Average approval time: 45 minutes
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>### Dashboard 3: Governance &amp; Compliance
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Track governance effectiveness:
 </span></code></pre></div>
-<h3 id="dashboard-3-governance-compliance">Dashboard 3: Governance &amp; Compliance<a class="headerlink" href="#dashboard-3-governance-compliance" title="Permanent link">&para;</a></h3>
-<p>Track governance effectiveness:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Panel 1: Masked Column Access
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>├── account_id (PII): Masked for 8 users (external_analyst)
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>├── merchant_id (Confidential): Masked for 5 users
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>├── transaction_id: Not masked
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>└── Status: All masking rules enforced
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>Panel 2: Query Audit Trail
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>├── Total queries (24h): 342
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>├── Queries with PII: 89 (26%)
-</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>├── Queries audited: 89 (100%)
-</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>└── Audit lag: &lt; 100ms
-</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>
-</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>Panel 3: Approval SLA Compliance
-</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>├── Access requests: 15 submitted
-</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>├── Approved within SLA: 15/15 (100%)
-</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>├── Average approval time: 45 min
-</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>├── SLA threshold: 4 hours
-</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>└── Status: COMPLIANT
-</span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>
-</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>Panel 4: Retention Policy Enforcement
-</span><span id="__span-18-21"><a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a>├── Transactions (7-year policy): ✓ Enforced
-</span><span id="__span-18-22"><a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>├── Risk/Compliance (10-year policy): ✓ Enforced
-</span><span id="__span-18-23"><a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a>├── Market Data (1-year policy): ✓ Enforced
-</span><span id="__span-18-24"><a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>├── Snapshots auto-deleted: 45 (90+ days old)
-</span><span id="__span-18-25"><a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>└── Status: All policies enforced
-</span></code></pre></div>
-<hr />
-<h2 id="alert-rules-prometheus">Alert Rules (Prometheus)<a class="headerlink" href="#alert-rules-prometheus" title="Permanent link">&para;</a></h2>
-<h3 id="critical-alerts-page-on-call">Critical Alerts (Page On-Call)<a class="headerlink" href="#critical-alerts-page-on-call" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_freshness_sla_violated</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}.{{</span><span class="nv"> </span><span class="s">$labels.table</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">minutes</span><span class="nv"> </span><span class="s">old</span><span class="nv"> </span><span class="s">(SLA:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.sla_minutes</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">min)&quot;</span>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">  </span><span class="no">data_freshness_minutes &gt; on(domain, table) group_left() data_freshness_sla_minutes</span>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
-</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
-</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Investigate</span><span class="nv"> </span><span class="s">ingest</span><span class="nv"> </span><span class="s">job;</span><span class="nv"> </span><span class="s">check</span><span class="nv"> </span><span class="s">Spark</span><span class="nv"> </span><span class="s">logs;</span><span class="nv"> </span><span class="s">verify</span><span class="nv"> </span><span class="s">Kafka</span><span class="nv"> </span><span class="s">availability&quot;</span>
-</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>
-</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quality_check_failure_rate_high</span>
-</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">quality</span><span class="nv"> </span><span class="s">check</span><span class="nv"> </span><span class="s">failure</span><span class="nv"> </span><span class="s">rate</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}%</span><span class="nv"> </span><span class="s">(threshold:</span><span class="nv"> </span><span class="s">1%)&quot;</span>
-</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">  </span><span class="no">(quality_checks_failed / (quality_checks_passed + quality_checks_failed)) &gt; 0.01</span>
-</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10m</span>
-</span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
-</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Review</span><span class="nv"> </span><span class="s">quality</span><span class="nv"> </span><span class="s">rules;</span><span class="nv"> </span><span class="s">check</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">anomalies&quot;</span>
-</span><span id="__span-19-16"><a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>
-</span><span id="__span-19-17"><a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka_lag_critical</span>
-</span><span id="__span-19-18"><a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">Kafka</span><span class="nv"> </span><span class="s">lag</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}s</span><span class="nv"> </span><span class="s">(threshold:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.critical_threshold</span><span class="nv"> </span><span class="s">}}s)&quot;</span>
-</span><span id="__span-19-19"><a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-19-20"><a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">  </span><span class="no">kafka_lag_seconds &gt; on(domain) group_left() kafka_lag_critical_seconds</span>
-</span><span id="__span-19-21"><a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
-</span><span id="__span-19-22"><a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
-</span><span id="__span-19-23"><a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Verify</span><span class="nv"> </span><span class="s">Spark</span><span class="nv"> </span><span class="s">job</span><span class="nv"> </span><span class="s">health;</span><span class="nv"> </span><span class="s">check</span><span class="nv"> </span><span class="s">Kafka</span><span class="nv"> </span><span class="s">broker</span><span class="nv"> </span><span class="s">health;</span><span class="nv"> </span><span class="s">scale</span><span class="nv"> </span><span class="s">Spark</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">needed&quot;</span>
-</span></code></pre></div>
+Panel 1: Masked Column Access
+├── account_id (PII): Masked for 8 users (external_analyst)
+├── merchant_id (Confidential): Masked for 5 users
+├── transaction_id: Not masked
+└── Status: All masking rules enforced</p>
+<p>Panel 2: Query Audit Trail
+├── Total queries (24h): 342
+├── Queries with PII: 89 (26%)
+├── Queries audited: 89 (100%)
+└── Audit lag: &lt; 100ms</p>
+<p>Panel 3: Approval SLA Compliance
+├── Access requests: 15 submitted
+├── Approved within SLA: 15/15 (100%)
+├── Average approval time: 45 min
+├── SLA threshold: 4 hours
+└── Status: COMPLIANT</p>
+<p>Panel 4: Retention Policy Enforcement
+├── Transactions (7-year policy): ✓ Enforced
+├── Risk/Compliance (10-year policy): ✓ Enforced
+├── Market Data (1-year policy): ✓ Enforced
+├── Snapshots auto-deleted: 45 (90+ days old)
+└── Status: All policies enforced
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>---
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>## Alert Rules (Prometheus)
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>### Critical Alerts (Page On-Call)
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>```yaml
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>alert: data_freshness_sla_violated
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>description: &quot;{{ $labels.domain }}.{{ $labels.table }} is {{ $value }} minutes old (SLA: {{ $labels.sla_minutes }} min)&quot;
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>expr: |
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>  data_freshness_minutes &gt; on(domain, table) group_left() data_freshness_sla_minutes
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>for: 5m
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>severity: critical
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>action: &quot;Investigate ingest job; check Spark logs; verify Kafka availability&quot;
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>alert: quality_check_failure_rate_high
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>description: &quot;{{ $labels.domain }} quality check failure rate is {{ $value }}% (threshold: 1%)&quot;
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>expr: |
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>  (quality_checks_failed / (quality_checks_passed + quality_checks_failed)) &gt; 0.01
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>for: 10m
+</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>severity: critical
+</span><span id="__span-12-22"><a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a>action: &quot;Review quality rules; check data source for anomalies&quot;
+</span><span id="__span-12-23"><a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a>
+</span><span id="__span-12-24"><a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a>alert: kafka_lag_critical
+</span><span id="__span-12-25"><a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a>description: &quot;{{ $labels.domain }} Kafka lag is {{ $value }}s (threshold: {{ $labels.critical_threshold }}s)&quot;
+</span><span id="__span-12-26"><a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a>expr: |
+</span><span id="__span-12-27"><a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>  kafka_lag_seconds &gt; on(domain) group_left() kafka_lag_critical_seconds
+</span><span id="__span-12-28"><a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a>for: 5m
+</span><span id="__span-12-29"><a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a>severity: critical
+</span><span id="__span-12-30"><a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a>action: &quot;Verify Spark job health; check Kafka broker health; scale Spark if needed&quot;
+</span></code></pre></div></p>
 <h3 id="warning-alerts-email">Warning Alerts (Email)<a class="headerlink" href="#warning-alerts-email" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_freshness_approaching_sla</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}.{{</span><span class="nv"> </span><span class="s">$labels.table</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">freshness</span><span class="nv"> </span><span class="s">at</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}m</span><span class="nv"> </span><span class="s">(SLA:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.sla_minutes</span><span class="nv"> </span><span class="s">}}m)&quot;</span>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">  </span><span class="no">data_freshness_minutes &gt; (data_freshness_sla_minutes * 0.6)</span>
-</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
-</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
-</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Monitor;</span><span class="nv"> </span><span class="s">ingest</span><span class="nv"> </span><span class="s">job</span><span class="nv"> </span><span class="s">may</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">slow</span><span class="nv"> </span><span class="s">due</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">high</span><span class="nv"> </span><span class="s">volume</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">cluster</span><span class="nv"> </span><span class="s">load&quot;</span>
-</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
-</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query_latency_high</span>
-</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">P95</span><span class="nv"> </span><span class="s">query</span><span class="nv"> </span><span class="s">latency:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}s</span><span class="nv"> </span><span class="s">(threshold:</span><span class="nv"> </span><span class="s">30s)&quot;</span>
-</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">  </span><span class="no">histogram_quantile(0.95, query_duration_seconds) &gt; 30</span>
-</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10m</span>
-</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
-</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Check</span><span class="nv"> </span><span class="s">Spark/Iceberg</span><span class="nv"> </span><span class="s">performance;</span><span class="nv"> </span><span class="s">consider</span><span class="nv"> </span><span class="s">query</span><span class="nv"> </span><span class="s">optimization</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">scaling&quot;</span>
-</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>
-</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingest_error_rate_elevated</span>
-</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">rate:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}%</span><span class="nv"> </span><span class="s">(threshold:</span><span class="nv"> </span><span class="s">0.5%)&quot;</span>
-</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a><span class="w">  </span><span class="no">(ingest_errors_total / ingest_records_total) &gt; 0.005</span>
-</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15m</span>
-</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
-</span><span id="__span-20-23"><a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Investigate</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">types;</span><span class="nv"> </span><span class="s">may</span><span class="nv"> </span><span class="s">need</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">validation</span><span class="nv"> </span><span class="s">fix</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">retry</span><span class="nv"> </span><span class="s">logic&quot;</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_freshness_approaching_sla</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}.{{</span><span class="nv"> </span><span class="s">$labels.table</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">freshness</span><span class="nv"> </span><span class="s">at</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}m</span><span class="nv"> </span><span class="s">(SLA:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.sla_minutes</span><span class="nv"> </span><span class="s">}}m)&quot;</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="no">data_freshness_minutes &gt; (data_freshness_sla_minutes * 0.6)</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Monitor;</span><span class="nv"> </span><span class="s">ingest</span><span class="nv"> </span><span class="s">job</span><span class="nv"> </span><span class="s">may</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">slow</span><span class="nv"> </span><span class="s">due</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">high</span><span class="nv"> </span><span class="s">volume</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">cluster</span><span class="nv"> </span><span class="s">load&quot;</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query_latency_high</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">P95</span><span class="nv"> </span><span class="s">query</span><span class="nv"> </span><span class="s">latency:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}s</span><span class="nv"> </span><span class="s">(threshold:</span><span class="nv"> </span><span class="s">30s)&quot;</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">  </span><span class="no">histogram_quantile(0.95, query_duration_seconds) &gt; 30</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10m</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Check</span><span class="nv"> </span><span class="s">Spark/Iceberg</span><span class="nv"> </span><span class="s">performance;</span><span class="nv"> </span><span class="s">consider</span><span class="nv"> </span><span class="s">query</span><span class="nv"> </span><span class="s">optimization</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">scaling&quot;</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingest_error_rate_elevated</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">$labels.domain</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">rate:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}%</span><span class="nv"> </span><span class="s">(threshold:</span><span class="nv"> </span><span class="s">0.5%)&quot;</span>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">  </span><span class="no">(ingest_errors_total / ingest_records_total) &gt; 0.005</span>
+</span><span id="__span-13-21"><a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15m</span>
+</span><span id="__span-13-22"><a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+</span><span id="__span-13-23"><a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Investigate</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">types;</span><span class="nv"> </span><span class="s">may</span><span class="nv"> </span><span class="s">need</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">validation</span><span class="nv"> </span><span class="s">fix</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">retry</span><span class="nv"> </span><span class="s">logic&quot;</span>
 </span></code></pre></div>
 <hr />
 <h2 id="metrics-collection-implementation">Metrics Collection Implementation<a class="headerlink" href="#metrics-collection-implementation" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># From platform/observability/metrics_exporter.py</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Gauge</span><span class="p">,</span> <span class="n">start_http_server</span>
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="kn">import</span> <span class="nn">time</span>
-</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>
-</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="k">class</span> <span class="nc">MetricsCollector</span><span class="p">:</span>
-</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>        <span class="c1"># Ingest metrics</span>
-</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_records</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span>
-</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>            <span class="s1">&#39;ingest_records_total&#39;</span><span class="p">,</span>
-</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>            <span class="s1">&#39;Records ingested&#39;</span><span class="p">,</span>
-</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">]</span>
-</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>        <span class="p">)</span>
-</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>
-</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_duration</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span>
-</span><span id="__span-21-16"><a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>            <span class="s1">&#39;ingest_duration_seconds&#39;</span><span class="p">,</span>
-</span><span id="__span-21-17"><a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>            <span class="s1">&#39;Duration of ingest batch&#39;</span><span class="p">,</span>
-</span><span id="__span-21-18"><a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">],</span>
-</span><span id="__span-21-19"><a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>            <span class="n">buckets</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
-</span><span id="__span-21-20"><a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>        <span class="p">)</span>
-</span><span id="__span-21-21"><a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>
-</span><span id="__span-21-22"><a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>        <span class="c1"># Freshness metrics</span>
-</span><span id="__span-21-23"><a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data_freshness</span> <span class="o">=</span> <span class="n">Gauge</span><span class="p">(</span>
-</span><span id="__span-21-24"><a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>            <span class="s1">&#39;data_freshness_minutes&#39;</span><span class="p">,</span>
-</span><span id="__span-21-25"><a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>            <span class="s1">&#39;Minutes since last snapshot&#39;</span><span class="p">,</span>
-</span><span id="__span-21-26"><a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">]</span>
-</span><span id="__span-21-27"><a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a>        <span class="p">)</span>
-</span><span id="__span-21-28"><a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>
-</span><span id="__span-21-29"><a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a>        <span class="c1"># Quality metrics</span>
-</span><span id="__span-21-30"><a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">quality_checks</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span>
-</span><span id="__span-21-31"><a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a>            <span class="s1">&#39;quality_checks_total&#39;</span><span class="p">,</span>
-</span><span id="__span-21-32"><a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a>            <span class="s1">&#39;Quality checks executed&#39;</span><span class="p">,</span>
-</span><span id="__span-21-33"><a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;rule&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">]</span>
-</span><span id="__span-21-34"><a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a>        <span class="p">)</span>
-</span><span id="__span-21-35"><a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a>
-</span><span id="__span-21-36"><a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a>        <span class="c1"># Query metrics</span>
-</span><span id="__span-21-37"><a id="__codelineno-21-37" name="__codelineno-21-37" href="#__codelineno-21-37"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">query_duration</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span>
-</span><span id="__span-21-38"><a id="__codelineno-21-38" name="__codelineno-21-38" href="#__codelineno-21-38"></a>            <span class="s1">&#39;query_duration_seconds&#39;</span><span class="p">,</span>
-</span><span id="__span-21-39"><a id="__codelineno-21-39" name="__codelineno-21-39" href="#__codelineno-21-39"></a>            <span class="s1">&#39;Query execution duration&#39;</span><span class="p">,</span>
-</span><span id="__span-21-40"><a id="__codelineno-21-40" name="__codelineno-21-40" href="#__codelineno-21-40"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">],</span>
-</span><span id="__span-21-41"><a id="__codelineno-21-41" name="__codelineno-21-41" href="#__codelineno-21-41"></a>            <span class="n">buckets</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">]</span>
-</span><span id="__span-21-42"><a id="__codelineno-21-42" name="__codelineno-21-42" href="#__codelineno-21-42"></a>        <span class="p">)</span>
-</span><span id="__span-21-43"><a id="__codelineno-21-43" name="__codelineno-21-43" href="#__codelineno-21-43"></a>
-</span><span id="__span-21-44"><a id="__codelineno-21-44" name="__codelineno-21-44" href="#__codelineno-21-44"></a>        <span class="c1"># Kafka metrics</span>
-</span><span id="__span-21-45"><a id="__codelineno-21-45" name="__codelineno-21-45" href="#__codelineno-21-45"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">kafka_lag</span> <span class="o">=</span> <span class="n">Gauge</span><span class="p">(</span>
-</span><span id="__span-21-46"><a id="__codelineno-21-46" name="__codelineno-21-46" href="#__codelineno-21-46"></a>            <span class="s1">&#39;kafka_lag_seconds&#39;</span><span class="p">,</span>
-</span><span id="__span-21-47"><a id="__codelineno-21-47" name="__codelineno-21-47" href="#__codelineno-21-47"></a>            <span class="s1">&#39;Seconds behind latest Kafka offset&#39;</span><span class="p">,</span>
-</span><span id="__span-21-48"><a id="__codelineno-21-48" name="__codelineno-21-48" href="#__codelineno-21-48"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;topic&#39;</span><span class="p">]</span>
-</span><span id="__span-21-49"><a id="__codelineno-21-49" name="__codelineno-21-49" href="#__codelineno-21-49"></a>        <span class="p">)</span>
-</span><span id="__span-21-50"><a id="__codelineno-21-50" name="__codelineno-21-50" href="#__codelineno-21-50"></a>
-</span><span id="__span-21-51"><a id="__codelineno-21-51" name="__codelineno-21-51" href="#__codelineno-21-51"></a>    <span class="k">def</span> <span class="nf">record_ingest_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-</span><span id="__span-21-52"><a id="__codelineno-21-52" name="__codelineno-21-52" href="#__codelineno-21-52"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_records</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
-</span><span id="__span-21-53"><a id="__codelineno-21-53" name="__codelineno-21-53" href="#__codelineno-21-53"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_duration</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
-</span><span id="__span-21-54"><a id="__codelineno-21-54" name="__codelineno-21-54" href="#__codelineno-21-54"></a>
-</span><span id="__span-21-55"><a id="__codelineno-21-55" name="__codelineno-21-55" href="#__codelineno-21-55"></a>        <span class="c1"># Update freshness</span>
-</span><span id="__span-21-56"><a id="__codelineno-21-56" name="__codelineno-21-56" href="#__codelineno-21-56"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data_freshness</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-</span><span id="__span-21-57"><a id="__codelineno-21-57" name="__codelineno-21-57" href="#__codelineno-21-57"></a>
-</span><span id="__span-21-58"><a id="__codelineno-21-58" name="__codelineno-21-58" href="#__codelineno-21-58"></a>    <span class="k">def</span> <span class="nf">update_freshness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">minutes_old</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-</span><span id="__span-21-59"><a id="__codelineno-21-59" name="__codelineno-21-59" href="#__codelineno-21-59"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data_freshness</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">minutes_old</span><span class="p">)</span>
-</span><span id="__span-21-60"><a id="__codelineno-21-60" name="__codelineno-21-60" href="#__codelineno-21-60"></a>
-</span><span id="__span-21-61"><a id="__codelineno-21-61" name="__codelineno-21-61" href="#__codelineno-21-61"></a><span class="c1"># Start Prometheus HTTP server on port 8001</span>
-</span><span id="__span-21-62"><a id="__codelineno-21-62" name="__codelineno-21-62" href="#__codelineno-21-62"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span><span id="__span-21-63"><a id="__codelineno-21-63" name="__codelineno-21-63" href="#__codelineno-21-63"></a>    <span class="n">start_http_server</span><span class="p">(</span><span class="mi">8001</span><span class="p">)</span>
-</span><span id="__span-21-64"><a id="__codelineno-21-64" name="__codelineno-21-64" href="#__codelineno-21-64"></a>    <span class="n">collector</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
-</span><span id="__span-21-65"><a id="__codelineno-21-65" name="__codelineno-21-65" href="#__codelineno-21-65"></a>    <span class="c1"># Collectors update metrics as ingest jobs run</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># From platform/observability/metrics_exporter.py</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Gauge</span><span class="p">,</span> <span class="n">start_http_server</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="kn">import</span> <span class="nn">time</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="k">class</span> <span class="nc">MetricsCollector</span><span class="p">:</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>        <span class="c1"># Ingest metrics</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_records</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>            <span class="s1">&#39;ingest_records_total&#39;</span><span class="p">,</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>            <span class="s1">&#39;Records ingested&#39;</span><span class="p">,</span>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">]</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>        <span class="p">)</span>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>
+</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_duration</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span>
+</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>            <span class="s1">&#39;ingest_duration_seconds&#39;</span><span class="p">,</span>
+</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>            <span class="s1">&#39;Duration of ingest batch&#39;</span><span class="p">,</span>
+</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">],</span>
+</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>            <span class="n">buckets</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
+</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>        <span class="p">)</span>
+</span><span id="__span-14-21"><a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>
+</span><span id="__span-14-22"><a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>        <span class="c1"># Freshness metrics</span>
+</span><span id="__span-14-23"><a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data_freshness</span> <span class="o">=</span> <span class="n">Gauge</span><span class="p">(</span>
+</span><span id="__span-14-24"><a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>            <span class="s1">&#39;data_freshness_minutes&#39;</span><span class="p">,</span>
+</span><span id="__span-14-25"><a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>            <span class="s1">&#39;Minutes since last snapshot&#39;</span><span class="p">,</span>
+</span><span id="__span-14-26"><a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">]</span>
+</span><span id="__span-14-27"><a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>        <span class="p">)</span>
+</span><span id="__span-14-28"><a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a>
+</span><span id="__span-14-29"><a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a>        <span class="c1"># Quality metrics</span>
+</span><span id="__span-14-30"><a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">quality_checks</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span>
+</span><span id="__span-14-31"><a id="__codelineno-14-31" name="__codelineno-14-31" href="#__codelineno-14-31"></a>            <span class="s1">&#39;quality_checks_total&#39;</span><span class="p">,</span>
+</span><span id="__span-14-32"><a id="__codelineno-14-32" name="__codelineno-14-32" href="#__codelineno-14-32"></a>            <span class="s1">&#39;Quality checks executed&#39;</span><span class="p">,</span>
+</span><span id="__span-14-33"><a id="__codelineno-14-33" name="__codelineno-14-33" href="#__codelineno-14-33"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;rule&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">]</span>
+</span><span id="__span-14-34"><a id="__codelineno-14-34" name="__codelineno-14-34" href="#__codelineno-14-34"></a>        <span class="p">)</span>
+</span><span id="__span-14-35"><a id="__codelineno-14-35" name="__codelineno-14-35" href="#__codelineno-14-35"></a>
+</span><span id="__span-14-36"><a id="__codelineno-14-36" name="__codelineno-14-36" href="#__codelineno-14-36"></a>        <span class="c1"># Query metrics</span>
+</span><span id="__span-14-37"><a id="__codelineno-14-37" name="__codelineno-14-37" href="#__codelineno-14-37"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">query_duration</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span>
+</span><span id="__span-14-38"><a id="__codelineno-14-38" name="__codelineno-14-38" href="#__codelineno-14-38"></a>            <span class="s1">&#39;query_duration_seconds&#39;</span><span class="p">,</span>
+</span><span id="__span-14-39"><a id="__codelineno-14-39" name="__codelineno-14-39" href="#__codelineno-14-39"></a>            <span class="s1">&#39;Query execution duration&#39;</span><span class="p">,</span>
+</span><span id="__span-14-40"><a id="__codelineno-14-40" name="__codelineno-14-40" href="#__codelineno-14-40"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">],</span>
+</span><span id="__span-14-41"><a id="__codelineno-14-41" name="__codelineno-14-41" href="#__codelineno-14-41"></a>            <span class="n">buckets</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">]</span>
+</span><span id="__span-14-42"><a id="__codelineno-14-42" name="__codelineno-14-42" href="#__codelineno-14-42"></a>        <span class="p">)</span>
+</span><span id="__span-14-43"><a id="__codelineno-14-43" name="__codelineno-14-43" href="#__codelineno-14-43"></a>
+</span><span id="__span-14-44"><a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a>        <span class="c1"># Kafka metrics</span>
+</span><span id="__span-14-45"><a id="__codelineno-14-45" name="__codelineno-14-45" href="#__codelineno-14-45"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">kafka_lag</span> <span class="o">=</span> <span class="n">Gauge</span><span class="p">(</span>
+</span><span id="__span-14-46"><a id="__codelineno-14-46" name="__codelineno-14-46" href="#__codelineno-14-46"></a>            <span class="s1">&#39;kafka_lag_seconds&#39;</span><span class="p">,</span>
+</span><span id="__span-14-47"><a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a>            <span class="s1">&#39;Seconds behind latest Kafka offset&#39;</span><span class="p">,</span>
+</span><span id="__span-14-48"><a id="__codelineno-14-48" name="__codelineno-14-48" href="#__codelineno-14-48"></a>            <span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">,</span> <span class="s1">&#39;topic&#39;</span><span class="p">]</span>
+</span><span id="__span-14-49"><a id="__codelineno-14-49" name="__codelineno-14-49" href="#__codelineno-14-49"></a>        <span class="p">)</span>
+</span><span id="__span-14-50"><a id="__codelineno-14-50" name="__codelineno-14-50" href="#__codelineno-14-50"></a>
+</span><span id="__span-14-51"><a id="__codelineno-14-51" name="__codelineno-14-51" href="#__codelineno-14-51"></a>    <span class="k">def</span> <span class="nf">record_ingest_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+</span><span id="__span-14-52"><a id="__codelineno-14-52" name="__codelineno-14-52" href="#__codelineno-14-52"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_records</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+</span><span id="__span-14-53"><a id="__codelineno-14-53" name="__codelineno-14-53" href="#__codelineno-14-53"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ingest_duration</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+</span><span id="__span-14-54"><a id="__codelineno-14-54" name="__codelineno-14-54" href="#__codelineno-14-54"></a>
+</span><span id="__span-14-55"><a id="__codelineno-14-55" name="__codelineno-14-55" href="#__codelineno-14-55"></a>        <span class="c1"># Update freshness</span>
+</span><span id="__span-14-56"><a id="__codelineno-14-56" name="__codelineno-14-56" href="#__codelineno-14-56"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data_freshness</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</span><span id="__span-14-57"><a id="__codelineno-14-57" name="__codelineno-14-57" href="#__codelineno-14-57"></a>
+</span><span id="__span-14-58"><a id="__codelineno-14-58" name="__codelineno-14-58" href="#__codelineno-14-58"></a>    <span class="k">def</span> <span class="nf">update_freshness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">minutes_old</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+</span><span id="__span-14-59"><a id="__codelineno-14-59" name="__codelineno-14-59" href="#__codelineno-14-59"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data_freshness</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">minutes_old</span><span class="p">)</span>
+</span><span id="__span-14-60"><a id="__codelineno-14-60" name="__codelineno-14-60" href="#__codelineno-14-60"></a>
+</span><span id="__span-14-61"><a id="__codelineno-14-61" name="__codelineno-14-61" href="#__codelineno-14-61"></a><span class="c1"># Start Prometheus HTTP server on port 8001</span>
+</span><span id="__span-14-62"><a id="__codelineno-14-62" name="__codelineno-14-62" href="#__codelineno-14-62"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span id="__span-14-63"><a id="__codelineno-14-63" name="__codelineno-14-63" href="#__codelineno-14-63"></a>    <span class="n">start_http_server</span><span class="p">(</span><span class="mi">8001</span><span class="p">)</span>
+</span><span id="__span-14-64"><a id="__codelineno-14-64" name="__codelineno-14-64" href="#__codelineno-14-64"></a>    <span class="n">collector</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
+</span><span id="__span-14-65"><a id="__codelineno-14-65" name="__codelineno-14-65" href="#__codelineno-14-65"></a>    <span class="c1"># Collectors update metrics as ingest jobs run</span>
 </span></code></pre></div>
 <hr />
 <h2 id="querying-metrics">Querying Metrics<a class="headerlink" href="#querying-metrics" title="Permanent link">&para;</a></h2>
 <h3 id="prometheus-query-examples">Prometheus Query Examples<a class="headerlink" href="#prometheus-query-examples" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a># Current freshness
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>data_freshness_minutes{domain=&quot;transactions&quot;}
-</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
-</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a># Ingest rate (records per minute)
-</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>rate(ingest_records_total[1m]) * 60
-</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>
-</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a># P95 query latency
-</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>histogram_quantile(0.95, query_duration_seconds)
-</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>
-</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a># Quality check success rate
-</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>(quality_checks_total{status=&quot;passed&quot;} / quality_checks_total) * 100
-</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>
-</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a># Kafka lag
-</span><span id="__span-22-14"><a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>kafka_lag_seconds
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a># Current freshness
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>data_freshness_minutes{domain=&quot;transactions&quot;}
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a># Ingest rate (records per minute)
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>rate(ingest_records_total[1m]) * 60
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a># P95 query latency
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>histogram_quantile(0.95, query_duration_seconds)
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a># Quality check success rate
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>(quality_checks_total{status=&quot;passed&quot;} / quality_checks_total) * 100
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a># Kafka lag
+</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>kafka_lag_seconds
 </span></code></pre></div>
 <hr />
 <h2 id="health-check-endpoints">Health Check Endpoints<a class="headerlink" href="#health-check-endpoints" title="Permanent link">&para;</a></h2>
 <h3 id="health">/health<a class="headerlink" href="#health" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>curl<span class="w"> </span>http://localhost:8000/health
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="o">{</span>
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;healthy&quot;</span>,
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">  </span><span class="s2">&quot;components&quot;</span>:<span class="w"> </span><span class="o">{</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="s2">&quot;kafka&quot;</span>:<span class="w"> </span><span class="o">{</span>
-</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
-</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">      </span><span class="s2">&quot;brokers&quot;</span>:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;kafka:9092&quot;</span><span class="o">]</span>
-</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">    </span><span class="o">}</span>,
-</span><span id="__span-23-10"><a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">    </span><span class="s2">&quot;iceberg_catalog&quot;</span>:<span class="w"> </span><span class="o">{</span>
-</span><span id="__span-23-11"><a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
-</span><span id="__span-23-12"><a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="w">      </span><span class="s2">&quot;uri&quot;</span>:<span class="w"> </span><span class="s2">&quot;http://iceberg-catalog:8181&quot;</span>
-</span><span id="__span-23-13"><a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a><span class="w">    </span><span class="o">}</span>,
-</span><span id="__span-23-14"><a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a><span class="w">    </span><span class="s2">&quot;opa&quot;</span>:<span class="w"> </span><span class="o">{</span>
-</span><span id="__span-23-15"><a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
-</span><span id="__span-23-16"><a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="w">      </span><span class="s2">&quot;uri&quot;</span>:<span class="w"> </span><span class="s2">&quot;http://opa:8181&quot;</span>
-</span><span id="__span-23-17"><a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="w">    </span><span class="o">}</span>,
-</span><span id="__span-23-18"><a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">    </span><span class="s2">&quot;elasticsearch&quot;</span>:<span class="w"> </span><span class="o">{</span>
-</span><span id="__span-23-19"><a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
-</span><span id="__span-23-20"><a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="w">      </span><span class="s2">&quot;cluster_health&quot;</span>:<span class="w"> </span><span class="s2">&quot;green&quot;</span>
-</span><span id="__span-23-21"><a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a><span class="w">    </span><span class="o">}</span>
-</span><span id="__span-23-22"><a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="w">  </span><span class="o">}</span>,
-</span><span id="__span-23-23"><a id="__codelineno-23-23" name="__codelineno-23-23" href="#__codelineno-23-23"></a><span class="w">  </span><span class="s2">&quot;freshness_lag&quot;</span>:<span class="w"> </span><span class="o">{</span>
-</span><span id="__span-23-24"><a id="__codelineno-23-24" name="__codelineno-23-24" href="#__codelineno-23-24"></a><span class="w">    </span><span class="s2">&quot;transactions&quot;</span>:<span class="w"> </span><span class="s2">&quot;2.3 minutes&quot;</span>,
-</span><span id="__span-23-25"><a id="__codelineno-23-25" name="__codelineno-23-25" href="#__codelineno-23-25"></a><span class="w">    </span><span class="s2">&quot;market_data&quot;</span>:<span class="w"> </span><span class="s2">&quot;0.8 minutes&quot;</span>
-</span><span id="__span-23-26"><a id="__codelineno-23-26" name="__codelineno-23-26" href="#__codelineno-23-26"></a><span class="w">  </span><span class="o">}</span>
-</span><span id="__span-23-27"><a id="__codelineno-23-27" name="__codelineno-23-27" href="#__codelineno-23-27"></a><span class="o">}</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="o">{</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;healthy&quot;</span>,
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">  </span><span class="s2">&quot;components&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="s2">&quot;kafka&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">      </span><span class="s2">&quot;brokers&quot;</span>:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;kafka:9092&quot;</span><span class="o">]</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">    </span><span class="o">}</span>,
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">    </span><span class="s2">&quot;iceberg_catalog&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">      </span><span class="s2">&quot;uri&quot;</span>:<span class="w"> </span><span class="s2">&quot;http://iceberg-catalog:8181&quot;</span>
+</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">    </span><span class="o">}</span>,
+</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">    </span><span class="s2">&quot;opa&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-16-15"><a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
+</span><span id="__span-16-16"><a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="w">      </span><span class="s2">&quot;uri&quot;</span>:<span class="w"> </span><span class="s2">&quot;http://opa:8181&quot;</span>
+</span><span id="__span-16-17"><a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="w">    </span><span class="o">}</span>,
+</span><span id="__span-16-18"><a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">    </span><span class="s2">&quot;elasticsearch&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-16-19"><a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="w">      </span><span class="s2">&quot;status&quot;</span>:<span class="w"> </span><span class="s2">&quot;connected&quot;</span>,
+</span><span id="__span-16-20"><a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="w">      </span><span class="s2">&quot;cluster_health&quot;</span>:<span class="w"> </span><span class="s2">&quot;green&quot;</span>
+</span><span id="__span-16-21"><a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="w">    </span><span class="o">}</span>
+</span><span id="__span-16-22"><a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a><span class="w">  </span><span class="o">}</span>,
+</span><span id="__span-16-23"><a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a><span class="w">  </span><span class="s2">&quot;freshness_lag&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-16-24"><a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a><span class="w">    </span><span class="s2">&quot;transactions&quot;</span>:<span class="w"> </span><span class="s2">&quot;2.3 minutes&quot;</span>,
+</span><span id="__span-16-25"><a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a><span class="w">    </span><span class="s2">&quot;market_data&quot;</span>:<span class="w"> </span><span class="s2">&quot;0.8 minutes&quot;</span>
+</span><span id="__span-16-26"><a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a><span class="w">  </span><span class="o">}</span>
+</span><span id="__span-16-27"><a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a><span class="o">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><a href="../../domains/transactions/">Transactions Domain</a></strong> — See how freshness SLOs are enforced</li>
 <li><strong><a href="../../production/deployment/">Production Deployment</a></strong> — Deploy Prometheus + Grafana</li>
-<li><strong><a href="../production/trade-offs.md">Trade-offs</a></strong> — Understand SLA design decisions</li>
+<li><strong><a href="../../production/trade-offs/">Trade-offs</a></strong> — Understand SLA design decisions</li>
 </ul>
 
 
@@ -2359,6 +2280,10 @@
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid-init.js"></script>
       
     
   </body>

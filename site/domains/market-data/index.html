@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://naren-chakraview.github.io/chakraview-fintech-data-mesh/domains/market-data/">
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/domains/market-data/">
       
       
         <link rel="prev" href="../counterparties/">
@@ -1390,7 +1390,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/scaling.md" class="md-nav__link">
+      <a href="../../production/scaling/" class="md-nav__link">
         
   
   
@@ -1418,7 +1418,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/troubleshooting.md" class="md-nav__link">
+      <a href="../../production/troubleshooting/" class="md-nav__link">
         
   
   
@@ -1446,7 +1446,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/trade-offs.md" class="md-nav__link">
+      <a href="../../production/trade-offs/" class="md-nav__link">
         
   
   
@@ -2131,210 +2131,206 @@
 </span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">    </span><span class="nt">classification</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span>
 </span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="nt">masked_for_roles</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 </span></code></pre></div></p>
-<p><strong>Downstream Consumers</strong>:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>risk-models (Real-time)
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── Consumes: Kafka topic market-rates-raw (hot path)
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>├── Purpose: Real-time risk valuation
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>└── SLA: &lt; 10 seconds to decision
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>pricing-engine (Real-time)
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>├── Consumes: Kafka topic market-prices-raw
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>├── Purpose: Dynamic pricing based on market moves
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>└── SLA: &lt; 5 seconds to adjust price
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>analytics-dashboard (Near-real-time)
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>├── Consumes: Iceberg table market_data.fx_rates
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>├── Purpose: Historical trends, volatility analysis
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>└── Frequency: Every 5 minutes (cold path freshness)
-</span></code></pre></div></p>
+<p><strong>Downstream Consumers</strong>:</p>
+<pre class="mermaid"><code>graph TD
+    A["risk-models Real-time"]
+    A --&gt; A1["Consumes: Kafka topic market-rates-raw hot path"]
+    A --&gt; A2["Purpose: Real-time risk valuation"]
+    A --&gt; A3["SLA: &amp;lt; 10 seconds to decision"]
+
+    B["pricing-engine Real-time"]
+    B --&gt; B1["Consumes: Kafka topic market-prices-raw"]
+    B --&gt; B2["Purpose: Dynamic pricing based on market moves"]
+    B --&gt; B3["SLA: &amp;lt; 5 seconds to adjust price"]
+
+    C["analytics-dashboard Near-real-time"]
+    C --&gt; C1["Consumes: Iceberg table market_data.fx_rates"]
+    C --&gt; C2["Purpose: Historical trends, volatility analysis"]
+    C --&gt; C3["Frequency: Every 5 minutes cold path freshness"]</code></pre>
 <hr />
 <h2 id="ingest-pipeline">Ingest Pipeline<a class="headerlink" href="#ingest-pipeline" title="Permanent link">&para;</a></h2>
 <h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Market Data Providers (External APIs)
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>         ↓
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>market-rates-raw, market-prices-raw (Kafka Topics)
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>├── Hot path: Real-time streaming (&lt; 1 second latency)
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>├── Partitions: [currency_pair] for FX, [bond_isin] for bonds
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>└── Retention: 7 days
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>         ↓
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>[MarketDataIngestJob - Spark Structured Streaming]
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>├── Read from Kafka every minute
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>├── Validate schema + business rules
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>├── Micro-batch every 5 minutes (cold path)
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>└── Partition for Iceberg
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>         ↓
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>Market_data.fx_rates, Market_data.bond_prices (Iceberg)
-</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>├── Retention: 1 year
-</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>├── Snapshots: Every 5 minutes
-</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>└── Partition pruning: By [year, month, day, hour]
-</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>         ↓
-</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>Analytics + Observability
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["Market Data Providers External APIs"]
+    A --&gt; B["market-rates-raw, market-prices-raw Kafka Topics"]
+    B --&gt; B1["Hot path: Real-time streaming &amp;lt; 1 second latency"]
+    B --&gt; B2["Partitions: currency_pair for FX, bond_isin for bonds"]
+    B --&gt; B3["Retention: 7 days"]
+    B --&gt; C["MarketDataIngestJob - Spark Structured Streaming"]
+    C --&gt; C1["Read from Kafka every minute"]
+    C --&gt; C2["Validate schema + business rules"]
+    C --&gt; C3["Micro-batch every 5 minutes cold path"]
+    C --&gt; C4["Partition for Iceberg"]
+    C --&gt; D["Market_data.fx_rates, Market_data.bond_prices Iceberg"]
+    D --&gt; D1["Retention: 1 year"]
+    D --&gt; D2["Snapshots: Every 5 minutes"]
+    D --&gt; D3["Partition pruning: By year, month, day, hour"]
+    D --&gt; E["Analytics + Observability"]</code></pre>
 <h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># From domains/market_data/ingest/ingest_job.py</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">class</span> <span class="nc">MarketDataIngestJob</span><span class="p">:</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">DOMAIN</span> <span class="o">=</span> <span class="s2">&quot;market_data&quot;</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">FX_TOPIC</span> <span class="o">=</span> <span class="s2">&quot;market-rates-raw&quot;</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">PRICES_TOPIC</span> <span class="o">=</span> <span class="s2">&quot;market-prices-raw&quot;</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">FX_TABLE</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DOMAIN</span><span class="si">}</span><span class="s2">.fx_rates&quot;</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">PRICES_TABLE</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DOMAIN</span><span class="si">}</span><span class="s2">.bond_prices&quot;</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="k">def</span> <span class="nf">run_fx_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Ingest FX rates with 1-minute freshness SLA&quot;&quot;&quot;</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;kafka&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;kafka.bootstrap.servers&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kafka_brokers</span><span class="p">)</span> \
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;subscribe&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FX_TOPIC</span><span class="p">)</span> \
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;startingOffsets&quot;</span><span class="p">,</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>            <span class="o">.</span><span class="n">load</span><span class="p">()</span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>        <span class="n">schema_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;{</span>
-</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="s1">            &quot;currency_pair&quot;: &quot;string&quot;,</span>
-</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="s1">            &quot;rate&quot;: &quot;double&quot;,</span>
-</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="s1">            &quot;timestamp&quot;: &quot;long&quot;,</span>
-</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="s1">            &quot;source&quot;: &quot;string&quot;</span>
-</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="s1">        }&#39;&#39;&#39;</span>
-</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>
-</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>        <span class="n">parsed_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>            <span class="n">from_json</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">),</span> <span class="n">schema_of_json</span><span class="p">(</span><span class="n">schema_str</span><span class="p">))</span>
-</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
-</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>        <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;data.*&quot;</span><span class="p">)</span>
-</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>
-</span><span id="__span-7-30"><a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>        <span class="c1"># Filter recent data (drop stale updates)</span>
-</span><span id="__span-7-31"><a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>        <span class="n">parsed_df</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-</span><span id="__span-7-32"><a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a>            <span class="n">col</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">unix_timestamp</span><span class="p">()</span> <span class="o">-</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># Max 5 min old</span>
-</span><span id="__span-7-33"><a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>        <span class="p">)</span>
-</span><span id="__span-7-34"><a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>
-</span><span id="__span-7-35"><a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">writeStream</span> \
-</span><span id="__span-7-36"><a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a>            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-37"><a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a>            <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-38"><a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;checkpointLocation&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/tmp/checkpoint/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">DOMAIN</span><span class="si">}</span><span class="s2">/fx&quot;</span><span class="p">)</span> \
-</span><span id="__span-7-39"><a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a>            <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FX_TABLE</span><span class="p">)</span>
-</span><span id="__span-7-40"><a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a>
-</span><span id="__span-7-41"><a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a>        <span class="n">query</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># From domains/market_data/ingest/ingest_job.py</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">class</span> <span class="nc">MarketDataIngestJob</span><span class="p">:</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">DOMAIN</span> <span class="o">=</span> <span class="s2">&quot;market_data&quot;</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">FX_TOPIC</span> <span class="o">=</span> <span class="s2">&quot;market-rates-raw&quot;</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">PRICES_TOPIC</span> <span class="o">=</span> <span class="s2">&quot;market-prices-raw&quot;</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">FX_TABLE</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DOMAIN</span><span class="si">}</span><span class="s2">.fx_rates&quot;</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">PRICES_TABLE</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DOMAIN</span><span class="si">}</span><span class="s2">.bond_prices&quot;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="k">def</span> <span class="nf">run_fx_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Ingest FX rates with 1-minute freshness SLA&quot;&quot;&quot;</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;kafka&quot;</span><span class="p">)</span> \
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;kafka.bootstrap.servers&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kafka_brokers</span><span class="p">)</span> \
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;subscribe&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FX_TOPIC</span><span class="p">)</span> \
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;startingOffsets&quot;</span><span class="p">,</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> \
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>            <span class="o">.</span><span class="n">load</span><span class="p">()</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>        <span class="n">schema_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;{</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="s1">            &quot;currency_pair&quot;: &quot;string&quot;,</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="s1">            &quot;rate&quot;: &quot;double&quot;,</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="s1">            &quot;timestamp&quot;: &quot;long&quot;,</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="s1">            &quot;source&quot;: &quot;string&quot;</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="s1">        }&#39;&#39;&#39;</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>        <span class="n">parsed_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>            <span class="n">from_json</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">),</span> <span class="n">schema_of_json</span><span class="p">(</span><span class="n">schema_str</span><span class="p">))</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>        <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;data.*&quot;</span><span class="p">)</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>
+</span><span id="__span-5-30"><a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>        <span class="c1"># Filter recent data (drop stale updates)</span>
+</span><span id="__span-5-31"><a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>        <span class="n">parsed_df</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+</span><span id="__span-5-32"><a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>            <span class="n">col</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">unix_timestamp</span><span class="p">()</span> <span class="o">-</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># Max 5 min old</span>
+</span><span id="__span-5-33"><a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>        <span class="p">)</span>
+</span><span id="__span-5-34"><a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>
+</span><span id="__span-5-35"><a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">writeStream</span> \
+</span><span id="__span-5-36"><a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
+</span><span id="__span-5-37"><a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a>            <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
+</span><span id="__span-5-38"><a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;checkpointLocation&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/tmp/checkpoint/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">DOMAIN</span><span class="si">}</span><span class="s2">/fx&quot;</span><span class="p">)</span> \
+</span><span id="__span-5-39"><a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>            <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FX_TABLE</span><span class="p">)</span>
+</span><span id="__span-5-40"><a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a>
+</span><span id="__span-5-41"><a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a>        <span class="n">query</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">()</span>
 </span></code></pre></div>
 <hr />
 <h2 id="governance-compliance">Governance &amp; Compliance<a class="headerlink" href="#governance-compliance" title="Permanent link">&para;</a></h2>
 <h3 id="retention-policy">Retention Policy<a class="headerlink" href="#retention-policy" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>FX Rates: 1 year
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>├── Rationale: Regulatory reporting (historical rates for disputed trades)
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>├── Cost: High volume (10K rates/min = 365M rows/year)
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>└── Optimization: Compress hourly snapshots after 30 days
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>Bond Prices: 1 year
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>├── Rationale: Historical price verification for audits
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>└── Deletion: Hard delete after 1 year (not critical data)
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["FX Rates: 1 year"]
+    A --&gt; A1["Rationale: Regulatory reporting historical rates for disputed trades"]
+    A --&gt; A2["Cost: High volume 10K rates/min = 365M rows/year"]
+    A --&gt; A3["Optimization: Compress hourly snapshots after 30 days"]
+
+    B["Bond Prices: 1 year"]
+    B --&gt; B1["Rationale: Historical price verification for audits"]
+    B --&gt; B2["Deletion: Hard delete after 1 year not critical data"]</code></pre>
 <h3 id="data-quality-monitoring">Data Quality Monitoring<a class="headerlink" href="#data-quality-monitoring" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Critical metrics (alert if violated):
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── Completeness: Min 95% of expected rates present
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>├── Freshness: Max 5 minutes old (warn at 3 min, alert at 5)
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>├── Accuracy: Cross-check against external benchmark (&lt; 0.1% deviation)
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>└── Gaps: Identify missing data windows (non-trading hours OK)
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["Critical metrics alert if violated"]
+    A --&gt; A1["Completeness: Min 95% of expected rates present"]
+    A --&gt; A2["Freshness: Max 5 minutes old warn at 3 min, alert at 5"]
+    A --&gt; A3["Accuracy: Cross-check against external benchmark &amp;lt; 0.1% deviation"]
+    A --&gt; A4["Gaps: Identify missing data windows non-trading hours OK"]</code></pre>
 <hr />
 <h2 id="queries">Queries<a class="headerlink" href="#queries" title="Permanent link">&para;</a></h2>
 <h3 id="volatility-analysis">Volatility Analysis<a class="headerlink" href="#volatility-analysis" title="Permanent link">&para;</a></h3>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1">-- 30-day volatility for each currency pair</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="n">currency_pair</span><span class="p">,</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="n">STDDEV</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">volatility</span><span class="p">,</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="k">MIN</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">min_rate</span><span class="p">,</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span><span class="k">MAX</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">max_rate</span><span class="p">,</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="k">AVG</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_rate</span><span class="p">,</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span><span class="p">(</span><span class="k">MAX</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">MIN</span><span class="p">(</span><span class="n">rate</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">pct_range</span>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="k">FROM</span><span class="w"> </span><span class="n">market_data</span><span class="p">.</span><span class="n">fx_rates</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="k">WHERE</span><span class="w"> </span><span class="k">timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">UNIX_TIMESTAMP</span><span class="p">(</span><span class="k">CURRENT_DATE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="n">days</span><span class="p">)</span>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="k">timestamp</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">UNIX_TIMESTAMP</span><span class="p">(</span><span class="k">CURRENT_DATE</span><span class="p">)</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">currency_pair</span>
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">volatility</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">-- 30-day volatility for each currency pair</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="n">currency_pair</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="n">STDDEV</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">volatility</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="k">MIN</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">min_rate</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="k">MAX</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">max_rate</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="k">AVG</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_rate</span><span class="p">,</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span><span class="p">(</span><span class="k">MAX</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">MIN</span><span class="p">(</span><span class="n">rate</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">pct_range</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="k">FROM</span><span class="w"> </span><span class="n">market_data</span><span class="p">.</span><span class="n">fx_rates</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">WHERE</span><span class="w"> </span><span class="k">timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">UNIX_TIMESTAMP</span><span class="p">(</span><span class="k">CURRENT_DATE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="n">days</span><span class="p">)</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="k">timestamp</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">UNIX_TIMESTAMP</span><span class="p">(</span><span class="k">CURRENT_DATE</span><span class="p">)</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">currency_pair</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">volatility</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
 </span></code></pre></div>
 <h3 id="market-move-detection">Market Move Detection<a class="headerlink" href="#market-move-detection" title="Permanent link">&para;</a></h3>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">-- Detect large market moves (&gt; 2% in 1 hour)</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="k">WITH</span><span class="w"> </span><span class="n">hourly_rates</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="n">currency_pair</span><span class="p">,</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="n">HOUR</span><span class="p">(</span><span class="n">FROM_UNIXTIME</span><span class="p">(</span><span class="k">timestamp</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">hour_of_day</span><span class="p">,</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="k">FIRST</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">open_rate</span><span class="p">,</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="k">LAST</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">close_rate</span><span class="p">,</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">high_rate</span><span class="p">,</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="k">MIN</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">low_rate</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">market_data</span><span class="p">.</span><span class="n">fx_rates</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="k">timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">UNIX_TIMESTAMP</span><span class="p">(</span><span class="k">CURRENT_DATE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">day</span><span class="p">)</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">currency_pair</span><span class="p">,</span><span class="w"> </span><span class="n">HOUR</span><span class="p">(</span><span class="n">FROM_UNIXTIME</span><span class="p">(</span><span class="k">timestamp</span><span class="p">))</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="p">)</span>
-</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">  </span><span class="n">currency_pair</span><span class="p">,</span>
-</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">  </span><span class="n">hour_of_day</span><span class="p">,</span>
-</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">  </span><span class="n">open_rate</span><span class="p">,</span>
-</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">  </span><span class="n">close_rate</span><span class="p">,</span>
-</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="w">  </span><span class="n">ROUND</span><span class="p">(</span><span class="mi">100</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">ABS</span><span class="p">(</span><span class="n">close_rate</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">open_rate</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">open_rate</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">pct_move</span>
-</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="k">FROM</span><span class="w"> </span><span class="n">hourly_rates</span>
-</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="k">WHERE</span><span class="w"> </span><span class="k">ABS</span><span class="p">(</span><span class="n">close_rate</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">open_rate</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">open_rate</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">02</span>
-</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">pct_move</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">-- Detect large market moves (&gt; 2% in 1 hour)</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">WITH</span><span class="w"> </span><span class="n">hourly_rates</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="n">currency_pair</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="n">HOUR</span><span class="p">(</span><span class="n">FROM_UNIXTIME</span><span class="p">(</span><span class="k">timestamp</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">hour_of_day</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="k">FIRST</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">open_rate</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="k">LAST</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">close_rate</span><span class="p">,</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">high_rate</span><span class="p">,</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="k">MIN</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">low_rate</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">market_data</span><span class="p">.</span><span class="n">fx_rates</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="k">timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">UNIX_TIMESTAMP</span><span class="p">(</span><span class="k">CURRENT_DATE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">day</span><span class="p">)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">currency_pair</span><span class="p">,</span><span class="w"> </span><span class="n">HOUR</span><span class="p">(</span><span class="n">FROM_UNIXTIME</span><span class="p">(</span><span class="k">timestamp</span><span class="p">))</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="p">)</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">  </span><span class="n">currency_pair</span><span class="p">,</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">  </span><span class="n">hour_of_day</span><span class="p">,</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">  </span><span class="n">open_rate</span><span class="p">,</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">  </span><span class="n">close_rate</span><span class="p">,</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">  </span><span class="n">ROUND</span><span class="p">(</span><span class="mi">100</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">ABS</span><span class="p">(</span><span class="n">close_rate</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">open_rate</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">open_rate</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">pct_move</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="k">FROM</span><span class="w"> </span><span class="n">hourly_rates</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="k">WHERE</span><span class="w"> </span><span class="k">ABS</span><span class="p">(</span><span class="n">close_rate</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">open_rate</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">open_rate</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">02</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">pct_move</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
 </span></code></pre></div>
 <hr />
 <h2 id="scaling-for-high-frequency-data">Scaling for High-Frequency Data<a class="headerlink" href="#scaling-for-high-frequency-data" title="Permanent link">&para;</a></h2>
 <h3 id="kafka-configuration">Kafka Configuration<a class="headerlink" href="#kafka-configuration" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Topic: market-rates-raw
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├── Partitions: 10 (one per currency group)
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>├── Replication: 3
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>├── Retention: 7 days
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>├── Throughput: 10,000 messages/minute (FX rates)
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>└── Partition key: currency_pair (ensures ordering per pair)
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>Topic: market-prices-raw
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>├── Partitions: 5
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>├── Retention: 7 days
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>├── Throughput: 5,000 messages/minute (bond prices)
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>└── Partition key: bond_isin
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Topic: market-rates-raw
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>├── Partitions: 10 (one per currency group)
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>├── Replication: 3
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>├── Retention: 7 days
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>├── Throughput: 10,000 messages/minute (FX rates)
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>└── Partition key: currency_pair (ensures ordering per pair)
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>Topic: market-prices-raw
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>├── Partitions: 5
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>├── Retention: 7 days
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>├── Throughput: 5,000 messages/minute (bond prices)
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>└── Partition key: bond_isin
 </span></code></pre></div>
 <h3 id="spark-job-scaling">Spark Job Scaling<a class="headerlink" href="#spark-job-scaling" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>MarketDataIngestJob (FX Rates):
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── Executors: 5 (matches Kafka partitions)
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>├── Cores per executor: 4
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>├── Memory per executor: 4GB
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>├── Typical batch: 50K FX updates per 5-min batch
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>└── Throughput: 10K msg/min → 167 msg/sec
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>MarketDataIngestJob (Bond Prices):
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>├── Executors: 2 (matches demand)
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>├── Cores: 2
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>├── Memory: 2GB
-</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>└── Throughput: 5K msg/min → 83 msg/sec
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>MarketDataIngestJob (FX Rates):
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── Executors: 5 (matches Kafka partitions)
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>├── Cores per executor: 4
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>├── Memory per executor: 4GB
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>├── Typical batch: 50K FX updates per 5-min batch
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>└── Throughput: 10K msg/min → 167 msg/sec
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>MarketDataIngestJob (Bond Prices):
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>├── Executors: 2 (matches demand)
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>├── Cores: 2
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>├── Memory: 2GB
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>└── Throughput: 5K msg/min → 83 msg/sec
 </span></code></pre></div>
 <h3 id="iceberg-optimization">Iceberg Optimization<a class="headerlink" href="#iceberg-optimization" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Partition strategy (hourly updates for FX):
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>├── [year, month, day, hour] = 8766 partitions/year
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>├── Typical partition size: 500MB (1 hour of FX data)
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>├── Query &quot;Last 7 days of EUR/USD&quot;: Scans 7*24 = 168 partitions (84GB)
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>└── Cost: $1.93/query vs. $23.10 without partitioning
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>Compaction schedule:
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>├── Daily: Merge files from previous day (&lt; 5 files/partition)
-</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>├── Monthly: Consolidate month-old snapshots
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>├── Yearly: Archive and compress data older than 6 months
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Partition strategy (hourly updates for FX):
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>├── [year, month, day, hour] = 8766 partitions/year
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>├── Typical partition size: 500MB (1 hour of FX data)
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>├── Query &quot;Last 7 days of EUR/USD&quot;: Scans 7*24 = 168 partitions (84GB)
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>└── Cost: $1.93/query vs. $23.10 without partitioning
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>Compaction schedule:
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>├── Daily: Merge files from previous day (&lt; 5 files/partition)
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>├── Monthly: Consolidate month-old snapshots
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>├── Yearly: Archive and compress data older than 6 months
 </span></code></pre></div>
 <hr />
 <h2 id="observability">Observability<a class="headerlink" href="#observability" title="Permanent link">&para;</a></h2>
 <h3 id="sla-dashboard">SLA Dashboard<a class="headerlink" href="#sla-dashboard" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_freshness_minutes{domain=&quot;market_data&quot;, table=&quot;fx_rates&quot;}</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nt">definition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Time</span><span class="nv"> </span><span class="s">since</span><span class="nv"> </span><span class="s">last</span><span class="nv"> </span><span class="s">Iceberg</span><span class="nv"> </span><span class="s">snapshot&quot;</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt; 1 minute</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="nt">warning</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 2 minutes</span>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 5 minutes</span>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka_lag_seconds{domain=&quot;market_data&quot;, topic=&quot;market-rates-raw&quot;}</span>
-</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="nt">definition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Time</span><span class="nv"> </span><span class="s">since</span><span class="nv"> </span><span class="s">Kafka</span><span class="nv"> </span><span class="s">event</span><span class="nv"> </span><span class="s">published</span><span class="nv"> </span><span class="s">vs.</span><span class="nv"> </span><span class="s">Spark</span><span class="nv"> </span><span class="s">reads&quot;</span>
-</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt; 10 seconds</span>
-</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="nt">warning</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 30 seconds</span>
-</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 60 seconds</span>
-</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>
-</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_completeness_pct{domain=&quot;market_data&quot;, table=&quot;fx_rates&quot;}</span>
-</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="nt">definition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Percentage</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">expected</span><span class="nv"> </span><span class="s">rates</span><span class="nv"> </span><span class="s">present&quot;</span>
-</span><span id="__span-15-15"><a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 99.5%</span>
-</span><span id="__span-15-16"><a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="nt">warning</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 95%</span>
-</span><span id="__span-15-17"><a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt; 90%</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_freshness_minutes{domain=&quot;market_data&quot;, table=&quot;fx_rates&quot;}</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nt">definition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Time</span><span class="nv"> </span><span class="s">since</span><span class="nv"> </span><span class="s">last</span><span class="nv"> </span><span class="s">Iceberg</span><span class="nv"> </span><span class="s">snapshot&quot;</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt; 1 minute</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nt">warning</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 2 minutes</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 5 minutes</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka_lag_seconds{domain=&quot;market_data&quot;, topic=&quot;market-rates-raw&quot;}</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="nt">definition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Time</span><span class="nv"> </span><span class="s">since</span><span class="nv"> </span><span class="s">Kafka</span><span class="nv"> </span><span class="s">event</span><span class="nv"> </span><span class="s">published</span><span class="nv"> </span><span class="s">vs.</span><span class="nv"> </span><span class="s">Spark</span><span class="nv"> </span><span class="s">reads&quot;</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt; 10 seconds</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="nt">warning</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 30 seconds</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 60 seconds</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_completeness_pct{domain=&quot;market_data&quot;, table=&quot;fx_rates&quot;}</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="nt">definition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Percentage</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">expected</span><span class="nv"> </span><span class="s">rates</span><span class="nv"> </span><span class="s">present&quot;</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 99.5%</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="nt">warning</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span><span class="err"> 95%</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt; 90%</span>
 </span></code></pre></div>
 <hr />
 <h2 id="production-considerations">Production Considerations<a class="headerlink" href="#production-considerations" title="Permanent link">&para;</a></h2>
@@ -2370,7 +2366,7 @@
 <ul>
 <li><strong><a href="../transactions/">Transactions Domain</a></strong> — Compare event velocity with market data</li>
 <li><strong><a href="../../platform/observability/">Observability</a></strong> — Set up freshness alerts</li>
-<li><strong><a href="../production/scaling.md">Production Scaling</a></strong> — Kafka and Spark tuning for high volume</li>
+<li><strong><a href="../../production/scaling/">Production Scaling</a></strong> — Kafka and Spark tuning for high volume</li>
 </ul>
 
 
@@ -2444,6 +2440,10 @@
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid-init.js"></script>
       
     
   </body>

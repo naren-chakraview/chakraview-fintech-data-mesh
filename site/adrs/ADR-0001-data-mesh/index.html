@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://naren-chakraview.github.io/chakraview-fintech-data-mesh/adrs/ADR-0001-data-mesh/">
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/adrs/ADR-0001-data-mesh/">
       
       
         <link rel="prev" href="../">
@@ -1063,7 +1063,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/scaling.md" class="md-nav__link">
+      <a href="../../production/scaling/" class="md-nav__link">
         
   
   
@@ -1091,7 +1091,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/troubleshooting.md" class="md-nav__link">
+      <a href="../../production/troubleshooting/" class="md-nav__link">
         
   
   
@@ -1119,7 +1119,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/trade-offs.md" class="md-nav__link">
+      <a href="../../production/trade-offs/" class="md-nav__link">
         
   
   
@@ -1867,13 +1867,20 @@
 <hr />
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
 <p><strong>Adopt the data mesh pattern</strong>: Each domain owns its data end-to-end (schema, ingest, SLAs, governance), while a federated platform enforces consistent policies.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Decentralized                    Federated Platform
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── Transactions Domain          ├── OPA policies (ABAC)
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── Accounts Domain              ├── Iceberg lakehouse
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── Risk/Compliance Domain       ├── Unified Spark SQL
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── Counterparties Domain        ├── Discovery portal
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>└── Market Data Domain           └── Observability (metrics)
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["Decentralized Domains"]
+    A --&gt; A1["Transactions Domain"]
+    A --&gt; A2["Accounts Domain"]
+    A --&gt; A3["Risk/Compliance Domain"]
+    A --&gt; A4["Counterparties Domain"]
+    A --&gt; A5["Market Data Domain"]
+
+    B["Federated Platform"]
+    B --&gt; B1["OPA policies ABAC"]
+    B --&gt; B2["Iceberg lakehouse"]
+    B --&gt; B3["Unified Spark SQL"]
+    B --&gt; B4["Discovery portal"]
+    B --&gt; B5["Observability metrics"]</code></pre>
 <h3 id="governance-model">Governance Model<a class="headerlink" href="#governance-model" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Domains own</strong>: Schema, ingest jobs, SLAs, quality rules</li>
@@ -1881,15 +1888,15 @@
 </ul>
 <h3 id="data-products">Data Products<a class="headerlink" href="#data-products" title="Permanent link">&para;</a></h3>
 <p>Each domain publishes a <strong>data product</strong> with an explicit contract:
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transaction-feed</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">sla</span><span class="p">:</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">freshness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5 minutes</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">availability</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">99.9%</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">access_policy</span><span class="p">:</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nt">masking</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">account_id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">account_holder_name</span><span class="p p-Indicator">]</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7 years (SOX)</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nt">quality_rules</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">positive_amount</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">valid_settlement_date</span><span class="p p-Indicator">]</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transaction-feed</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">sla</span><span class="p">:</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">freshness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5 minutes</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">availability</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">99.9%</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">access_policy</span><span class="p">:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">masking</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">account_id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">account_holder_name</span><span class="p p-Indicator">]</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7 years (SOX)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nt">quality_rules</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">positive_amount</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">valid_settlement_date</span><span class="p p-Indicator">]</span>
 </span></code></pre></div></p>
 <hr />
 <h2 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h2>
@@ -2078,6 +2085,10 @@
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid-init.js"></script>
       
     
   </body>

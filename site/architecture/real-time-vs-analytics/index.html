@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://naren-chakraview.github.io/chakraview-fintech-data-mesh/architecture/real-time-vs-analytics/">
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/architecture/real-time-vs-analytics/">
       
       
         <link rel="prev" href="../iceberg-design/">
@@ -726,34 +726,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kafka-iceberg-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Kafka + Iceberg Integration
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Kafka + Iceberg Integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-spark-structured-streaming-bridges-them" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How Spark Structured Streaming Bridges Them
-      
-    </span>
-  </a>
-  
-</li>
-        
           <li class="md-nav__item">
   <a href="#exactly-once-semantics" class="md-nav__link">
     <span class="md-ellipsis">
@@ -875,7 +847,7 @@
   <a href="#kafka-lag-hot-path-health" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Kafka Lag (Hot Path Health)
+        Kafka Lag Hot Path Health
       
     </span>
   </a>
@@ -886,7 +858,7 @@
   <a href="#iceberg-freshness-cold-path-health" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Iceberg Freshness (Cold Path Health)
+        Iceberg Freshness Cold Path Health
       
     </span>
   </a>
@@ -1406,7 +1378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/scaling.md" class="md-nav__link">
+      <a href="../../production/scaling/" class="md-nav__link">
         
   
   
@@ -1434,7 +1406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/troubleshooting.md" class="md-nav__link">
+      <a href="../../production/troubleshooting/" class="md-nav__link">
         
   
   
@@ -1462,7 +1434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../production/trade-offs.md" class="md-nav__link">
+      <a href="../../production/trade-offs/" class="md-nav__link">
         
   
   
@@ -1796,34 +1768,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kafka-iceberg-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Kafka + Iceberg Integration
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Kafka + Iceberg Integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-spark-structured-streaming-bridges-them" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How Spark Structured Streaming Bridges Them
-      
-    </span>
-  </a>
-  
-</li>
-        
           <li class="md-nav__item">
   <a href="#exactly-once-semantics" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1945,7 +1889,7 @@
   <a href="#kafka-lag-hot-path-health" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Kafka Lag (Hot Path Health)
+        Kafka Lag Hot Path Health
       
     </span>
   </a>
@@ -1956,7 +1900,7 @@
   <a href="#iceberg-freshness-cold-path-health" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Iceberg Freshness (Cold Path Health)
+        Iceberg Freshness Cold Path Health
       
     </span>
   </a>
@@ -2050,133 +1994,143 @@
 3. Operational systems read Kafka; analysts query Iceberg</p>
 <hr />
 <h2 id="architecture-hot-cold-paths">Architecture: Hot + Cold Paths<a class="headerlink" href="#architecture-hot-cold-paths" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Transactions Domain Ingest:
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── HOT PATH (Kafka)
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── Source: Payment processor publishes events
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   ├── Topic: market-transactions-raw
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   ├── Frequency: Real-time (events as they occur)
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ├── Consumers: Fraud detection (live dashboards)
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   └── Retention: 7 days (cost-optimized)
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>└── COLD PATH (Iceberg)
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    ├── Source: Kafka topic
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    ├── Processor: Spark Structured Streaming job
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    ├── Target: transactions.raw_transactions (Iceberg table)
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    ├── Frequency: Micro-batches every 5 minutes
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    ├── Freshness SLA: 5 minutes
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    ├── Consumers: Analysts, compliance, auditors
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    └── Retention: 7 years (SOX requirement)
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["Transactions Domain Ingest"]
+
+    A --&gt; B["HOT PATH - Kafka"]
+    B --&gt; B1["Source: Payment processor"]
+    B --&gt; B2["Topic: market-transactions-raw"]
+    B --&gt; B3["Frequency: Real-time events"]
+    B --&gt; B4["Consumers: Fraud detection dashboards"]
+    B --&gt; B5["Retention: 7 days"]
+
+    A --&gt; C["COLD PATH - Iceberg"]
+    C --&gt; C1["Source: Kafka topic"]
+    C --&gt; C2["Processor: Spark Structured Streaming"]
+    C --&gt; C3["Target: transactions.raw_transactions"]
+    C --&gt; C4["Frequency: Micro-batches every 5 minutes"]
+    C --&gt; C5["Freshness SLA: 5 minutes"]
+    C --&gt; C6["Consumers: Analysts, compliance, auditors"]
+    C --&gt; C7["Retention: 7 years SOX requirement"]</code></pre>
 <h3 id="real-time-use-case-fraud-detection-dashboard">Real-Time Use Case: Fraud Detection Dashboard<a class="headerlink" href="#real-time-use-case-fraud-detection-dashboard" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>11:35:02 - Transaction event published to Kafka:
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>{
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  &quot;transaction_id&quot;: &quot;tx_42&quot;,
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  &quot;account_id&quot;: &quot;acc_100&quot;,
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  &quot;amount&quot;: 5000.00,
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  &quot;merchant_id&quot;: &quot;merch_999&quot;,
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  &quot;timestamp&quot;: &quot;2026-04-30 11:35:00&quot;
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>}
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>11:35:03 - Fraud Detection Service reads Kafka:
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>├── Evaluates ML model (real-time)
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>├── Score: fraud_probability = 0.92
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>├── Action: FLAG transaction (blocks payment, routes to manual review)
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>└── Latency: &lt;1 second
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>11:35:04 - Dashboard shows:
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>├── Fraud alert: Transaction tx_42 flagged
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>├── Account holder: Alerted via SMS
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>└── User refresh: See result immediately
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="mi">11</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">02</span><span class="w"> </span><span class="mi">-</span><span class="w"> </span><span class="err">Tra</span><span class="kc">nsa</span><span class="err">c</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="w"> </span><span class="err">eve</span><span class="kc">nt</span><span class="w"> </span><span class="err">published</span><span class="w"> </span><span class="kc">t</span><span class="err">o</span><span class="w"> </span><span class="err">Ka</span><span class="kc">f</span><span class="err">ka</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">{</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;transaction_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tx_42&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;account_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acc_100&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5000.00</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">&quot;merchant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merch_999&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-30 11:35:00&quot;</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
 </span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["11:35:03 - Fraud Detection Service reads Kafka"]
+    A --&gt; B["Evaluates ML model real-time"]
+    A --&gt; C["Score: fraud_probability = 0.92"]
+    A --&gt; D["Action: FLAG transaction"]
+    D --&gt; D1["Blocks payment"]
+    D --&gt; D2["Routes to manual review"]
+    A --&gt; E["Latency: &amp;lt;1 second"]
+
+    F["11:35:04 - Dashboard shows"]
+    F --&gt; F1["Fraud alert: Transaction tx_42 flagged"]
+    F --&gt; F2["Account holder: Alerted via SMS"]
+    F --&gt; F3["User refresh: See result immediately"]</code></pre>
 <p><strong>Why Kafka for this?</strong> Iceberg latency (5 min) would delay fraud detection by 5 minutes—unacceptable for preventing fraud.</p>
 <h3 id="analytical-use-case-compliance-audit">Analytical Use Case: Compliance Audit<a class="headerlink" href="#analytical-use-case-compliance-audit" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>April 30, 2026 - Auditor queries:
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&quot;Show me all transactions flagged as fraud 
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a> that exceeded risk threshold in April 2026&quot;
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>SELECT t.transaction_id, t.amount, r.fraud_score, r.evaluated_at
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>FROM transactions.raw_transactions t
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>INNER JOIN risk_compliance.fraud_scores r
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  ON t.transaction_id = r.transaction_id
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>WHERE r.fraud_score &gt; 0.90
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  AND t.booking_timestamp &gt;= &#39;2026-04-01&#39;
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  AND t.booking_timestamp &lt; &#39;2026-05-01&#39;
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>ORDER BY r.evaluated_at DESC;
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>Query plan:
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>├── Partition pruning: Only read April data (1 partition)
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>├── Column pruning: Skip columns not in SELECT
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>├── Columnar scan: Amount, fraud_score compressed
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>├── Join: Hash join on transaction_id
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>└── Execution time: 5 seconds (scan 30GB April data, filtered to 2MB results)
+<p><div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>April 30, 2026 - Auditor queries:
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>&quot;Show me all transactions flagged as fraud 
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> that exceeded risk threshold in April 2026&quot;
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>SELECT t.transaction_id, t.amount, r.fraud_score, r.evaluated_at
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>FROM transactions.raw_transactions t
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>INNER JOIN risk_compliance.fraud_scores r
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  ON t.transaction_id = r.transaction_id
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>WHERE r.fraud_score &gt; 0.90
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  AND t.booking_timestamp &gt;= &#39;2026-04-01&#39;
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  AND t.booking_timestamp &lt; &#39;2026-05-01&#39;
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>ORDER BY r.evaluated_at DESC;
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>```mermaid
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>graph TD
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    A[&quot;Query Execution Plan&quot;]
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    A --&gt; B[&quot;Partition pruning: Only read April data 1 partition&quot;]
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    A --&gt; C[&quot;Column pruning: Skip columns not in SELECT&quot;]
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    A --&gt; D[&quot;Columnar scan: Amount, fraud_score compressed&quot;]
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    A --&gt; E[&quot;Join: Hash join on transaction_id&quot;]
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    A --&gt; F[&quot;Execution time: 5 seconds scan 30GB April, filtered to 2MB&quot;]
 </span></code></pre></div>
-<p><strong>Why Iceberg for this?</strong> 
-- Large historical scans are cheap (columnar compression, partition pruning)
-- Time-travel for audit (need snapshot from April 5, 2pm? Query it)
-- Retention (7-year retention requires persistent storage)</p>
-<hr />
-<h2 id="kafka-iceberg-integration">Kafka + Iceberg Integration<a class="headerlink" href="#kafka-iceberg-integration" title="Permanent link">&para;</a></h2>
-<h3 id="how-spark-structured-streaming-bridges-them">How Spark Structured Streaming Bridges Them<a class="headerlink" href="#how-spark-structured-streaming-bridges-them" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># From domains/transactions/ingest/ingest_job.py</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">class</span> <span class="nc">TransactionIngestJob</span><span class="p">:</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="c1"># Step 1: Read from Kafka (hot path)</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;kafka&quot;</span><span class="p">)</span> \
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;kafka.bootstrap.servers&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kafka_brokers</span><span class="p">)</span> \
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;subscribe&quot;</span><span class="p">,</span> <span class="s2">&quot;market-transactions-raw&quot;</span><span class="p">)</span> \
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;startingOffsets&quot;</span><span class="p">,</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> \
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="o">.</span><span class="n">load</span><span class="p">()</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="c1"># Step 2: Parse and validate schema</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="n">schema_str</span> <span class="o">=</span> <span class="s1">&#39;{&quot;transaction_id&quot;: &quot;string&quot;, &quot;account_id&quot;: &quot;string&quot;, ...}&#39;</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="n">parsed_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>            <span class="n">from_json</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">),</span> <span class="n">schema_of_json</span><span class="p">(</span><span class="n">schema_str</span><span class="p">))</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;data.*&quot;</span><span class="p">)</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="c1"># Step 3: Write to Iceberg (cold path)</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">writeStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>            <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span> \
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;checkpointLocation&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/checkpoint/transactions&quot;</span><span class="p">)</span> \
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>            <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>        <span class="c1"># Step 4: Await termination (keeps job running)</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="n">query</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">()</span>
-</span></code></pre></div>
-<p><strong>What happens internally</strong>:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Time: 11:35:00
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── Kafka event 1 arrives
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>├── Event 2 arrives
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>├── Event 3 arrives
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>├── ...
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>└── Event 144 arrives (11:35:59)
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>Micro-batch trigger: Every 5 minutes
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>Time: 11:40:00 (5 minutes later)
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>├── Spark collects events 1-144 (from last checkpoint)
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>├── Validates against schema
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>├── Deduplicates (if any duplicates from previous batch)
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>├── Creates new Iceberg snapshot (144 new rows)
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>├── Atomic commit (one transaction per 5-minute batch)
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>├── Saves checkpoint (offset = last Kafka offset processed)
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>└── Events now queryable in Iceberg
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
-</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>Time: 11:40:01 onwards
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>├── New batch starts collecting events
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>├── Kafka continues streaming (independent of Spark job)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>**Why Iceberg for this?** 
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>- Large historical scans are cheap (columnar compression, partition pruning)
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>- Time-travel for audit (need snapshot from April 5, 2pm? Query it)
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>- Retention (7-year retention requires persistent storage)
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>---
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>## Kafka + Iceberg Integration
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>### How Spark Structured Streaming Bridges Them
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>```python
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a># From domains/transactions/ingest/ingest_job.py
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>class TransactionIngestJob:
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    def run(self):
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        # Step 1: Read from Kafka (hot path)
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        df = self.spark.readStream.format(&quot;kafka&quot;) \
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>            .option(&quot;kafka.bootstrap.servers&quot;, self.kafka_brokers) \
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>            .option(&quot;subscribe&quot;, &quot;market-transactions-raw&quot;) \
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>            .option(&quot;startingOffsets&quot;, &quot;latest&quot;) \
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>            .load()
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>        # Step 2: Parse and validate schema
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        schema_str = &#39;{&quot;transaction_id&quot;: &quot;string&quot;, &quot;account_id&quot;: &quot;string&quot;, ...}&#39;
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>        parsed_df = df.select(
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>            from_json(col(&quot;value&quot;).cast(&quot;string&quot;), schema_of_json(schema_str))
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>                .alias(&quot;data&quot;)
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>        ).select(&quot;data.*&quot;)
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>        # Step 3: Write to Iceberg (cold path)
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>        query = parsed_df.writeStream.format(&quot;iceberg&quot;) \
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>            .mode(&quot;append&quot;) \
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>            .option(&quot;checkpointLocation&quot;, &quot;/tmp/checkpoint/transactions&quot;) \
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>            .toTable(&quot;transactions.raw_transactions&quot;)
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>        # Step 4: Await termination (keeps job running)
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>        query.awaitTermination()
 </span></code></pre></div></p>
+<p><strong>What happens internally</strong>:</p>
+<pre class="mermaid"><code>graph TD
+    A["Time: 11:35:00"]
+    A --&gt; A1["Kafka event 1 arrives"]
+    A --&gt; A2["Event 2 arrives"]
+    A --&gt; A3["Event 3 arrives"]
+    A --&gt; A4["... events continue"]
+    A --&gt; A5["Event 144 arrives 11:35:59"]
+
+    B["Micro-batch trigger: Every 5 minutes"]
+
+    C["Time: 11:40:00 5 minutes later"]
+    C --&gt; C1["Spark collects events 1-144"]
+    C --&gt; C2["Validates against schema"]
+    C --&gt; C3["Deduplicates duplicates"]
+    C --&gt; C4["Creates new Iceberg snapshot"]
+    C --&gt; C5["Atomic commit per 5-minute batch"]
+    C --&gt; C6["Saves checkpoint Kafka offset"]
+    C --&gt; C7["Events now queryable in Iceberg"]
+
+    D["Time: 11:40:01 onwards"]
+    D --&gt; D1["New batch starts collecting"]
+    D --&gt; D2["Kafka continues streaming independently"]</code></pre>
 <h3 id="exactly-once-semantics">Exactly-Once Semantics<a class="headerlink" href="#exactly-once-semantics" title="Permanent link">&para;</a></h3>
-<p><strong>Without checkpoints</strong> (naive approach):
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Spark job: Read 100 events → Write to Iceberg → Crash
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Restart: Read from Kafka offset 0 → Read 100 events again → Duplicate!
-</span></code></pre></div></p>
-<p><strong>With Iceberg + Checkpoints</strong>:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Spark job: Read 100 events (offset 0-99) → Write to Iceberg → Save checkpoint (offset 99)
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Crash: All atomic (either full batch written or nothing)
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Restart: Read checkpoint (offset 99) → Start from event 100 → No duplicates!
-</span></code></pre></div></p>
+<p><strong>Without checkpoints</strong> (naive approach):</p>
+<pre class="mermaid"><code>graph LR
+    A["Spark job: Read 100 events"] --&gt; B["Write to Iceberg"] --&gt; C["Crash"]
+    D["Restart: Read from Kafka offset 0"] --&gt; E["Read 100 events again"] --&gt; F["Duplicate!"]</code></pre>
+<p><strong>With Iceberg + Checkpoints</strong>:</p>
+<pre class="mermaid"><code>graph LR
+    A["Spark job: Read 100 events offset 0-99"] --&gt; B["Write to Iceberg"] --&gt; C["Save checkpoint offset 99"]
+    D["Crash: All atomic"] --&gt; E["Full batch written or nothing"]
+    F["Restart: Read checkpoint offset 99"] --&gt; G["Start from event 100"] --&gt; H["No duplicates!"]</code></pre>
 <hr />
 <h2 id="freshness-vs-cost-the-trade-off-table">Freshness vs Cost: The Trade-Off Table<a class="headerlink" href="#freshness-vs-cost-the-trade-off-table" title="Permanent link">&para;</a></h2>
 <table>
@@ -2251,104 +2205,100 @@
 <hr />
 <h2 id="handling-duplicates-out-of-order-events">Handling Duplicates &amp; Out-of-Order Events<a class="headerlink" href="#handling-duplicates-out-of-order-events" title="Permanent link">&para;</a></h2>
 <h3 id="scenario-event-arrives-late">Scenario: Event Arrives Late<a class="headerlink" href="#scenario-event-arrives-late" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>11:35:00 - Event 1 published to Kafka
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>11:35:30 - Event 2 published to Kafka
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>11:35:45 - Event 1 arrives (delayed due to network issue)
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>Micro-batch 1 (11:40:00): Processes Event 2 → writes to Iceberg
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>Micro-batch 2 (11:45:00): Processes Event 1 → would duplicate!
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>11:35:00 - Event 1 published to Kafka
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>11:35:30 - Event 2 published to Kafka
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>11:35:45 - Event 1 arrives (delayed due to network issue)
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>Micro-batch 1 (11:40:00): Processes Event 2 → writes to Iceberg
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Micro-batch 2 (11:45:00): Processes Event 1 → would duplicate!
 </span></code></pre></div>
 <p><strong>Iceberg Solution 1: Deduplication in Spark</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">parsed_df</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">])</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">parsed_df</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">])</span>
 </span></code></pre></div>
 Inefficient for large streams.</p>
 <p><strong>Iceberg Solution 2: Idempotent Writes</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Kafka includes timestamp and offset</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># Spark uses timestamp as dedup key</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">parsed_df</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">])</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Kafka includes timestamp and offset</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># Spark uses timestamp as dedup key</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">parsed_df</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">&quot;transaction_id&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">])</span>
 </span></code></pre></div></p>
 <p><strong>Iceberg Solution 3: Merge-on-Read (Production)</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Use MERGE command to update if exists, insert if new</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">parsed_df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;merge-schema&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span> \
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span> \
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Use MERGE command to update if exists, insert if new</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">parsed_df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;merge-schema&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span> \
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="o">.</span><span class="n">toTable</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">)</span>
 </span></code></pre></div></p>
 <p><strong>In this project</strong>: We use idempotent writes (timestamp-based dedup) for most domains. Risk/Compliance domain uses MERGE (high accuracy requirement).</p>
 <hr />
 <h2 id="observability-monitoring-both-paths">Observability: Monitoring Both Paths<a class="headerlink" href="#observability-monitoring-both-paths" title="Permanent link">&para;</a></h2>
-<h3 id="kafka-lag-hot-path-health">Kafka Lag (Hot Path Health)<a class="headerlink" href="#kafka-lag-hot-path-health" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Metric: kafka_lag_seconds
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Definition: Time since event published to Kafka vs. when Spark reads it
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>Threshold: 
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>├── &lt; 1 sec: Healthy
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>├── 1-5 sec: Acceptable (burst traffic)
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>└── &gt; 5 sec: Alert (fraud detection SLA at risk)
-</span></code></pre></div>
-<h3 id="iceberg-freshness-cold-path-health">Iceberg Freshness (Cold Path Health)<a class="headerlink" href="#iceberg-freshness-cold-path-health" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Metric: data_freshness_minutes
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Definition: Time since last Iceberg snapshot vs. current time
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>Threshold:
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>├── &lt; 5 min: Healthy (meets SLA)
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>├── 5-10 min: Acceptable (Spark job slow)
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>└── &gt; 10 min: Alert (SLA violated, check Spark logs)
-</span></code></pre></div>
+<h3 id="kafka-lag-hot-path-health">Kafka Lag Hot Path Health<a class="headerlink" href="#kafka-lag-hot-path-health" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>graph TD
+    A["Metric: kafka_lag_seconds"]
+    A --&gt; B["Definition: Time since event published&lt;br/&gt;vs. when Spark reads it"]
+    B --&gt; C["Threshold"]
+    C --&gt; C1["&amp;lt; 1 sec: Healthy"]
+    C --&gt; C2["1-5 sec: Acceptable burst traffic"]
+    C --&gt; C3["&amp;gt; 5 sec: Alert fraud detection SLA at risk"]</code></pre>
+<h3 id="iceberg-freshness-cold-path-health">Iceberg Freshness Cold Path Health<a class="headerlink" href="#iceberg-freshness-cold-path-health" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>graph TD
+    A["Metric: data_freshness_minutes"]
+    A --&gt; B["Definition: Time since last Iceberg snapshot&lt;br/&gt;vs. current time"]
+    B --&gt; C["Threshold"]
+    C --&gt; C1["&amp;lt; 5 min: Healthy meets SLA"]
+    C --&gt; C2["5-10 min: Acceptable Spark job slow"]
+    C --&gt; C3["&amp;gt; 10 min: Alert SLA violated, check logs"]</code></pre>
 <h3 id="dashboard-queries">Dashboard Queries<a class="headerlink" href="#dashboard-queries" title="Permanent link">&para;</a></h3>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">-- Kafka lag per domain</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">domain</span><span class="p">,</span><span class="w"> </span><span class="n">consumer_group</span><span class="p">,</span><span class="w"> </span><span class="n">lag_seconds</span><span class="p">,</span><span class="w"> </span><span class="n">last_update</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">kafka_metrics</span><span class="p">.</span><span class="n">consumer_lag</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">lag_seconds</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1">-- Iceberg freshness per table</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">table_name</span><span class="p">,</span><span class="w"> </span><span class="n">last_snapshot_time</span><span class="p">,</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">last_snapshot_time</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">freshness_minutes</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="k">FROM</span><span class="w"> </span><span class="n">iceberg_metrics</span><span class="p">.</span><span class="n">snapshot_status</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">freshness_minutes</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">-- Kafka lag per domain</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">domain</span><span class="p">,</span><span class="w"> </span><span class="n">consumer_group</span><span class="p">,</span><span class="w"> </span><span class="n">lag_seconds</span><span class="p">,</span><span class="w"> </span><span class="n">last_update</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">kafka_metrics</span><span class="p">.</span><span class="n">consumer_lag</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">lag_seconds</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">-- Iceberg freshness per table</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">table_name</span><span class="p">,</span><span class="w"> </span><span class="n">last_snapshot_time</span><span class="p">,</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">last_snapshot_time</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">freshness_minutes</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">FROM</span><span class="w"> </span><span class="n">iceberg_metrics</span><span class="p">.</span><span class="n">snapshot_status</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">freshness_minutes</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
 </span></code></pre></div>
 <hr />
 <h2 id="production-example-market-data-domain">Production Example: Market Data Domain<a class="headerlink" href="#production-example-market-data-domain" title="Permanent link">&para;</a></h2>
 <p>Market Data publishes FX rates with 1-minute freshness SLA:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>FX rates published to market-rates-raw (Kafka)
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>├── Frequency: 1 per minute (9 AM - 5 PM ET)
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>├── Volume: 10,000 pairs × 1 rate/min = 10k events/min
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>├── Consumers: 
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>│   ├── Live dashboard (&lt; 1 sec latency requirement)
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>│   ├── Risk models (&lt; 5 sec latency requirement)
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>│   └── Historical archive (time-travel required)
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>
-</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>Kafka topic: market-rates-raw
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>├── Retention: 7 days (cost: $50/month)
-</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>├── Partition: rate_pair (ensures order per pair)
-</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>
-</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>Iceberg table: market_data.fx_rates
-</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>├── Schema: [rate_pair, rate, timestamp, source]
-</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>├── Partitions: [year, month, day, hour]
-</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>├── Retention: 1 year (cost: $200/month)
-</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>├── Snapshot: Every 5 minutes
-</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>├── Freshness SLA: 5 minutes
-</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>
-</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>Spark job (MarketDataIngestJob):
-</span><span id="__span-14-21"><a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>├── Reads market-rates-raw (Kafka)
-</span><span id="__span-14-22"><a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>├── Micro-batches every 5 minutes
-</span><span id="__span-14-23"><a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>├── Deduplicates on (rate_pair, timestamp)
-</span><span id="__span-14-24"><a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>├── Writes to market_data.fx_rates
-</span><span id="__span-14-25"><a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>└── Checkpoint: Tracks offset (recovery)
-</span><span id="__span-14-26"><a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a>
-</span><span id="__span-14-27"><a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>Monitoring:
-</span><span id="__span-14-28"><a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a>├── Kafka lag: Should stay &lt; 1 min
-</span><span id="__span-14-29"><a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a>├── Iceberg freshness: Should stay &lt; 5 min
-</span><span id="__span-14-30"><a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a>└── Alert: If either exceeds threshold
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    A["FX rates published to market-rates-raw Kafka"]
+    A --&gt; A1["Frequency: 1 per minute 9 AM - 5 PM ET"]
+    A --&gt; A2["Volume: 10,000 pairs × 1 rate/min = 10k events/min"]
+    A --&gt; A3["Consumers"]
+    A3 --&gt; A3a["Live dashboard &amp;lt; 1 sec latency"]
+    A3 --&gt; A3b["Risk models &amp;lt; 5 sec latency"]
+    A3 --&gt; A3c["Historical archive time-travel required"]
+
+    B["Kafka topic: market-rates-raw"]
+    B --&gt; B1["Retention: 7 days cost: $50/month"]
+    B --&gt; B2["Partition: rate_pair ensures order per pair"]
+
+    C["Iceberg table: market_data.fx_rates"]
+    C --&gt; C1["Schema: rate_pair, rate, timestamp, source"]
+    C --&gt; C2["Partitions: year, month, day, hour"]
+    C --&gt; C3["Retention: 1 year cost: $200/month"]
+    C --&gt; C4["Snapshot: Every 5 minutes"]
+    C --&gt; C5["Freshness SLA: 5 minutes"]
+
+    D["Spark job MarketDataIngestJob"]
+    D --&gt; D1["Reads market-rates-raw Kafka"]
+    D --&gt; D2["Micro-batches every 5 minutes"]
+    D --&gt; D3["Deduplicates on rate_pair, timestamp"]
+    D --&gt; D4["Writes to market_data.fx_rates"]
+    D --&gt; D5["Checkpoint: Tracks offset recovery"]
+
+    E["Monitoring"]
+    E --&gt; E1["Kafka lag: Should stay &amp;lt; 1 min"]
+    E --&gt; E2["Iceberg freshness: Should stay &amp;lt; 5 min"]
+    E --&gt; E3["Alert: If either exceeds threshold"]</code></pre>
 <hr />
 <h2 id="next-explore-more">Next: Explore More<a class="headerlink" href="#next-explore-more" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><a href="../../platform/governance/">Governance &amp; OPA</a></strong> — Enforce freshness SLAs and data quality</li>
 <li><strong><a href="../../platform/observability/">Observability</a></strong> — Set up Prometheus metrics for both paths</li>
-<li><strong><a href="../production/scaling.md">Production Scaling</a></strong> — Scale Kafka partitions and Spark parallelism</li>
-<li><strong><a href="../production/trade-offs.md">Trade-offs</a></strong> — Kafka vs Kinesis, Spark vs Flink comparison</li>
+<li><strong><a href="../../production/scaling/">Production Scaling</a></strong> — Scale Kafka partitions and Spark parallelism</li>
+<li><strong><a href="../../production/trade-offs/">Trade-offs</a></strong> — Kafka vs Kinesis, Spark vs Flink comparison</li>
 </ul>
 
 
@@ -2422,6 +2372,10 @@ Inefficient for large streams.</p>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid-init.js"></script>
       
     
   </body>
