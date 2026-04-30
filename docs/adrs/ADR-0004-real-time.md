@@ -30,12 +30,12 @@ Can we have both?
 graph TD
     A["Events occur"]
     A --> B["Kafka Topic real-time, 7-day retention"]
-    B --> B1["Consumers: Fraud detection, pricing engine<br/>need < 1-second latency"]
+    B --> B1["Consumers: Fraud detection, pricing engineneed < 1-second latency"]
     B --> B2["Latency: < 100ms"]
-    B --> C["Spark Structured Streaming<br/>micro-batch every 5 minutes"]
+    B --> C["Spark Structured Streamingmicro-batch every 5 minutes"]
     C --> C1["Checkpoint: Ensures exactly-once delivery"]
     C --> D["Iceberg Table cold path, 7-year retention"]
-    D --> D1["Consumers: Analysts, compliance<br/>can tolerate 5-minute lag"]
+    D --> D1["Consumers: Analysts, compliancecan tolerate 5-minute lag"]
     D --> D2["Cost: 60% cheaper than Kafka retention"]
     D --> D3["Latency: 5 minutes"]
 ```

@@ -12,20 +12,20 @@ The result: **decentralized speed with centralized compliance**.
 graph TB
     subgraph org["Organization Structure (Decentralized)"]
         direction TB
-        T["<b>Transactions Domain</b><br/>- transaction_feed<br/>- 5-min freshness<br/>- 7yr retention"]
-        R["<b>Risk/Compliance Domain</b><br/>- fraud_scores<br/>- 10-min freshness<br/>- 10yr retention"]
-        A["<b>Accounts Domain</b><br/>- account_master<br/>- 10-min freshness<br/>- 3yr retention"]
-        C["<b>Counterparties Domain</b><br/>- merchant_master<br/>- 60-min freshness<br/>- 2yr retention"]
-        M["<b>Market Data Domain</b><br/>- fx_rates<br/>- 1-min freshness<br/>- 1yr retention"]
+        T["<b>Transactions Domain</b>- transaction_feed- 5-min freshness- 7yr retention"]
+        R["<b>Risk/Compliance Domain</b>- fraud_scores- 10-min freshness- 10yr retention"]
+        A["<b>Accounts Domain</b>- account_master- 10-min freshness- 3yr retention"]
+        C["<b>Counterparties Domain</b>- merchant_master- 60-min freshness- 2yr retention"]
+        M["<b>Market Data Domain</b>- fx_rates- 1-min freshness- 1yr retention"]
     end
     
     subgraph plat["Platform Layer (Federated)"]
         direction LR
-        GOV["<b>Governance</b><br/>OPA policies"]
-        DISC["<b>Discovery</b><br/>Self-service portal"]
-        ANA["<b>Analytics</b><br/>Spark SQL"]
-        OBS["<b>Observability</b><br/>SLO dashboards"]
-        STOR["<b>Storage</b><br/>Iceberg lakehouse"]
+        GOV["<b>Governance</b>OPA policies"]
+        DISC["<b>Discovery</b>Self-service portal"]
+        ANA["<b>Analytics</b>Spark SQL"]
+        OBS["<b>Observability</b>SLO dashboards"]
+        STOR["<b>Storage</b>Iceberg lakehouse"]
     end
     
     T --> GOV

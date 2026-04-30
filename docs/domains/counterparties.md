@@ -190,7 +190,7 @@ class CounterpartyIngestJob:
 graph TD
     A["Counterparty Master: 2 years"]
     A --> A1["Rationale: Reference data, inactive counterparties archive"]
-    A --> A2["Retention starts: From last transaction<br/>3-year rule: if no activity, mark inactive"]
+    A --> A2["Retention starts: From last transaction3-year rule: if no activity, mark inactive"]
     A --> A3["Deletion process: Hard delete after 2 years of inactivity"]
 ```
 
@@ -198,12 +198,12 @@ graph TD
 
 ```mermaid
 graph TD
-    A["User: I need counterparty credit limits<br/>to audit exposure"]
+    A["User: I need counterparty credit limitsto audit exposure"]
     A --> B["OPA Evaluation"]
     B --> B1["User role: auditor"]
     B --> B2["Data classification: confidential credit_limit"]
     B --> B3["Auto-approve? NO"]
-    B --> B4["Route to: Counterparty Domain Owner<br/>transactions@chakra.fintech"]
+    B --> B4["Route to: Counterparty Domain Ownertransactions@chakra.fintech"]
     B --> B5["SLA: 4 hours"]
     B --> C["Owner decision"]
     C --> C1["Context review: Purpose? Justification?"]

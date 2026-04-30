@@ -61,7 +61,7 @@ Query 1: Can analyst_42 read transactions.raw_transactions?
 graph TD
     A["OPA Evaluation"]
     A --> A1["default allow = false"]
-    A --> A2["Check rule 1:<br/>analyst_42 role is analyst ✓<br/>action is read ✓<br/>classification is public ✓"]
+    A --> A2["Check rule 1:analyst_42 role is analyst ✓action is read ✓classification is public ✓"]
     A --> A3["Result: ALLOW rule 1 matches"]
 ```
 
@@ -71,9 +71,9 @@ Query 2: Can contractor_5 write to market_data.fx_rates?
 graph TD
     B["OPA Evaluation"]
     B --> B1["default allow = false"]
-    B --> B2["Check rule 1: contractor_5 role = contractor ✗<br/>rule requires analyst"]
-    B --> B3["Check rule 2: contractor_5 role = contractor ✗<br/>rule requires data_owner"]
-    B --> B4["Check rule 3: contractor_5 role = contractor ✗<br/>rule requires admin"]
+    B --> B2["Check rule 1: contractor_5 role = contractor ✗rule requires analyst"]
+    B --> B3["Check rule 2: contractor_5 role = contractor ✗rule requires data_owner"]
+    B --> B4["Check rule 3: contractor_5 role = contractor ✗rule requires admin"]
     B --> B5["Result: DENY no rules match"]
 ```
 
@@ -115,7 +115,7 @@ graph TD
     B["Column: amount"]
     B --> B1["Classification: public"]
     B --> B2["User role: external_analyst"]
-    B --> B3["Applies mask_pii rule? ✗<br/>public != pii"]
+    B --> B3["Applies mask_pii rule? ✗public != pii"]
     B --> B4["Result: Raw value returned"]
     
     C["Column: account_holder_name"]
@@ -307,23 +307,23 @@ opa test platform/governance/opa-policies/policy_test.rego -v
 
 ```mermaid
 graph TD
-    A["Analyst submits query:<br/>SELECT transaction_id, account_id, amount<br/>FROM transactions.raw_transactions<br/>WHERE booking_date = '2026-04-30'"]
+    A["Analyst submits query:SELECT transaction_id, account_id, amountFROM transactions.raw_transactionsWHERE booking_date = '2026-04-30'"]
     
     B["Spark SQL Parser"]
     A --> B
     B --> B1["Parse query"]
-    B --> B2["Identify columns:<br/>transaction_id, account_id, amount"]
-    B --> B3["Identify table:<br/>transactions.raw_transactions"]
+    B --> B2["Identify columns:transaction_id, account_id, amount"]
+    B --> B3["Identify table:transactions.raw_transactions"]
     B --> B4["Identify action: read"]
     
     C["OPA Policy Evaluator"]
     B --> C
     C --> C1["Fetch policy: abac.rego, masking.rego"]
     C --> C2["Evaluate for each column:"]
-    C2 --> C2a["transaction_id pii:<br/>Mask for external_analyst? YES<br/>apply hash_mask"]
-    C2 --> C2b["account_id pii:<br/>Mask for external_analyst? YES<br/>apply hash_mask"]
-    C2 --> C2c["amount public:<br/>Mask? NO → raw value"]
-    C --> C3["Evaluate for audit:<br/>Log query? YES pii columns read"]
+    C2 --> C2a["transaction_id pii:Mask for external_analyst? YESapply hash_mask"]
+    C2 --> C2b["account_id pii:Mask for external_analyst? YESapply hash_mask"]
+    C2 --> C2c["amount public:Mask? NO → raw value"]
+    C --> C3["Evaluate for audit:Log query? YES pii columns read"]
     C --> C4["Decision: ALLOW with masking"]
     
     D["Spark Execution"]

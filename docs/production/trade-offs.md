@@ -139,10 +139,17 @@ graph TD
 
 ```mermaid
 graph TD
-    A["LATENCY milliseconds"]
-    A --> B["100ms Flink continuous<br/>Cost: $$$$<br/>Complexity: Hard"]
-    A --> C["1,000ms Flink mini-batch<br/>Spark micro-batch"]
-    A --> D["5,000ms Spark 5-min window ← This project<br/>Cost: $<br/>Complexity: Easy<br/>Operational: Simple"]
+    A["LATENCY: milliseconds"]
+    A --> B["100ms Flink continuous"]
+    B --> B1["Cost: $$$$"]
+    B --> B2["Complexity: Hard"]
+    
+    A --> C["1,000ms Flink mini-batch or Spark micro-batch"]
+    
+    A --> D["5,000ms Spark 5-min window ← This project"]
+    D --> D1["Cost: $"]
+    D --> D2["Complexity: Easy"]
+    D --> D3["Operational: Simple"]
 ```
 
 ### Decision Tree

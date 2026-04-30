@@ -72,15 +72,15 @@ Action: Read all old files, rewrite with new schema → 8 hours downtime
 ```mermaid
 graph TD
     A["Snapshot 1 metadata"]
-    A --> A1["Schema: transaction_id, account_id, amount,<br/>merchant_id, timestamp"]
+    A --> A1["Schema: transaction_id, account_id, amount,merchant_id, timestamp"]
     A --> A2["Data files: 00000.parquet, 00001.parquet, ..."]
     A --> A3["Snapshot ID: 1"]
     
     B["New writes with new field"]
     
     C["Snapshot 2 metadata"]
-    C --> C1["Schema: transaction_id, account_id, amount,<br/>merchant_id, timestamp, fraud_risk_score"]
-    C --> C2["Data files: 00000.parquet, 00001.parquet, ...,<br/>00100.parquet new file"]
+    C --> C1["Schema: transaction_id, account_id, amount,merchant_id, timestamp, fraud_risk_score"]
+    C --> C2["Data files: 00000.parquet, 00001.parquet, ...,00100.parquet new file"]
     C --> C3["Snapshot ID: 2"]
     
     D["Existing readers see Snapshot 2 schema automatically"]

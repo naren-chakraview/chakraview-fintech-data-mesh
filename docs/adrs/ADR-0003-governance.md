@@ -34,7 +34,7 @@ graph TD
     C --> C2["Evaluate: Can user access these columns?"]
     C --> C3["Check: Is masking required?"]
     C --> C4["Check: Should query be audited?"]
-    C --> C5["Decision: ALLOW + MASK account_id +<br/>LOG TO ELASTICSEARCH"]
+    C --> C5["Decision: ALLOW + MASK account_id +LOG TO ELASTICSEARCH"]
     C5 --> D["Spark Execution"]
     D --> D1["Read data"]
     D --> D2["Apply masking via UDF"]

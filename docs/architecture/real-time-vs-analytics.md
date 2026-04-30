@@ -289,7 +289,7 @@ parsed_df.write.format("iceberg") \
 ```mermaid
 graph TD
     A["Metric: kafka_lag_seconds"]
-    A --> B["Definition: Time since event published<br/>vs. when Spark reads it"]
+    A --> B["Definition: Time since event publishedvs. when Spark reads it"]
     B --> C["Threshold"]
     C --> C1["< 1 sec: Healthy"]
     C --> C2["1-5 sec: Acceptable burst traffic"]
@@ -301,7 +301,7 @@ graph TD
 ```mermaid
 graph TD
     A["Metric: data_freshness_minutes"]
-    A --> B["Definition: Time since last Iceberg snapshot<br/>vs. current time"]
+    A --> B["Definition: Time since last Iceberg snapshotvs. current time"]
     B --> C["Threshold"]
     C --> C1["< 5 min: Healthy meets SLA"]
     C --> C2["5-10 min: Acceptable Spark job slow"]
