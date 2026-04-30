@@ -2,7 +2,7 @@ site_name: Chakra Commerce — Fintech Data Mesh
 site_description: >
   Production-grade data mesh reference implementation for fintech: Apache Iceberg lakehouse,
   decentralized domain ownership, unified analytics, federated governance, enterprise observability.
-site_url: https://naren-chakraview.github.io/chakraview-fintech-data-mesh/
+site_url: https://naren-chakraview.github.io/fintech-data-mesh/
 repo_name: naren-chakraview/chakraview-fintech-data-mesh
 repo_url: https://github.com/naren-chakraview/chakraview-fintech-data-mesh
 edit_uri: edit/main/docs/
