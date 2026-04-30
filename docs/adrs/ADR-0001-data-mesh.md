@@ -19,13 +19,21 @@ The organization has multiple business domains (Transactions, Accounts, Risk/Com
 
 **Adopt the data mesh pattern**: Each domain owns its data end-to-end (schema, ingest, SLAs, governance), while a federated platform enforces consistent policies.
 
-```
-Decentralized                    Federated Platform
-├── Transactions Domain          ├── OPA policies (ABAC)
-├── Accounts Domain              ├── Iceberg lakehouse
-├── Risk/Compliance Domain       ├── Unified Spark SQL
-├── Counterparties Domain        ├── Discovery portal
-└── Market Data Domain           └── Observability (metrics)
+```mermaid
+graph TD
+    A["Decentralized Domains"]
+    A --> A1["Transactions Domain"]
+    A --> A2["Accounts Domain"]
+    A --> A3["Risk/Compliance Domain"]
+    A --> A4["Counterparties Domain"]
+    A --> A5["Market Data Domain"]
+    
+    B["Federated Platform"]
+    B --> B1["OPA policies ABAC"]
+    B --> B2["Iceberg lakehouse"]
+    B --> B3["Unified Spark SQL"]
+    B --> B4["Discovery portal"]
+    B --> B5["Observability metrics"]
 ```
 
 ### Governance Model

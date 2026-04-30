@@ -24,23 +24,21 @@ Traditional approaches:
 **Choose OPA (Open Policy Agent)** for policy-as-code governance.
 
 ### How It Works
-```
-User query: SELECT account_id, amount FROM transactions
-         ↓
-[Spark SQL Parser]
-     ↓
-[OPA Policy Evaluator]
-├── Load: platform/governance/opa-policies/abac.rego
-├── Evaluate: Can user access these columns?
-├── Check: Is masking required?
-├── Check: Should query be audited?
-└── Decision: ALLOW + MASK account_id + LOG TO ELASTICSEARCH
 
-     ↓
-[Spark Execution]
-├── Read data
-├── Apply masking via UDF
-├── Return results to user
+```mermaid
+graph TD
+    A["User query: SELECT account_id, amount FROM transactions"]
+    A --> B["Spark SQL Parser"]
+    B --> C["OPA Policy Evaluator"]
+    C --> C1["Load: platform/governance/opa-policies/abac.rego"]
+    C --> C2["Evaluate: Can user access these columns?"]
+    C --> C3["Check: Is masking required?"]
+    C --> C4["Check: Should query be audited?"]
+    C --> C5["Decision: ALLOW + MASK account_id +<br/>LOG TO ELASTICSEARCH"]
+    C5 --> D["Spark Execution"]
+    D --> D1["Read data"]
+    D --> D2["Apply masking via UDF"]
+    D --> D3["Return results to user"]
 ```
 
 ### Policy Example

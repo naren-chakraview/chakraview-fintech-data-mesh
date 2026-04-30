@@ -22,14 +22,16 @@ Traditional Parquet + Hive metastore struggles with schema changes (requires ful
 **Choose Apache Iceberg** as the lakehouse storage format.
 
 ### Key Features Used
-```
-Iceberg provides:
-├── Schema evolution (add/drop/rename columns without rewrite)
-├── ACID transactions (atomic snapshot commits)
-├── Time-travel (query historical snapshots for audits)
-├── Partition pruning (cost-optimized scans)
-├── Hidden partitions (abstraction over partition scheme)
-└── Compatibility (works with Spark, Trino, Flink)
+
+```mermaid
+graph TD
+    A["Iceberg provides"]
+    A --> A1["Schema evolution add/drop/rename columns without rewrite"]
+    A --> A2["ACID transactions atomic snapshot commits"]
+    A --> A3["Time-travel query historical snapshots for audits"]
+    A --> A4["Partition pruning cost-optimized scans"]
+    A --> A5["Hidden partitions abstraction over partition scheme"]
+    A --> A6["Compatibility works with Spark, Trino, Flink"]
 ```
 
 ---
@@ -67,22 +69,26 @@ Iceberg provides:
 - Restart reads Kafka from beginning
 - Result: Duplicates ❌ (need deduplication logic)
 
-### Cost (Columnar Compression)
-```
-7 years of transaction data (1B records/year):
+### Cost Columnar Compression
 
-Row-oriented Parquet:
-├── Uncompressed: 350GB (50 bytes per record)
-├── With compression: 140GB
-└── S3 cost: $0.023/GB/month = $3.22K/month
-
-Iceberg (columnar):
-├── Uncompressed: 150GB (smaller due to column ordering)
-├── With compression: 100GB (better compression per column)
-└── S3 cost: $0.023/GB/month = $2.30K/month
-
-**Savings**: ~$1K/month per domain, $5K/month company-wide
-**Over 7 years**: $420K savings for transactions domain alone
+```mermaid
+graph TD
+    A["7 years of transaction data 1B records/year"]
+    
+    B["Row-oriented Parquet"]
+    A --> B
+    B --> B1["Uncompressed: 350GB 50 bytes per record"]
+    B --> B2["With compression: 140GB"]
+    B --> B3["S3 cost: $0.023/GB/month = $3.22K/month"]
+    
+    C["Iceberg columnar"]
+    A --> C
+    C --> C1["Uncompressed: 150GB smaller due to column ordering"]
+    C --> C2["With compression: 100GB better compression per column"]
+    C --> C3["S3 cost: $0.023/GB/month = $2.30K/month"]
+    
+    D["Savings: ~$1K/month per domain, $5K/month company-wide"]
+    E["Over 7 years: $420K savings for transactions domain alone"]
 ```
 
 ### Time-Travel for Compliance

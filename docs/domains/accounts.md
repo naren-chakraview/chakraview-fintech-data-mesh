@@ -115,21 +115,23 @@ columns:
 ```
 
 **Downstream Consumers**:
-```
-account-reconciliation (Batch)
-├── Queries: daily_account_balances
-├── Purpose: Reconcile against general ledger
-└── Frequency: Daily
 
-account-risk-scoring (Real-time)
-├── Queries: account.balance
-├── Purpose: Risk model inputs (account velocity)
-└── Frequency: Per transaction
-
-reporting-portal (Batch)
-├── Queries: All columns
-├── Purpose: Customer reporting, statements
-└── Frequency: Daily/weekly
+```mermaid
+graph TD
+    A["account-reconciliation Batch"]
+    A --> A1["Queries: daily_account_balances"]
+    A --> A2["Purpose: Reconcile against general ledger"]
+    A --> A3["Frequency: Daily"]
+    
+    B["account-risk-scoring Real-time"]
+    B --> B1["Queries: account.balance"]
+    B --> B2["Purpose: Risk model inputs account velocity"]
+    B --> B3["Frequency: Per transaction"]
+    
+    C["reporting-portal Batch"]
+    C --> C1["Queries: All columns"]
+    C --> C2["Purpose: Customer reporting, statements"]
+    C --> C3["Frequency: Daily/weekly"]
 ```
 
 ---

@@ -93,21 +93,23 @@ columns:
 ```
 
 **Downstream Consumers**:
-```
-fraud-detection-service (Real-time, hot path)
-├── Consumes: Kafka topic risk-scores-raw
-├── Purpose: Block or approve transactions in real-time
-└── SLA: < 500ms decision time
 
-transaction-settlement (Batch)
-├── Consumes: Iceberg table risk_compliance.fraud_scores
-├── Purpose: Link fraud decisions to settlement status
-└── Frequency: Daily
-
-compliance-reporting (Quarterly)
-├── Consumes: Iceberg table + 10-year time-travel
-├── Purpose: AML/SAR filing for regulators
-└── Frequency: Quarterly + event-driven
+```mermaid
+graph TD
+    A["fraud-detection-service Real-time, hot path"]
+    A --> A1["Consumes: Kafka topic risk-scores-raw"]
+    A --> A2["Purpose: Block or approve transactions in real-time"]
+    A --> A3["SLA: &lt; 500ms decision time"]
+    
+    B["transaction-settlement Batch"]
+    B --> B1["Consumes: Iceberg table risk_compliance.fraud_scores"]
+    B --> B2["Purpose: Link fraud decisions to settlement status"]
+    B --> B3["Frequency: Daily"]
+    
+    C["compliance-reporting Quarterly"]
+    C --> C1["Consumes: Iceberg table + 10-year time-travel"]
+    C --> C2["Purpose: AML/SAR filing for regulators"]
+    C --> C3["Frequency: Quarterly + event-driven"]
 ```
 
 ### kyc-verdicts

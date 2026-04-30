@@ -26,20 +26,18 @@ Can we have both?
 
 **Adopt hybrid strategy: Kafka (hot path) + Iceberg (cold path)**
 
-```
-Events occur
-     ↓
-Kafka Topic (real-time, 7-day retention)
-├── Consumers: Fraud detection, pricing engine (need < 1-second latency)
-└── Latency: < 100ms
-     ↓
-Spark Structured Streaming (micro-batch every 5 minutes)
-└── Checkpoint: Ensures exactly-once delivery
-     ↓
-Iceberg Table (cold path, 7-year retention)
-├── Consumers: Analysts, compliance (can tolerate 5-minute lag)
-├── Cost: 60% cheaper than Kafka retention
-└── Latency: 5 minutes
+```mermaid
+graph TD
+    A["Events occur"]
+    A --> B["Kafka Topic real-time, 7-day retention"]
+    B --> B1["Consumers: Fraud detection, pricing engine<br/>need &lt; 1-second latency"]
+    B --> B2["Latency: &lt; 100ms"]
+    B --> C["Spark Structured Streaming<br/>micro-batch every 5 minutes"]
+    C --> C1["Checkpoint: Ensures exactly-once delivery"]
+    C --> D["Iceberg Table cold path, 7-year retention"]
+    D --> D1["Consumers: Analysts, compliance<br/>can tolerate 5-minute lag"]
+    D --> D2["Cost: 60% cheaper than Kafka retention"]
+    D --> D3["Latency: 5 minutes"]
 ```
 
 ### Trade-Off
@@ -91,46 +89,54 @@ Iceberg Table (cold path, 7-year retention)
 ### Scenario: 1B transactions/year × 7-year retention
 
 **Option 1: Pure Kafka** (7-day retention, cluster costs)
-```
-Kafka cluster: 5 brokers × 10TB storage × $2K/month/TB
-= 5 × 10 × $2,000 = $100K/month
-Over 7 years: $8.4M
+
+```mermaid
+graph TD
+    A["Kafka cluster: 5 brokers × 10TB storage × $2K/month/TB"]
+    A --> B["= 5 × 10 × $2,000 = $100K/month"]
+    B --> C["Over 7 years: $8.4M"]
 ```
 
 **Option 2: Pure Iceberg** (7-year retention, S3 storage)
-```
-Data size: 1B tx/yr × 50 bytes = 50GB/yr raw
-Iceberg compressed: 60% reduction = 20GB/yr
-7 years: 140GB total
-S3 cost: 140GB × $0.023/GB/month = $3.22K/month
-Over 7 years: $270K
+
+```mermaid
+graph TD
+    A["Data size: 1B tx/yr × 50 bytes = 50GB/yr raw"]
+    A --> B["Iceberg compressed: 60% reduction = 20GB/yr"]
+    B --> C["7 years: 140GB total"]
+    C --> D["S3 cost: 140GB × $0.023/GB/month = $3.22K/month"]
+    D --> E["Over 7 years: $270K"]
 ```
 
-**Option 3: Hybrid (Kafka 7-day + Iceberg 7-year)**
-```
-Kafka cluster: 5 brokers × 0.5TB storage (7-day, not years)
-= 5 × 0.5 × $2,000 = $5K/month
+**Option 3: Hybrid Kafka 7-day + Iceberg 7-year**
 
-Iceberg S3: 140GB
-= $3.22K/month
-
-Total: $8.22K/month = $98K/year
-Over 7 years: $686K
+```mermaid
+graph TD
+    A["Kafka cluster: 5 brokers × 0.5TB storage 7-day, not years"]
+    A --> B["= 5 × 0.5 × $2,000 = $5K/month"]
+    
+    C["Iceberg S3: 140GB"]
+    C --> D["= $3.22K/month"]
+    
+    E["Total: $8.22K/month = $98K/year"]
+    E --> F["Over 7 years: $686K"]
 ```
 
 **Savings**: Hybrid is 31x cheaper than pure Kafka, 2.5x more expensive than pure Iceberg but 31x faster for fraud detection.
 
 ### Latency Trade-Off
-```
-Fraud detection decision latency:
-├── Kafka only: 100ms (but expensive)
-├── Iceberg only: 5 minutes (too slow)
-└── Hybrid: 100ms (fraud detection uses Kafka, no Iceberg latency)
 
-Compliance audit query:
-├── Kafka only: Offline after 7 days (no time-travel)
-├── Iceberg only: 5 minutes old (acceptable)
-└── Hybrid: 5 minutes old (acceptable)
+```mermaid
+graph TD
+    A["Fraud detection decision latency"]
+    A --> A1["Kafka only: 100ms but expensive"]
+    A --> A2["Iceberg only: 5 minutes too slow"]
+    A --> A3["Hybrid: 100ms fraud detection uses Kafka, no Iceberg latency"]
+    
+    B["Compliance audit query"]
+    B --> B1["Kafka only: Offline after 7 days no time-travel"]
+    B --> B2["Iceberg only: 5 minutes old acceptable"]
+    B --> B3["Hybrid: 5 minutes old acceptable"]
 ```
 
 ---

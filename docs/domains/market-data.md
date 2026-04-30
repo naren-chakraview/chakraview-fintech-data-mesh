@@ -123,21 +123,23 @@ columns:
 ```
 
 **Downstream Consumers**:
-```
-risk-models (Real-time)
-├── Consumes: Kafka topic market-rates-raw (hot path)
-├── Purpose: Real-time risk valuation
-└── SLA: < 10 seconds to decision
 
-pricing-engine (Real-time)
-├── Consumes: Kafka topic market-prices-raw
-├── Purpose: Dynamic pricing based on market moves
-└── SLA: < 5 seconds to adjust price
-
-analytics-dashboard (Near-real-time)
-├── Consumes: Iceberg table market_data.fx_rates
-├── Purpose: Historical trends, volatility analysis
-└── Frequency: Every 5 minutes (cold path freshness)
+```mermaid
+graph TD
+    A["risk-models Real-time"]
+    A --> A1["Consumes: Kafka topic market-rates-raw hot path"]
+    A --> A2["Purpose: Real-time risk valuation"]
+    A --> A3["SLA: &lt; 10 seconds to decision"]
+    
+    B["pricing-engine Real-time"]
+    B --> B1["Consumes: Kafka topic market-prices-raw"]
+    B --> B2["Purpose: Dynamic pricing based on market moves"]
+    B --> B3["SLA: &lt; 5 seconds to adjust price"]
+    
+    C["analytics-dashboard Near-real-time"]
+    C --> C1["Consumes: Iceberg table market_data.fx_rates"]
+    C --> C2["Purpose: Historical trends, volatility analysis"]
+    C --> C3["Frequency: Every 5 minutes cold path freshness"]
 ```
 
 ---
@@ -146,26 +148,23 @@ analytics-dashboard (Near-real-time)
 
 ### Architecture
 
-```
-Market Data Providers (External APIs)
-         ↓
-market-rates-raw, market-prices-raw (Kafka Topics)
-├── Hot path: Real-time streaming (< 1 second latency)
-├── Partitions: [currency_pair] for FX, [bond_isin] for bonds
-└── Retention: 7 days
-         ↓
-[MarketDataIngestJob - Spark Structured Streaming]
-├── Read from Kafka every minute
-├── Validate schema + business rules
-├── Micro-batch every 5 minutes (cold path)
-└── Partition for Iceberg
-         ↓
-Market_data.fx_rates, Market_data.bond_prices (Iceberg)
-├── Retention: 1 year
-├── Snapshots: Every 5 minutes
-└── Partition pruning: By [year, month, day, hour]
-         ↓
-Analytics + Observability
+```mermaid
+graph TD
+    A["Market Data Providers External APIs"]
+    A --> B["market-rates-raw, market-prices-raw Kafka Topics"]
+    B --> B1["Hot path: Real-time streaming &lt; 1 second latency"]
+    B --> B2["Partitions: currency_pair for FX, bond_isin for bonds"]
+    B --> B3["Retention: 7 days"]
+    B --> C["MarketDataIngestJob - Spark Structured Streaming"]
+    C --> C1["Read from Kafka every minute"]
+    C --> C2["Validate schema + business rules"]
+    C --> C3["Micro-batch every 5 minutes cold path"]
+    C --> C4["Partition for Iceberg"]
+    C --> D["Market_data.fx_rates, Market_data.bond_prices Iceberg"]
+    D --> D1["Retention: 1 year"]
+    D --> D2["Snapshots: Every 5 minutes"]
+    D --> D3["Partition pruning: By year, month, day, hour"]
+    D --> E["Analytics + Observability"]
 ```
 
 ### Implementation
@@ -220,25 +219,27 @@ class MarketDataIngestJob:
 
 ### Retention Policy
 
-```
-FX Rates: 1 year
-├── Rationale: Regulatory reporting (historical rates for disputed trades)
-├── Cost: High volume (10K rates/min = 365M rows/year)
-└── Optimization: Compress hourly snapshots after 30 days
-
-Bond Prices: 1 year
-├── Rationale: Historical price verification for audits
-└── Deletion: Hard delete after 1 year (not critical data)
+```mermaid
+graph TD
+    A["FX Rates: 1 year"]
+    A --> A1["Rationale: Regulatory reporting historical rates for disputed trades"]
+    A --> A2["Cost: High volume 10K rates/min = 365M rows/year"]
+    A --> A3["Optimization: Compress hourly snapshots after 30 days"]
+    
+    B["Bond Prices: 1 year"]
+    B --> B1["Rationale: Historical price verification for audits"]
+    B --> B2["Deletion: Hard delete after 1 year not critical data"]
 ```
 
 ### Data Quality Monitoring
 
-```
-Critical metrics (alert if violated):
-├── Completeness: Min 95% of expected rates present
-├── Freshness: Max 5 minutes old (warn at 3 min, alert at 5)
-├── Accuracy: Cross-check against external benchmark (< 0.1% deviation)
-└── Gaps: Identify missing data windows (non-trading hours OK)
+```mermaid
+graph TD
+    A["Critical metrics alert if violated"]
+    A --> A1["Completeness: Min 95% of expected rates present"]
+    A --> A2["Freshness: Max 5 minutes old warn at 3 min, alert at 5"]
+    A --> A3["Accuracy: Cross-check against external benchmark &lt; 0.1% deviation"]
+    A --> A4["Gaps: Identify missing data windows non-trading hours OK"]
 ```
 
 ---

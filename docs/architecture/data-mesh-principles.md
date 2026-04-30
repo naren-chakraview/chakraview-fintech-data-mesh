@@ -71,24 +71,29 @@ apply_masking {
 ```
 
 **Example Decision Flow**:
+
+Query 1: "Can I query risk_compliance.fraud_scores?"
+
+```mermaid
+graph TD
+    A["OPA Evaluation"]
+    A --> A1["User role: external_analyst"]
+    A --> A2["Data classification: pii fraud_score is internal"]
+    A --> A3["Action: read"]
+    A --> A4["Result: DENY external analyst + restricted data"]
 ```
-User: "Can I query risk_compliance.fraud_scores?"
 
-OPA Evaluation:
-├── User role: external_analyst
-├── Data classification: pii (fraud_score is internal)
-├── Action: read
-├── Result: DENY (external analyst + restricted data)
+Query 2: "Can I query transactions.merchant_id?"
 
-User: "Can I query transactions.merchant_id?"
-
-OPA Evaluation:
-├── User role: external_analyst
-├── Data classification: pii
-├── Action: read
-├── Masking rule applies: Show partial (first 4 chars)
-├── Audit: Log access
-├── Result: ALLOW with masking
+```mermaid
+graph TD
+    B["OPA Evaluation"]
+    B --> B1["User role: external_analyst"]
+    B --> B2["Data classification: pii"]
+    B --> B3["Action: read"]
+    B --> B4["Masking rule applies: Show partial first 4 chars"]
+    B --> B5["Audit: Log access"]
+    B --> B6["Result: ALLOW with masking"]
 ```
 
 ### Benefits
