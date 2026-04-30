@@ -2401,7 +2401,7 @@
 </tbody>
 </table>
 <h3 id="decision-framework">Decision Framework<a class="headerlink" href="#decision-framework" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["How many events/minute?"]
 
     A --&gt; B["&amp;lt; 10K/min"]
@@ -2425,7 +2425,7 @@
 
     F["If organization is multi-cloud"]
     F --&gt; F1["Use: Kafka portable across AWS, GCP, Azure, on-prem"]
-    F --&gt; F2["Accept: More operational overhead"]</code></pre>
+    F --&gt; F2["Accept: More operational overhead"]</div>
 <h3 id="recommendation-for-this-project">Recommendation for This Project<a class="headerlink" href="#recommendation-for-this-project" title="Permanent link">&para;</a></h3>
 <p><strong>Chose Kafka because</strong>:
 - ✅ Multi-cloud portability (example for enterprises)
@@ -2522,7 +2522,7 @@
 <hr />
 <h2 id="spark-structured-streaming-vs-flink-vs-storm-micro-batches-vs-continuous">Spark Structured Streaming vs Flink vs Storm (Micro-Batches vs Continuous)<a class="headerlink" href="#spark-structured-streaming-vs-flink-vs-storm-micro-batches-vs-continuous" title="Permanent link">&para;</a></h2>
 <h3 id="latency-vs-cost-vs-simplicity">Latency vs Cost vs Simplicity<a class="headerlink" href="#latency-vs-cost-vs-simplicity" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["LATENCY: milliseconds"]
     A --&gt; B["100ms Flink continuous"]
     B --&gt; B1["Cost: $$$$"]
@@ -2533,9 +2533,9 @@
     A --&gt; D["5,000ms Spark 5-min window ← This project"]
     D --&gt; D1["Cost: $"]
     D --&gt; D2["Complexity: Easy"]
-    D --&gt; D3["Operational: Simple"]</code></pre>
+    D --&gt; D3["Operational: Simple"]</div>
 <h3 id="decision-tree">Decision Tree<a class="headerlink" href="#decision-tree" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A{"Do you need &amp;lt; 1 second latency?"}
 
     A --&gt;|YES| B["Use Flink continuous processing"]
@@ -2552,7 +2552,7 @@
     C --&gt; C2{"If latency tolerance: 1-5 minutes"}
     C2 --&gt; C2a["Cost: $8-15K/month more executors"]
     C2 --&gt; C2b["Complexity: Easy Spark"]
-    C2 --&gt; C2c["Example: Market data ingestion 1-min window"]</code></pre>
+    C2 --&gt; C2c["Example: Market data ingestion 1-min window"]</div>
 <h3 id="recommendation-for-this-project_2">Recommendation for This Project<a class="headerlink" href="#recommendation-for-this-project_2" title="Permanent link">&para;</a></h3>
 <p><strong>Chose Spark because</strong>:
 - ✅ 5-minute latency acceptable for cold-path analytics

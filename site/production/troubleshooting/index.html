@@ -2065,34 +2065,34 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Check:<span class="w"> </span>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>pod/transaction-ingest-job
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Error:<span class="w"> </span>java.lang.OutOfMemoryError:<span class="w"> </span>Java<span class="w"> </span>heap<span class="w"> </span>space
 </span></code></pre></div>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Fix"]
     A --&gt; A1["Increase executor memory"]
-    A --&gt; A2["kubectl set resources deployment&lt;br/&gt;transaction-ingest-job limits and requests"]
-    A --&gt; A3["Restart job"]</code></pre>
+    A --&gt; A2["kubectl set resources deployment transaction-ingest-job--limits=memory=32Gi --requests=memory=16Gi"]
+    A --&gt; A3["Restart job"]</div>
 <p><strong>Cause 2: Kafka Broker Down</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Check:<span class="w"> </span>kafka-topics.sh<span class="w"> </span>--bootstrap-server<span class="w"> </span>kafka:9092<span class="w"> </span>--list
 </span></code></pre></div>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["If no response"]
-    A --&gt; A1["Check broker status:&lt;br/&gt;kubectl get pods kafka-0, kafka-1"]
-    A --&gt; A2["If any pod not running:&lt;br/&gt;kubectl logs kafka-0"]
-    A --&gt; A3["Restart: kubectl delete pod kafka-0&lt;br/&gt;(PVC persists data)"]
-    A --&gt; A4["Wait 5 min for recovery"]</code></pre>
+    A --&gt; A1["Check broker status: kubectl get pods kafka-0, kafka-1, kafka-2"]
+    A --&gt; A2["If any pod not running: kubectl logs kafka-0"]
+    A --&gt; A3["Restart: kubectl delete pod kafka-0PVC persists data"]
+    A --&gt; A4["Wait 5 min for recovery"]</div>
 <p><strong>Cause 3: Iceberg Catalog Slow</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Check:<span class="w"> </span>curl<span class="w"> </span>http://iceberg-catalog:8181/health
 </span></code></pre></div>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["If not 200 OK"]
-    A --&gt; A1["Restart catalog:&lt;br/&gt;kubectl rollout restart deployment&lt;br/&gt;iceberg-catalog"]
-    A --&gt; A2["If still down, check logs:&lt;br/&gt;kubectl logs pod/iceberg-catalog"]
-    A --&gt; A3["May be: S3 connectivity, memory,&lt;br/&gt;or corruption"]
+    A --&gt; A1["Restart catalog: kubectl rollout restart deployment iceberg-catalog"]
+    A --&gt; A2["If still down, check logs: kubectl logs -f pod/iceberg-catalog-xxxxx"]
+    A --&gt; A3["May be: S3/MinIO connectivity, memory, or corruption"]
 
     B["Recovery"]
-    B --&gt; B1["Stop ingest job&lt;br/&gt;prevent more writes"]
-    B --&gt; B2["kubectl patch deployment&lt;br/&gt;transaction-ingest-job"]
-    B --&gt; B3["Restart catalog&lt;br/&gt;wait for recovery"]
-    B --&gt; B4["Restart ingest job"]</code></pre>
+    B --&gt; B1["Stop ingest job prevent more writes"]
+    B --&gt; B2["kubectl patch deployment transaction-ingest-job-p '{spec:replicas:0}'"]
+    B --&gt; B3["Restart catalog wait for recovery"]
+    B --&gt; B4["Restart ingest job"]</div>
 <p><strong>Cause 4: Network Connectivity</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Check<span class="w"> </span>network<span class="w"> </span>connectivity<span class="w"> </span>between<span class="w"> </span>services:
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>kubectl<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>debug-pod<span class="w"> </span>--image<span class="o">=</span>busybox<span class="w"> </span>--<span class="w"> </span>sh
@@ -2102,47 +2102,47 @@
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>nc<span class="w"> </span>-zv<span class="w"> </span>iceberg-catalog<span class="w"> </span><span class="m">8181</span><span class="w">    </span><span class="c1"># Catalog</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>nc<span class="w"> </span>-zv<span class="w"> </span>minio<span class="w"> </span><span class="m">9000</span><span class="w">              </span><span class="c1"># MinIO</span>
 </span></code></pre></div>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["If any fail"]
     A --&gt; A1["Check network policies: kubectl get networkpolicies -n fintech-mesh"]
     A --&gt; A2["Verify DNS: nslookup kafka.fintech-mesh"]
-    A --&gt; A3["Check service: kubectl get svc kafka -n fintech-mesh"]</code></pre>
+    A --&gt; A3["Check service: kubectl get svc kafka -n fintech-mesh"]</div>
 <p><strong>Cause 5: High Volume Spike</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Check:<span class="w"> </span>Kafka<span class="w"> </span>lag<span class="w"> </span>metric<span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>&lt;<span class="w"> </span><span class="m">30</span><span class="w"> </span>sec<span class="w"> </span>normally
 </span></code></pre></div>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["If lag is increasing"]
-    A --&gt; A1["Verify: ingest_records_total&lt;br/&gt;increasing steadily?"]
-    A --&gt; A2["Calculate: messages per minute&lt;br/&gt;from lag over 5 minutes"]
-    A --&gt; A3["If greater than 200K per min&lt;br/&gt;2x normal load"]
-    A3 --&gt; A3a["This is expected;&lt;br/&gt;Spark will catch up"]
-    A3 --&gt; A3b["Monitor lag: should decrease&lt;br/&gt;within 30 minutes"]
-    A3 --&gt; A3c["If lag continues increasing:&lt;br/&gt;Scale Spark"]
-    A3 --&gt; A3d["kubectl scale deployment&lt;br/&gt;transaction-ingest-job"]
-    A --&gt; A4["Verify SLA still met&lt;br/&gt;after scaling"]</code></pre>
+    A --&gt; A1["Verify: ingest_records_total increasing steadily?"]
+    A --&gt; A2["Calculate: messages_per_minute = lag_now - lag_5min_ago / 5"]
+    A --&gt; A3["If &gt; 200K msg/min 2x normal 100K"]
+    A3 --&gt; A3a["This is expected; Spark will catch up"]
+    A3 --&gt; A3b["Monitor lag: should decrease within 30 min"]
+    A3 --&gt; A3c["If lag continues increasing: Scale Spark"]
+    A3 --&gt; A3d["kubectl scale deployment transaction-ingest-job --replicas=2"]
+    A --&gt; A4["Verify SLA still met after scaling"]</div>
 <h3 id="resolution-steps-priority-order">Resolution Steps Priority Order<a class="headerlink" href="#resolution-steps-priority-order" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Troubleshooting Flow"]
-    A --&gt; A1["1. Is ingest job running?&lt;br/&gt;Restart if needed"]
-    A1 --&gt; A2["2. Is Kafka healthy?&lt;br/&gt;Restart brokers if needed"]
-    A2 --&gt; A3["3. Is catalog healthy?&lt;br/&gt;Restart catalog"]
-    A3 --&gt; A4["4. Is there network connectivity?&lt;br/&gt;Check DNS and policies"]
-    A4 --&gt; A5["5. Is Spark slow?&lt;br/&gt;Check CPU and memory"]
-    A5 --&gt; A6["6. Is there a volume spike?&lt;br/&gt;Scale, then analyze"]</code></pre>
+    A --&gt; A1["1. Is ingest job running?→ Restart if needed"]
+    A1 --&gt; A2["2. Is Kafka healthy?→ Restart brokers if needed"]
+    A2 --&gt; A3["3. Is catalog healthy?→ Restart catalog"]
+    A3 --&gt; A4["4. Is there network connectivity?→ Check DNS, policies"]
+    A4 --&gt; A5["5. Is Spark slow?→ Check CPU/memory, scale if needed"]
+    A5 --&gt; A6["6. Is there a volume spike?→ Temporarily scale, then analyze"]</div>
 <h3 id="prevention">Prevention<a class="headerlink" href="#prevention" title="Permanent link">&para;</a></h3>
 <p><strong>Alerting thresholds</strong> (set in Prometheus):</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Alert Thresholds"]
-    A --&gt; A1["freshness warning:&lt;br/&gt;data age greater than 5 min SLA&lt;br/&gt;Action: Page on-call"]
-    A --&gt; A2["kafka lag critical:&lt;br/&gt;lag greater than 60 seconds&lt;br/&gt;Action: Page on-call"]
-    A --&gt; A3["ingest errors high:&lt;br/&gt;error rate greater than 1 percent&lt;br/&gt;Action: Page on-call"]</code></pre>
+    A --&gt; A1["data_freshness_sla_warningCondition: data_freshness_minutes &gt; 360% of 5-min SLAAction: Page on-call, investigate"]
+    A --&gt; A2["kafka_lag_criticalCondition: kafka_lag_seconds &gt; 60Action: Page on-call"]
+    A --&gt; A3["ingest_errors_highCondition: rate ingest_errors_total[5m] &gt; 0.01&gt;1% errorsAction: Page on-call"]</div>
 <p><strong>Health checks</strong> (automated):</p>
-<p><pre class="mermaid"><code>graph TD
+<p><div class="mermaid">graph TD
     A["Automated Health Checks"]
     A --&gt; A1["Every 1 minute: Check ingest job running"]
     A --&gt; A2["Every 5 minutes: Check Kafka lag &lt; 30 sec"]
     A --&gt; A3["Every 10 minutes: Check Iceberg write latency &lt; 500ms"]
-    A --&gt; A4["Alert if any fail 2 consecutive checks"]</code></pre>
+    A --&gt; A4["Alert if any fail 2 consecutive checks"]</div>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>---
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>## Query Latency Spikes (P95 &gt; 30 seconds)

@@ -1924,7 +1924,7 @@
 <p>Traditional data warehouses centralize ownership: one platform, one catalog, one security model, one schema review committee. This creates bottlenecks that fintech organizations feel acutely—compliance policies differ per domain, SLAs vary by data sensitivity, and schema changes block multiple teams.</p>
 <p><strong>Data mesh flips this model:</strong> each domain (Transactions, Risk/Compliance, Accounts) owns its data, schema, governance, and SLAs. A <em>federated governance layer</em> (OPA policies) replaces a centralized review board. Domains publish <em>data products</em>—formal contracts with SLAs, quality rules, and masking policies—that other teams consume.</p>
 <p>The result: <strong>decentralized speed with centralized compliance</strong>.</p>
-<pre class="mermaid"><code>graph TB
+<div class="mermaid">graph TB
     subgraph org["Organization Structure (Decentralized)"]
         direction TB
         T["Transactions Domain (5min/7yr)"]
@@ -1962,7 +1962,7 @@
     M --&gt; ANA
 
     ANA --&gt; OBS
-    GOV --&gt; STOR</code></pre>
+    GOV --&gt; STOR</div>
 <hr />
 <h2 id="why-data-mesh-for-fintech">Why Data Mesh for Fintech?<a class="headerlink" href="#why-data-mesh-for-fintech" title="Permanent link">&para;</a></h2>
 <h3 id="problem-1-compliance-complexity">Problem 1: Compliance Complexity<a class="headerlink" href="#problem-1-compliance-complexity" title="Permanent link">&para;</a></h3>

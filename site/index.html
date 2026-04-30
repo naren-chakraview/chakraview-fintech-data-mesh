@@ -1903,16 +1903,16 @@
 - <strong>Scale limits</strong>: One catalog, one security model, one SLA for all domains</p>
 <hr />
 <h2 id="the-solution-data-mesh-lakehouse">✨ The Solution: Data Mesh Lakehouse<a class="headerlink" href="#the-solution-data-mesh-lakehouse" title="Permanent link">&para;</a></h2>
-<pre class="mermaid"><code>graph TD
-    A["Unified Spark SQL Analytics&lt;br/&gt;(Time-travel, masking, SLOs)"]
+<div class="mermaid">graph TD
+    A["Unified Spark SQL Analytics Engine(Time-travel, masking, SLOs)"]
 
-    B["Transactions - Iceberg ACID&lt;br/&gt;7yr retention"]
-    C["Accounts - Iceberg ACID&lt;br/&gt;3yr retention"]
-    D["Risk - Compliance - Iceberg ACID&lt;br/&gt;10yr retention"]
+    B["TransactionsIcebergACID, 7yr retention"]
+    C["AccountsIcebergACID, 3yr retention"]
+    D["Risk/ComplianceIcebergACID, 10yr retention"]
 
-    E["Kafka Real-time&lt;br/&gt;5-min SLA"]
-    F["Kafka Real-time&lt;br/&gt;10-min SLA"]
-    G["Kafka Real-time&lt;br/&gt;10-min SLA"]
+    E["KafkaReal-time5-min SLA"]
+    F["KafkaReal-time10-min SLA"]
+    G["KafkaReal-time10-min SLA"]
 
     B --&gt; A
     C --&gt; A
@@ -1920,7 +1920,7 @@
 
     E --&gt; B
     F --&gt; C
-    G --&gt; D</code></pre>
+    G --&gt; D</div>
 <p><strong>Key Principles:</strong>
 - <strong>Decentralized ownership</strong>: Each domain manages its own data, schema, SLAs
 - <strong>Federated governance</strong>: OPA policies (not roles) enforce compliance across domains

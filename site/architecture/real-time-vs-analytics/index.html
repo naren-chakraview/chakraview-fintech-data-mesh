@@ -1994,7 +1994,7 @@
 3. Operational systems read Kafka; analysts query Iceberg</p>
 <hr />
 <h2 id="architecture-hot-cold-paths">Architecture: Hot + Cold Paths<a class="headerlink" href="#architecture-hot-cold-paths" title="Permanent link">&para;</a></h2>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Transactions Domain Ingest"]
 
     A --&gt; B["HOT PATH - Kafka"]
@@ -2011,7 +2011,7 @@
     C --&gt; C4["Frequency: Micro-batches every 5 minutes"]
     C --&gt; C5["Freshness SLA: 5 minutes"]
     C --&gt; C6["Consumers: Analysts, compliance, auditors"]
-    C --&gt; C7["Retention: 7 years SOX requirement"]</code></pre>
+    C --&gt; C7["Retention: 7 years SOX requirement"]</div>
 <h3 id="real-time-use-case-fraud-detection-dashboard">Real-Time Use Case: Fraud Detection Dashboard<a class="headerlink" href="#real-time-use-case-fraud-detection-dashboard" title="Permanent link">&para;</a></h3>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="mi">11</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">02</span><span class="w"> </span><span class="mi">-</span><span class="w"> </span><span class="err">Tra</span><span class="kc">nsa</span><span class="err">c</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="w"> </span><span class="err">eve</span><span class="kc">nt</span><span class="w"> </span><span class="err">published</span><span class="w"> </span><span class="kc">t</span><span class="err">o</span><span class="w"> </span><span class="err">Ka</span><span class="kc">f</span><span class="err">ka</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">{</span>
@@ -2022,7 +2022,7 @@
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-30 11:35:00&quot;</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
 </span></code></pre></div>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["11:35:03 - Fraud Detection Service reads Kafka"]
     A --&gt; B["Evaluates ML model real-time"]
     A --&gt; C["Score: fraud_probability = 0.92"]
@@ -2034,7 +2034,7 @@
     F["11:35:04 - Dashboard shows"]
     F --&gt; F1["Fraud alert: Transaction tx_42 flagged"]
     F --&gt; F2["Account holder: Alerted via SMS"]
-    F --&gt; F3["User refresh: See result immediately"]</code></pre>
+    F --&gt; F3["User refresh: See result immediately"]</div>
 <p><strong>Why Kafka for this?</strong> Iceberg latency (5 min) would delay fraud detection by 5 minutes—unacceptable for preventing fraud.</p>
 <h3 id="analytical-use-case-compliance-audit">Analytical Use Case: Compliance Audit<a class="headerlink" href="#analytical-use-case-compliance-audit" title="Permanent link">&para;</a></h3>
 <p><div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>April 30, 2026 - Auditor queries:
@@ -2099,7 +2099,7 @@
 </span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>        query.awaitTermination()
 </span></code></pre></div></p>
 <p><strong>What happens internally</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Time: 11:35:00"]
     A --&gt; A1["Kafka event 1 arrives"]
     A --&gt; A2["Event 2 arrives"]
@@ -2120,17 +2120,17 @@
 
     D["Time: 11:40:01 onwards"]
     D --&gt; D1["New batch starts collecting"]
-    D --&gt; D2["Kafka continues streaming independently"]</code></pre>
+    D --&gt; D2["Kafka continues streaming independently"]</div>
 <h3 id="exactly-once-semantics">Exactly-Once Semantics<a class="headerlink" href="#exactly-once-semantics" title="Permanent link">&para;</a></h3>
 <p><strong>Without checkpoints</strong> (naive approach):</p>
-<pre class="mermaid"><code>graph LR
+<div class="mermaid">graph LR
     A["Spark job: Read 100 events"] --&gt; B["Write to Iceberg"] --&gt; C["Crash"]
-    D["Restart: Read from Kafka offset 0"] --&gt; E["Read 100 events again"] --&gt; F["Duplicate!"]</code></pre>
+    D["Restart: Read from Kafka offset 0"] --&gt; E["Read 100 events again"] --&gt; F["Duplicate!"]</div>
 <p><strong>With Iceberg + Checkpoints</strong>:</p>
-<pre class="mermaid"><code>graph LR
+<div class="mermaid">graph LR
     A["Spark job: Read 100 events offset 0-99"] --&gt; B["Write to Iceberg"] --&gt; C["Save checkpoint offset 99"]
     D["Crash: All atomic"] --&gt; E["Full batch written or nothing"]
-    F["Restart: Read checkpoint offset 99"] --&gt; G["Start from event 100"] --&gt; H["No duplicates!"]</code></pre>
+    F["Restart: Read checkpoint offset 99"] --&gt; G["Start from event 100"] --&gt; H["No duplicates!"]</div>
 <hr />
 <h2 id="freshness-vs-cost-the-trade-off-table">Freshness vs Cost: The Trade-Off Table<a class="headerlink" href="#freshness-vs-cost-the-trade-off-table" title="Permanent link">&para;</a></h2>
 <table>
@@ -2232,21 +2232,21 @@ Inefficient for large streams.</p>
 <hr />
 <h2 id="observability-monitoring-both-paths">Observability: Monitoring Both Paths<a class="headerlink" href="#observability-monitoring-both-paths" title="Permanent link">&para;</a></h2>
 <h3 id="kafka-lag-hot-path-health">Kafka Lag Hot Path Health<a class="headerlink" href="#kafka-lag-hot-path-health" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Metric: kafka_lag_seconds"]
     A --&gt; B["Definition: Time since event publishedvs. when Spark reads it"]
     B --&gt; C["Threshold"]
     C --&gt; C1["&lt; 1 sec: Healthy"]
     C --&gt; C2["1-5 sec: Acceptable burst traffic"]
-    C --&gt; C3["&gt; 5 sec: Alert fraud detection SLA at risk"]</code></pre>
+    C --&gt; C3["&gt; 5 sec: Alert fraud detection SLA at risk"]</div>
 <h3 id="iceberg-freshness-cold-path-health">Iceberg Freshness Cold Path Health<a class="headerlink" href="#iceberg-freshness-cold-path-health" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Metric: data_freshness_minutes"]
     A --&gt; B["Definition: Time since last Iceberg snapshotvs. current time"]
     B --&gt; C["Threshold"]
     C --&gt; C1["&lt; 5 min: Healthy meets SLA"]
     C --&gt; C2["5-10 min: Acceptable Spark job slow"]
-    C --&gt; C3["&gt; 10 min: Alert SLA violated, check logs"]</code></pre>
+    C --&gt; C3["&gt; 10 min: Alert SLA violated, check logs"]</div>
 <h3 id="dashboard-queries">Dashboard Queries<a class="headerlink" href="#dashboard-queries" title="Permanent link">&para;</a></h3>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">-- Kafka lag per domain</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">domain</span><span class="p">,</span><span class="w"> </span><span class="n">consumer_group</span><span class="p">,</span><span class="w"> </span><span class="n">lag_seconds</span><span class="p">,</span><span class="w"> </span><span class="n">last_update</span>
@@ -2261,7 +2261,7 @@ Inefficient for large streams.</p>
 <hr />
 <h2 id="production-example-market-data-domain">Production Example: Market Data Domain<a class="headerlink" href="#production-example-market-data-domain" title="Permanent link">&para;</a></h2>
 <p>Market Data publishes FX rates with 1-minute freshness SLA:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["FX rates published to market-rates-raw Kafka"]
     A --&gt; A1["Frequency: 1 per minute 9 AM - 5 PM ET"]
     A --&gt; A2["Volume: 10,000 pairs × 1 rate/min = 10k events/min"]
@@ -2291,7 +2291,7 @@ Inefficient for large streams.</p>
     E["Monitoring"]
     E --&gt; E1["Kafka lag: Should stay &lt; 1 min"]
     E --&gt; E2["Iceberg freshness: Should stay &lt; 5 min"]
-    E --&gt; E3["Alert: If either exceeds threshold"]</code></pre>
+    E --&gt; E3["Alert: If either exceeds threshold"]</div>
 <hr />
 <h2 id="next-explore-more">Next: Explore More<a class="headerlink" href="#next-explore-more" title="Permanent link">&para;</a></h2>
 <ul>

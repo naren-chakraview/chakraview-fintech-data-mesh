@@ -1867,11 +1867,11 @@
 <hr />
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
 <p><strong>Adopt the data mesh pattern</strong>: Each domain owns its data end-to-end (schema, ingest, SLAs, governance), while a federated platform enforces consistent policies.</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Decentralized Domains"]
     A --&gt; A1["Transactions Domain"]
     A --&gt; A2["Accounts Domain"]
-    A --&gt; A3["Risk - Compliance Domain"]
+    A --&gt; A3["Risk/Compliance Domain"]
     A --&gt; A4["Counterparties Domain"]
     A --&gt; A5["Market Data Domain"]
 
@@ -1880,7 +1880,7 @@
     B --&gt; B2["Iceberg lakehouse"]
     B --&gt; B3["Unified Spark SQL"]
     B --&gt; B4["Discovery portal"]
-    B --&gt; B5["Observability metrics"]</code></pre>
+    B --&gt; B5["Observability metrics"]</div>
 <h3 id="governance-model">Governance Model<a class="headerlink" href="#governance-model" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Domains own</strong>: Schema, ingest jobs, SLAs, quality rules</li>

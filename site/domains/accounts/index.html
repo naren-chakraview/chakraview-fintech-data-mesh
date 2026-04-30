@@ -1936,7 +1936,7 @@
 </span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">    </span><span class="nt">masked_for_roles</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 </span></code></pre></div></p>
 <p><strong>Downstream Consumers</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["account-reconciliation Batch"]
     A --&gt; A1["Queries: daily_account_balances"]
     A --&gt; A2["Purpose: Reconcile against general ledger"]
@@ -1950,7 +1950,7 @@
     C["reporting-portal Batch"]
     C --&gt; C1["Queries: All columns"]
     C --&gt; C2["Purpose: Customer reporting, statements"]
-    C --&gt; C3["Frequency: Daily/weekly"]</code></pre>
+    C --&gt; C3["Frequency: Daily/weekly"]</div>
 <hr />
 <h2 id="ingest-pipeline">Ingest Pipeline<a class="headerlink" href="#ingest-pipeline" title="Permanent link">&para;</a></h2>
 <h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>

@@ -2195,7 +2195,7 @@
 </span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">    </span><span class="nt">mask_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no_mask</span>
 </span></code></pre></div></p>
 <p><strong>Downstream Consumers</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["fraud-detection-service Real-time"]
     A --&gt; A1["Consumes: Kafka topic market-transactions-raw"]
     A --&gt; A2["SLA required: &lt; 1 second latency"]
@@ -2212,7 +2212,7 @@
     C --&gt; C1["Consumes: Iceberg table + time-travel for audit"]
     C --&gt; C2["SLA required: Within 30 days of quarter end"]
     C --&gt; C3["Fields: All fields PII masked for external auditors"]
-    C --&gt; C4["Purpose: Regulatory reporting FinCEN, AML"]</code></pre>
+    C --&gt; C4["Purpose: Regulatory reporting FinCEN, AML"]</div>
 <hr />
 <h3 id="2-settlement-status">2. settlement-status<a class="headerlink" href="#2-settlement-status" title="Permanent link">&para;</a></h3>
 <p>Settled transactions with post-settlement confirmation.</p>
@@ -2236,7 +2236,7 @@
 <hr />
 <h2 id="ingest-pipeline">Ingest Pipeline<a class="headerlink" href="#ingest-pipeline" title="Permanent link">&para;</a></h2>
 <h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
-<p><pre class="mermaid"><code>graph TD
+<p><div class="mermaid">graph TD
     A["Transactions occur Payment Processor"]
     A --&gt; B["Market-transactions-raw Kafka Topic"]
     B --&gt; C["TransactionIngestJob - Spark Structured Streaming"]
@@ -2245,7 +2245,7 @@
     C --&gt; C3["Deduplicate transaction_id"]
     C --&gt; C4["Partition for Iceberg"]
     C --&gt; C5["Micro-batch every 5 minutes"]
-    C5 --&gt; D["Transactions.raw_transactions Iceberg Table"]</code></pre>
+    C5 --&gt; D["Transactions.raw_transactions Iceberg Table"]</div>
          ↓
 Unified Analytics (Spark SQL + OPA policies)
 <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>### Implementation

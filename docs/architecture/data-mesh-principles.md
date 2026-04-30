@@ -78,9 +78,9 @@ Query 1: "Can I query risk_compliance.fraud_scores?"
 graph TD
     A["OPA Evaluation"]
     A --> A1["User role: external_analyst"]
-    A --> A2["Data classification: internal<br/>fraud_score"]
+    A --> A2["Data classification: pii fraud_score is internal"]
     A --> A3["Action: read"]
-    A --> A4["Result: DENY - external analyst<br/>and restricted data"]
+    A --> A4["Result: DENY external analyst + restricted data"]
 ```
 
 Query 2: "Can I query transactions.merchant_id?"
@@ -89,9 +89,9 @@ Query 2: "Can I query transactions.merchant_id?"
 graph TD
     B["OPA Evaluation"]
     B --> B1["User role: external_analyst"]
-    B --> B2["Data classification: PII"]
+    B --> B2["Data classification: pii"]
     B --> B3["Action: read"]
-    B --> B4["Masking rule applies:<br/>Show partial first 4 chars"]
+    B --> B4["Masking rule applies: Show partial first 4 chars"]
     B --> B5["Audit: Log access"]
     B --> B6["Result: ALLOW with masking"]
 ```

@@ -1875,7 +1875,7 @@
 3. <strong>Request access</strong> (with approval workflows)
 4. <strong>Track status</strong> (access request lifecycle)</p>
 <p><strong>Architecture</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Discovery Portal FastAPI"]
     A --&gt; A1["/api/products search, list"]
     A --&gt; A2["/api/products/{id} details"]
@@ -1886,7 +1886,7 @@
     B --&gt; B1["product catalog"]
 
     A --&gt; C["OPA Policies"]
-    C --&gt; C1["auto-approval logic"]</code></pre>
+    C --&gt; C1["auto-approval logic"]</div>
 <hr />
 <h2 id="product-search">Product Search<a class="headerlink" href="#product-search" title="Permanent link">&para;</a></h2>
 <h3 id="endpoint-get-apiproducts">Endpoint: GET /api/products<a class="headerlink" href="#endpoint-get-apiproducts" title="Permanent link">&para;</a></h3>

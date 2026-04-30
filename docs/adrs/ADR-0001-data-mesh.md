@@ -24,7 +24,7 @@ graph TD
     A["Decentralized Domains"]
     A --> A1["Transactions Domain"]
     A --> A2["Accounts Domain"]
-    A --> A3["Risk - Compliance Domain"]
+    A --> A3["Risk/Compliance Domain"]
     A --> A4["Counterparties Domain"]
     A --> A5["Market Data Domain"]
     

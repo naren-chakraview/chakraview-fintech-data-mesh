@@ -1987,7 +1987,7 @@
 - <strong>Compliance</strong>: Full transaction history, immutable snapshots</p>
 <hr />
 <h2 id="iceberg-architecture-metadata-data">Iceberg Architecture: Metadata + Data<a class="headerlink" href="#iceberg-architecture-metadata-data" title="Permanent link">&para;</a></h2>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["S3 Bucket or MinIO, GCS, etc."]
 
     A --&gt; B["metadata/"]
@@ -2005,7 +2005,7 @@
     A --&gt; D["manifests/"]
     D --&gt; D1["snapshot-1-manifest-list.avro"]
     D --&gt; D2["snapshot-2-manifest-list.avro"]
-    D --&gt; D3["snapshot-3-manifest-list.avro"]</code></pre>
+    D --&gt; D3["snapshot-3-manifest-list.avro"]</div>
 <p><strong>Key insight</strong>: Each snapshot is immutable. New writes don't modify old files; they create new manifest entries pointing to new data files. This enables:
 1. <strong>Time-travel</strong>: Query snapshot 2 (state from 2 hours ago)
 2. <strong>Concurrent writes</strong>: Different transactions write different files
@@ -2020,7 +2020,7 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Action: Read all old files, rewrite with new schema → 8 hours downtime
 </span></code></pre></div></p>
 <p><strong>With Iceberg</strong>: Simple metadata update</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Snapshot 1 metadata"]
     A --&gt; A1["Schema: transaction_id, account_id, amount,merchant_id, timestamp"]
     A --&gt; A2["Data files: 00000.parquet, 00001.parquet, ..."]
@@ -2035,7 +2035,7 @@
 
     D["Existing readers see Snapshot 2 schema automatically"]
     E["Old data files implicitly project missing column as NULL"]
-    F["No rewrite required → 5 minute update"]</code></pre>
+    F["No rewrite required → 5 minute update"]</div>
 <p><strong>Implementation</strong> (in this project):
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># From shared/schemas/iceberg_schemas.py</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span> <span class="nn">pyiceberg.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
@@ -2064,7 +2064,7 @@
 <hr />
 <h2 id="acid-transactions-exactly-once-semantics">ACID Transactions &amp; Exactly-Once Semantics<a class="headerlink" href="#acid-transactions-exactly-once-semantics" title="Permanent link">&para;</a></h2>
 <h3 id="the-challenge-kafka-spark-duplicates">The Challenge: Kafka + Spark = Duplicates?<a class="headerlink" href="#the-challenge-kafka-spark-duplicates" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph LR
+<div class="mermaid">graph LR
     A["Kafka"] --&gt; B["Spark job reads batch"] --&gt; C["Writes to table"]
 
     D["Risk 1: Job crashes after write starts but before commit"]
@@ -2074,7 +2074,7 @@
 
     E["Risk 2: Kafka offset tracking fails"]
     E --&gt; E1["Job doesn't know which records were already written"]
-    E --&gt; E2["Rereads old batch → duplicate"]</code></pre>
+    E --&gt; E2["Rereads old batch → duplicate"]</div>
 <h3 id="iceberg-solution-atomic-snapshots">Iceberg Solution: Atomic Snapshots<a class="headerlink" href="#iceberg-solution-atomic-snapshots" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># From domains/transactions/ingest/ingest_job.py</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">query</span> <span class="o">=</span> <span class="n">parsed_df</span><span class="o">.</span><span class="n">writeStream</span> \

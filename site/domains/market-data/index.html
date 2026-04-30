@@ -2132,7 +2132,7 @@
 </span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="nt">masked_for_roles</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 </span></code></pre></div></p>
 <p><strong>Downstream Consumers</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["risk-models Real-time"]
     A --&gt; A1["Consumes: Kafka topic market-rates-raw hot path"]
     A --&gt; A2["Purpose: Real-time risk valuation"]
@@ -2146,11 +2146,11 @@
     C["analytics-dashboard Near-real-time"]
     C --&gt; C1["Consumes: Iceberg table market_data.fx_rates"]
     C --&gt; C2["Purpose: Historical trends, volatility analysis"]
-    C --&gt; C3["Frequency: Every 5 minutes cold path freshness"]</code></pre>
+    C --&gt; C3["Frequency: Every 5 minutes cold path freshness"]</div>
 <hr />
 <h2 id="ingest-pipeline">Ingest Pipeline<a class="headerlink" href="#ingest-pipeline" title="Permanent link">&para;</a></h2>
 <h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Market Data Providers External APIs"]
     A --&gt; B["market-rates-raw, market-prices-raw Kafka Topics"]
     B --&gt; B1["Hot path: Real-time streaming &lt; 1 second latency"]
@@ -2165,7 +2165,7 @@
     D --&gt; D1["Retention: 1 year"]
     D --&gt; D2["Snapshots: Every 5 minutes"]
     D --&gt; D3["Partition pruning: By year, month, day, hour"]
-    D --&gt; E["Analytics + Observability"]</code></pre>
+    D --&gt; E["Analytics + Observability"]</div>
 <h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># From domains/market_data/ingest/ingest_job.py</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
@@ -2212,7 +2212,7 @@
 <hr />
 <h2 id="governance-compliance">Governance &amp; Compliance<a class="headerlink" href="#governance-compliance" title="Permanent link">&para;</a></h2>
 <h3 id="retention-policy">Retention Policy<a class="headerlink" href="#retention-policy" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["FX Rates: 1 year"]
     A --&gt; A1["Rationale: Regulatory reporting historical rates for disputed trades"]
     A --&gt; A2["Cost: High volume 10K rates/min = 365M rows/year"]
@@ -2220,14 +2220,14 @@
 
     B["Bond Prices: 1 year"]
     B --&gt; B1["Rationale: Historical price verification for audits"]
-    B --&gt; B2["Deletion: Hard delete after 1 year not critical data"]</code></pre>
+    B --&gt; B2["Deletion: Hard delete after 1 year not critical data"]</div>
 <h3 id="data-quality-monitoring">Data Quality Monitoring<a class="headerlink" href="#data-quality-monitoring" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Critical metrics alert if violated"]
     A --&gt; A1["Completeness: Min 95% of expected rates present"]
     A --&gt; A2["Freshness: Max 5 minutes old warn at 3 min, alert at 5"]
     A --&gt; A3["Accuracy: Cross-check against external benchmark &lt; 0.1% deviation"]
-    A --&gt; A4["Gaps: Identify missing data windows non-trading hours OK"]</code></pre>
+    A --&gt; A4["Gaps: Identify missing data windows non-trading hours OK"]</div>
 <hr />
 <h2 id="queries">Queries<a class="headerlink" href="#queries" title="Permanent link">&para;</a></h2>
 <h3 id="volatility-analysis">Volatility Analysis<a class="headerlink" href="#volatility-analysis" title="Permanent link">&para;</a></h3>

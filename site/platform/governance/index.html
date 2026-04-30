@@ -2261,19 +2261,19 @@
 </span></code></pre></div>
 <p><strong>Decision flow</strong>:</p>
 <p>Query 1: Can analyst_42 read transactions.raw_transactions?</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["OPA Evaluation"]
     A --&gt; A1["default allow = false"]
     A --&gt; A2["Check rule 1:analyst_42 role is analyst ✓action is read ✓classification is public ✓"]
-    A --&gt; A3["Result: ALLOW rule 1 matches"]</code></pre>
+    A --&gt; A3["Result: ALLOW rule 1 matches"]</div>
 <p>Query 2: Can contractor_5 write to market_data.fx_rates?</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     B["OPA Evaluation"]
     B --&gt; B1["default allow = false"]
     B --&gt; B2["Check rule 1: contractor_5 role = contractor ✗rule requires analyst"]
     B --&gt; B3["Check rule 2: contractor_5 role = contractor ✗rule requires data_owner"]
     B --&gt; B4["Check rule 3: contractor_5 role = contractor ✗rule requires admin"]
-    B --&gt; B5["Result: DENY no rules match"]</code></pre>
+    B --&gt; B5["Result: DENY no rules match"]</div>
 <h3 id="2-pii-masking-rules">2. PII Masking Rules<a class="headerlink" href="#2-pii-masking-rules" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a># Mask PII columns for external users
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
@@ -2294,7 +2294,7 @@
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="p">.</span><span class="n">raw_transactions</span><span class="p">;</span>
 </span></code></pre></div></p>
 <p><strong>OPA intercepts</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Column: transaction_id"]
     A --&gt; A1["Classification: pii"]
     A --&gt; A2["User role: external_analyst"]
@@ -2313,7 +2313,7 @@
     C --&gt; C2["User role: external_analyst"]
     C --&gt; C3["Applies mask_pii rule? ✓"]
     C --&gt; C4["Masking strategy: full_hash"]
-    C --&gt; C5["Result: Hash value returned"]</code></pre>
+    C --&gt; C5["Result: Hash value returned"]</div>
 <h3 id="3-approval-workflows">3. Approval Workflows<a class="headerlink" href="#3-approval-workflows" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a># Sensitive data requires approval
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
@@ -2339,7 +2339,7 @@
 </span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>}
 </span></code></pre></div>
 <p><strong>Workflow</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["User: analyst_42 wants to read risk_compliance.fraud_scores"]
     A --&gt; B["OPA Evaluation"]
     B --&gt; B1["Check: allows read? ✗"]
@@ -2351,7 +2351,7 @@
     C --&gt; C2["Owner reviews: Purpose? Risk level?"]
     C --&gt; C3["Owner grants: access_request_id = req_9999"]
     C --&gt; C4["Analyst notified: Access granted or denied"]
-    C --&gt; C5["Audit: Log decision + reasoning"]</code></pre>
+    C --&gt; C5["Audit: Log decision + reasoning"]</div>
 <h3 id="4-retention-enforcement">4. Retention Enforcement<a class="headerlink" href="#4-retention-enforcement" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a># Enforce minimum and maximum retention policies
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
@@ -2473,7 +2473,7 @@
 <hr />
 <h2 id="integration-how-spark-reads-opa-policies">Integration: How Spark Reads OPA Policies<a class="headerlink" href="#integration-how-spark-reads-opa-policies" title="Permanent link">&para;</a></h2>
 <h3 id="query-execution-flow">Query Execution Flow<a class="headerlink" href="#query-execution-flow" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Analyst submits query:SELECT transaction_id, account_id, amountFROM transactions.raw_transactionsWHERE booking_date = '2026-04-30'"]
 
     B["Spark SQL Parser"]
@@ -2498,7 +2498,7 @@
     D --&gt; D1["Read Iceberg table"]
     D --&gt; D2["Apply masking via Spark UDF"]
     D --&gt; D3["Log to Elasticsearch audit trail"]
-    D --&gt; D4["Return results to analyst"]</code></pre>
+    D --&gt; D4["Return results to analyst"]</div>
 <h3 id="code-implementation">Code Implementation<a class="headerlink" href="#code-implementation" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># From platform/governance/opa_evaluator.py</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>

@@ -2138,19 +2138,19 @@
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
 <p><strong>Choose OPA (Open Policy Agent)</strong> for policy-as-code governance.</p>
 <h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
-    A["User query: SELECT account_id, amount&lt;br/&gt;FROM transactions"]
+<div class="mermaid">graph TD
+    A["User query: SELECT account_id, amount FROM transactions"]
     A --&gt; B["Spark SQL Parser"]
     B --&gt; C["OPA Policy Evaluator"]
-    C --&gt; C1["Load: platform/governance/&lt;br/&gt;opa-policies/abac.rego"]
-    C --&gt; C2["Evaluate: Can user access&lt;br/&gt;these columns?"]
+    C --&gt; C1["Load: platform/governance/opa-policies/abac.rego"]
+    C --&gt; C2["Evaluate: Can user access these columns?"]
     C --&gt; C3["Check: Is masking required?"]
     C --&gt; C4["Check: Should query be audited?"]
-    C --&gt; C5["Decision: ALLOW, MASK account_id,&lt;br/&gt;LOG TO ELASTICSEARCH"]
+    C --&gt; C5["Decision: ALLOW + MASK account_id +LOG TO ELASTICSEARCH"]
     C5 --&gt; D["Spark Execution"]
     D --&gt; D1["Read data"]
     D --&gt; D2["Apply masking via UDF"]
-    D --&gt; D3["Return results to user"]</code></pre>
+    D --&gt; D3["Return results to user"]</div>
 <h3 id="policy-example">Policy Example<a class="headerlink" href="#policy-example" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a># Default deny
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>default allow = false

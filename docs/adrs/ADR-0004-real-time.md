@@ -29,14 +29,14 @@ Can we have both?
 ```mermaid
 graph TD
     A["Events occur"]
-    A --> B["Kafka Topic - real-time<br/>7-day retention"]
-    B --> B1["Consumers: Fraud detection,<br/>pricing engine"]
-    B --> B2["Latency requirement: &lt; 100ms"]
-    B --> C["Spark Structured Streaming<br/>micro-batch every 5 minutes"]
-    C --> C1["Checkpoint: Ensures<br/>exactly-once delivery"]
-    C --> D["Iceberg Table - cold path<br/>7-year retention"]
-    D --> D1["Consumers: Analysts, compliance<br/>can tolerate 5-minute lag"]
-    D --> D2["Cost: 60% cheaper than Kafka"]
+    A --> B["Kafka Topic real-time, 7-day retention"]
+    B --> B1["Consumers: Fraud detection, pricing engineneed < 1-second latency"]
+    B --> B2["Latency: < 100ms"]
+    B --> C["Spark Structured Streamingmicro-batch every 5 minutes"]
+    C --> C1["Checkpoint: Ensures exactly-once delivery"]
+    C --> D["Iceberg Table cold path, 7-year retention"]
+    D --> D1["Consumers: Analysts, compliancecan tolerate 5-minute lag"]
+    D --> D2["Cost: 60% cheaper than Kafka retention"]
     D --> D3["Latency: 5 minutes"]
 ```
 
@@ -92,34 +92,34 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Kafka cluster: 5 brokers<br/>10TB storage at 2K per TB/month"]
-    A --> B["5 x 10 x 2000 = 100K per month"]
-    B --> C["Over 7 years: 8.4M total"]
+    A["Kafka cluster: 5 brokers × 10TB storage × $2K/month/TB"]
+    A --> B["= 5 × 10 × $2,000 = $100K/month"]
+    B --> C["Over 7 years: $8.4M"]
 ```
 
 **Option 2: Pure Iceberg** (7-year retention, S3 storage)
 
 ```mermaid
 graph TD
-    A["Data size: 1B tx per year<br/>at 50 bytes each = 50GB raw"]
-    A --> B["Iceberg compressed:<br/>60 percent reduction = 20GB per year"]
+    A["Data size: 1B tx/yr × 50 bytes = 50GB/yr raw"]
+    A --> B["Iceberg compressed: 60% reduction = 20GB/yr"]
     B --> C["7 years: 140GB total"]
-    C --> D["S3 cost: 140GB at 0.023 per GB<br/>per month = 3.22K per month"]
-    D --> E["Over 7 years: 270K total"]
+    C --> D["S3 cost: 140GB × $0.023/GB/month = $3.22K/month"]
+    D --> E["Over 7 years: $270K"]
 ```
 
 **Option 3: Hybrid Kafka 7-day + Iceberg 7-year**
 
 ```mermaid
 graph TD
-    A["Kafka cluster: 5 brokers<br/>0.5TB storage, 7-day retention"]
-    A --> B["Cost: 5 x 0.5 x 2000<br/>= 5K per month"]
+    A["Kafka cluster: 5 brokers × 0.5TB storage 7-day, not years"]
+    A --> B["= 5 × 0.5 × $2,000 = $5K/month"]
     
     C["Iceberg S3: 140GB"]
-    C --> D["Cost: 3.22K per month"]
+    C --> D["= $3.22K/month"]
     
-    E["Total: 8.22K per month<br/>= 98K per year"]
-    E --> F["Over 7 years: 686K total"]
+    E["Total: $8.22K/month = $98K/year"]
+    E --> F["Over 7 years: $686K"]
 ```
 
 **Savings**: Hybrid is 31x cheaper than pure Kafka, 2.5x more expensive than pure Iceberg but 31x faster for fraud detection.

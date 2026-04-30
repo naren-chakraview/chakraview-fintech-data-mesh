@@ -22,15 +22,15 @@ Traditional centralized data warehouses create bottlenecks:
 
 ```mermaid
 graph TD
-    A["Unified Spark SQL Analytics<br/>(Time-travel, masking, SLOs)"]
+    A["Unified Spark SQL Analytics Engine(Time-travel, masking, SLOs)"]
     
-    B["Transactions - Iceberg ACID<br/>7yr retention"]
-    C["Accounts - Iceberg ACID<br/>3yr retention"]
-    D["Risk - Compliance - Iceberg ACID<br/>10yr retention"]
+    B["TransactionsIcebergACID, 7yr retention"]
+    C["AccountsIcebergACID, 3yr retention"]
+    D["Risk/ComplianceIcebergACID, 10yr retention"]
     
-    E["Kafka Real-time<br/>5-min SLA"]
-    F["Kafka Real-time<br/>10-min SLA"]
-    G["Kafka Real-time<br/>10-min SLA"]
+    E["KafkaReal-time5-min SLA"]
+    F["KafkaReal-time10-min SLA"]
+    G["KafkaReal-time10-min SLA"]
     
     B --> A
     C --> A

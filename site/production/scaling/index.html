@@ -1983,20 +1983,20 @@
 <h2 id="horizontal-scaling-the-principles">Horizontal Scaling: The Principles<a class="headerlink" href="#horizontal-scaling-the-principles" title="Permanent link">&para;</a></h2>
 <h3 id="1-kafka-partitioning-hot-path-scale">1. Kafka Partitioning (Hot Path Scale)<a class="headerlink" href="#1-kafka-partitioning-hot-path-scale" title="Permanent link">&para;</a></h3>
 <p><strong>Partition Key</strong>: Should distribute evenly across partitions</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Domain: Transactions"]
-    A --&gt; A1["Partition key: account_id&lt;br/&gt;or transaction_id"]
+    A --&gt; A1["Partition key: account_id or transaction_id for ordering"]
     A --&gt; A2["Initial: 10 partitions"]
-    A --&gt; A3["Target: 100K tx per minute"]
-    A --&gt; A4["Per partition: 10K per minute"]
-    A --&gt; A5["Scaling: Add partitions if&lt;br/&gt;any exceeds 20K per minute"]
+    A --&gt; A3["Target throughput: 100K tx/min"]
+    A --&gt; A4["Messages per partition: 10K/min"]
+    A --&gt; A5["Scaling: Add partitions if any partition &gt; 20K/min"]
 
     B["Domain: Market Data"]
-    B --&gt; B1["Partition key: currency_pair&lt;br/&gt;ensures order"]
+    B --&gt; B1["Partition key: currency_pair ensures order per pair"]
     B --&gt; B2["Initial: 10 partitions"]
-    B --&gt; B3["Target: 10K rates per minute"]
-    B --&gt; B4["Per partition: 1K per minute"]
-    B --&gt; B5["Scaling: Add partitions if&lt;br/&gt;throughput exceeds 15K per minute"]</code></pre>
+    B --&gt; B3["Target throughput: 10K rates/min"]
+    B --&gt; B4["Messages per partition: 1K/min"]
+    B --&gt; B5["Scaling: Add partitions if throughput &gt; 15K/min"]</div>
 <p><strong>Increase Partitions</strong>:
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kafka-topics.sh<span class="w"> </span>--bootstrap-server<span class="w"> </span>kafka:9092<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>--alter<span class="w"> </span>--topic<span class="w"> </span>market-transactions-raw<span class="w"> </span>--partitions<span class="w"> </span><span class="m">20</span>
@@ -2004,11 +2004,11 @@
 <p><strong>Impact</strong>: Spark consumer group scales to match (up to partition count).</p>
 <h3 id="2-spark-executor-scaling-cold-path-scale">2. Spark Executor Scaling (Cold Path Scale)<a class="headerlink" href="#2-spark-executor-scaling-cold-path-scale" title="Permanent link">&para;</a></h3>
 <p><strong>Scaling Decision Tree</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A{"Is batch_duration &amp;gt; 5 minutes?"}
     A --&gt;|YES| B["Increase executors for more parallelism"]
     A --&gt;|NO| C["Batch is fast; look elsewhere"]
-    C --&gt; D["Check: CPU, memory, I/O contention"]</code></pre>
+    C --&gt; D["Check: CPU, memory, I/O contention"]</div>
 <p><strong>Executor Configuration</strong>:
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># domains/transactions/ingest/config.yaml</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">spark</span><span class="p">:</span>
@@ -2035,7 +2035,7 @@
 </span></code></pre></div></p>
 <h3 id="3-iceberg-table-scaling-storage-scale">3. Iceberg Table Scaling (Storage Scale)<a class="headerlink" href="#3-iceberg-table-scaling-storage-scale" title="Permanent link">&para;</a></h3>
 <p><strong>Partition Count Impact</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Table: transactions.raw_transactions"]
     A --&gt; A1["Partition spec: year, month, day, account_id"]
     A --&gt; A2["Data volume: 1B tx/year × 50 bytes = 50GB/year"]
@@ -2052,7 +2052,7 @@
     C["But Iceberg uses hidden partitions efficient"]
     C --&gt; C1["Only create partitions with data"]
     C --&gt; C2["Typical: 360K partitions/year 1 per day-account combo with data"]
-    C --&gt; C3["File count per partition: 2-5 files daily Spark batch"]</code></pre>
+    C --&gt; C3["File count per partition: 2-5 files daily Spark batch"]</div>
 <p><strong>Optimize Partitions</strong>:
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># If partition count &gt; 1M, consider dropping account_id partition</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># and add it to column-level partitioning instead</span>

@@ -1921,53 +1921,53 @@
 <h3 id="dashboard-1-data-mesh-health-overview">Dashboard 1: Data Mesh Health Overview<a class="headerlink" href="#dashboard-1-data-mesh-health-overview" title="Permanent link">&para;</a></h3>
 <p>6 panels showing system health:</p>
 <p><strong>1. Data Freshness Gauge</strong></p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Data Freshness per Domain"]
     A --&gt; A1["Transactions: 2.3 min / 5 min SLA GREEN"]
     A --&gt; A2["Accounts: 8.5 min / 10 min SLA YELLOW"]
-    A --&gt; A3["Risk - Compliance: 4.1 min / 10 min SLA GREEN"]
+    A --&gt; A3["Risk/Compliance: 4.1 min / 10 min SLA GREEN"]
     A --&gt; A4["Market Data: 0.8 min / 1 min SLA GREEN"]
-    A --&gt; A5["Counterparties: 45 min / 60 min SLA GREEN"]</code></pre>
+    A --&gt; A5["Counterparties: 45 min / 60 min SLA GREEN"]</div>
 <p><strong>2. Ingest Record Rate Time Series</strong></p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Records ingested per minute, last 24 hours"]
     A --&gt; A1["Transactions: 150K records/min steady"]
     A --&gt; A2["Market Data: 10K rates/min spikes during trading hours"]
     A --&gt; A3["Accounts: 100 records/min flat line, low velocity"]
-    A --&gt; A4["Risk - Compliance: 50K scores/min spiky, depends on transaction volume"]</code></pre>
+    A --&gt; A4["Risk/Compliance: 50K scores/min spiky, depends on transaction volume"]</div>
 <p><strong>3. Query Duration Time Series</strong></p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["P95 query latency over time"]
     A --&gt; A1["Transactions: 8.5 sec stable"]
-    A --&gt; A2["Risk - Compliance: 12.3 sec slower due to joins"]
+    A --&gt; A2["Risk/Compliance: 12.3 sec slower due to joins"]
     A --&gt; A3["Accounts: 2.1 sec small table"]
-    A --&gt; A4["Alert if P95 &gt; 30 sec performance degradation"]</code></pre>
+    A --&gt; A4["Alert if P95 &gt; 30 sec performance degradation"]</div>
 <p><strong>4. Quality Check Pass Rate Gauge</strong></p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Percentage of records passing quality rules"]
     A --&gt; A1["Transactions: 99.8% pass"]
     A --&gt; A2["Accounts: 100% pass strict validation"]
-    A --&gt; A3["Risk - Compliance: 99.2% pass some edge cases"]
+    A --&gt; A3["Risk/Compliance: 99.2% pass some edge cases"]
     A --&gt; A4["Counterparties: 99.9% pass"]
-    A --&gt; A5["Market Data: 98.5% pass missing rates during gaps"]</code></pre>
+    A --&gt; A5["Market Data: 98.5% pass missing rates during gaps"]</div>
 <p><strong>5. Kafka Lag Time Series</strong></p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Lag between Kafka publish and Spark read"]
     A --&gt; A1["Transactions: 15 sec under 30 sec SLA"]
     A --&gt; A2["Market Data: 3 sec very tight"]
     A --&gt; A3["Accounts: 45 sec acceptable, lower velocity"]
-    A --&gt; A4["Risk - Compliance: 25 sec acceptable, lower volume"]</code></pre>
+    A --&gt; A4["Risk/Compliance: 25 sec acceptable, lower volume"]</div>
 <p><strong>6. Ingest Errors Time Series</strong></p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Errors per minute"]
     A --&gt; A1["Transactions: 0 errors healthy"]
     A --&gt; A2["Market Data: 2-5 errors/min acceptable, high throughput"]
     A --&gt; A3["Accounts: 0 errors stable reference data"]
-    A --&gt; A4["Risk - Compliance: 1-2 errors/min model retries"]
-    A --&gt; A5["Counterparties: 0 errors low velocity"]</code></pre>
+    A --&gt; A4["Risk/Compliance: 1-2 errors/min model retries"]
+    A --&gt; A5["Counterparties: 0 errors low velocity"]</div>
 <h3 id="dashboard-2-transactions-domain-deep-dive">Dashboard 2: Transactions Domain Deep-Dive<a class="headerlink" href="#dashboard-2-transactions-domain-deep-dive" title="Permanent link">&para;</a></h3>
 <p>Drill-down for transactions domain:</p>
-<p><pre class="mermaid"><code>graph TD
+<p><div class="mermaid">graph TD
     A["Panel 1: Raw Transactions Freshness"]
     A --&gt; A1["Current: 2.3 minutes"]
     A --&gt; A2["SLA: 5 minutes"]
@@ -1989,7 +1989,7 @@
     D["Panel 4: Partition Statistics"]
     D --&gt; D1["Partitions per day: 4 year, month, day, account_id"]
     D --&gt; D2["Files per partition: avg 3.2"]
-    D --&gt; D3["Size per partition: avg 500MB"]</code></pre>
+    D --&gt; D3["Size per partition: avg 500MB"]</div>
 └── Scan efficiency: 85% (partition pruning working)</p>
 <p>Panel 5: Data Volume Growth
 ├── Daily growth: 42GB/day
@@ -2024,7 +2024,7 @@ Panel 1: Masked Column Access
 └── Status: COMPLIANT</p>
 <p>Panel 4: Retention Policy Enforcement
 ├── Transactions (7-year policy): ✓ Enforced
-├── Risk - Compliance (10-year policy): ✓ Enforced
+├── Risk/Compliance (10-year policy): ✓ Enforced
 ├── Market Data (1-year policy): ✓ Enforced
 ├── Snapshots auto-deleted: 45 (90+ days old)
 └── Status: All policies enforced

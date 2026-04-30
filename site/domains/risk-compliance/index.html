@@ -2042,7 +2042,7 @@
 </span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="nt">mask_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">partial_hash</span>
 </span></code></pre></div></p>
 <p><strong>Downstream Consumers</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["fraud-detection-service Real-time, hot path"]
     A --&gt; A1["Consumes: Kafka topic risk-scores-raw"]
     A --&gt; A2["Purpose: Block or approve transactions in real-time"]
@@ -2056,7 +2056,7 @@
     C["compliance-reporting Quarterly"]
     C --&gt; C1["Consumes: Iceberg table + 10-year time-travel"]
     C --&gt; C2["Purpose: AML/SAR filing for regulators"]
-    C --&gt; C3["Frequency: Quarterly + event-driven"]</code></pre>
+    C --&gt; C3["Frequency: Quarterly + event-driven"]</div>
 <h3 id="kyc-verdicts">kyc-verdicts<a class="headerlink" href="#kyc-verdicts" title="Permanent link">&para;</a></h3>
 <p>Know Your Customer (KYC) verification status and results.</p>
 <p><strong>Schema</strong> (Avro v1.0):

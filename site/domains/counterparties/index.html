@@ -1901,7 +1901,7 @@
 </span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="nt">masked_for_roles</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 </span></code></pre></div></p>
 <p><strong>Downstream Consumers</strong>:</p>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["transaction-processing Real-time"]
     A --&gt; A1["Consumes: Kafka topic counterparties-raw hot path"]
     A --&gt; A2["Purpose: Route transactions to correct processor"]
@@ -1915,7 +1915,7 @@
     C["analytics-reporting Batch"]
     C --&gt; C1["Consumes: Iceberg table"]
     C --&gt; C2["Purpose: Counterparty performance analysis"]
-    C --&gt; C3["Frequency: Weekly/monthly"]</code></pre>
+    C --&gt; C3["Frequency: Weekly/monthly"]</div>
 <hr />
 <h2 id="ingest-pipeline">Ingest Pipeline<a class="headerlink" href="#ingest-pipeline" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># From domains/counterparties/ingest/ingest_job.py</span>
@@ -1965,13 +1965,13 @@
 <hr />
 <h2 id="governance-compliance">Governance &amp; Compliance<a class="headerlink" href="#governance-compliance" title="Permanent link">&para;</a></h2>
 <h3 id="retention-policy">Retention Policy<a class="headerlink" href="#retention-policy" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["Counterparty Master: 2 years"]
     A --&gt; A1["Rationale: Reference data, inactive counterparties archive"]
     A --&gt; A2["Retention starts: From last transaction3-year rule: if no activity, mark inactive"]
-    A --&gt; A3["Deletion process: Hard delete after 2 years of inactivity"]</code></pre>
+    A --&gt; A3["Deletion process: Hard delete after 2 years of inactivity"]</div>
 <h3 id="approval-workflow-for-commercial-data">Approval Workflow for Commercial Data<a class="headerlink" href="#approval-workflow-for-commercial-data" title="Permanent link">&para;</a></h3>
-<pre class="mermaid"><code>graph TD
+<div class="mermaid">graph TD
     A["User: I need counterparty credit limitsto audit exposure"]
     A --&gt; B["OPA Evaluation"]
     B --&gt; B1["User role: auditor"]
@@ -1982,7 +1982,7 @@
     B --&gt; C["Owner decision"]
     C --&gt; C1["Context review: Purpose? Justification?"]
     C --&gt; C2["Accept: Grant access masking rules may still apply"]
-    C --&gt; C3["Reject: Deny explain why"]</code></pre>
+    C --&gt; C3["Reject: Deny explain why"]</div>
 <hr />
 <h2 id="queries">Queries<a class="headerlink" href="#queries" title="Permanent link">&para;</a></h2>
 <h3 id="find-high-risk-merchants">Find High-Risk Merchants<a class="headerlink" href="#find-high-risk-merchants" title="Permanent link">&para;</a></h3>
