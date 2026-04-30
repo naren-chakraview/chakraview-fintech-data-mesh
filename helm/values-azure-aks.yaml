@@ -1,0 +1,197 @@
+# Azure AKS-Specific Helm Values
+# Deploy with: helm install fintech-mesh ./helm -f helm/values-azure-aks.yaml
+
+global:
+  cloud: azure
+  subscription_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  resource_group: fintech-mesh-rg
+  region: eastus
+  environment: production
+
+# AKS Cluster Configuration
+aks:
+  cluster_name: fintech-mesh-prod
+  resource_group: fintech-mesh-rg
+  vm_set_type: VirtualMachineScaleSets
+  os_type: Linux
+  kubernetes_version: 1.27  # or latest
+
+# Storage: Azure Blob Storage for Iceberg Warehouse
+storage:
+  type: abfs  # Azure Blob File System
+  account_name: fintemesmeshstorage
+  container: warehouse
+  access_key: ${AZURE_STORAGE_ACCOUNT_KEY}
+  authentication: shared_key  # Use managed identity if preferred
+
+# Kafka Configuration
+kafka:
+  brokers: 5
+  replication: 3
+  storage_class: managed-premium  # Azure Premium Managed Disk
+  storage_size: 100Gi
+  vm_size: Standard_D4s_v3  # 4 CPU, 16GB RAM
+
+# Iceberg REST Catalog
+iceberg_catalog:
+  replicas: 3
+  image: apache/iceberg-rest-catalog:latest
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1
+    limits:
+      memory: 4Gi
+      cpu: 2
+  database:
+    type: azure_database  # Azure Database for PostgreSQL
+
+# Azure Database for PostgreSQL (managed)
+azure_database:
+  enabled: true
+  server_name: fintech-mesh-postgres
+  sku: Standard_D4s_v3  # 4 vCore
+  storage_gb: 500
+  backup:
+    enabled: true
+    retention_days: 30
+    geo_redundant: true
+
+# Spark Configuration
+spark:
+  executors: 10
+  executor_cores: 8
+  executor_memory: 16Gi
+  driver_memory: 4Gi
+
+  # Azure-specific tuning
+  azure_credentials:
+    type: managed_identity  # Use Azure Managed Identity
+    client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    tenant_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Prometheus + Grafana
+monitoring:
+  prometheus:
+    storage_size: 100Gi
+    storage_class: managed-premium
+    retention: 30d
+  grafana:
+    replicas: 2
+    azure_storage: true
+
+# Application Insights (Azure native monitoring)
+application_insights:
+  enabled: true
+  instrumentation_key: ${APPINSIGHTS_INSTRUMENTATION_KEY}
+  log_analytics_workspace: fintech-mesh-logs
+
+# OPA Configuration
+opa:
+  replicas: 3
+  image: openpolicyagent/opa:latest
+
+# Discovery Portal
+discovery_portal:
+  replicas: 3
+  image: fintech-mesh/discovery-portal:latest
+  ingress:
+    enabled: true
+    class: azure  # Azure Application Gateway
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway
+      appgw.ingress.kubernetes.io/backend-path-prefix: /
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+# Auto Scaling
+autoscaling:
+  enabled: true
+  min_count: 3
+  max_count: 20
+  auto_scaling_profile: balanced
+  scale_down_enabled: true
+  scale_down_delay: 300  # 5 minutes
+
+# Managed Identity (Azure-native RBAC)
+managed_identity:
+  enabled: true
+  identities:
+    - name: spark
+      scope: /subscriptions/SUB_ID/resourceGroups/fintech-mesh-rg
+      roles:
+        - Storage Blob Data Contributor
+        - Storage Queue Data Contributor
+    - name: iceberg
+      scope: /subscriptions/SUB_ID/resourceGroups/fintech-mesh-rg
+      roles:
+        - Storage Blob Data Reader
+    - name: monitoring
+      scope: /subscriptions/SUB_ID/resourceGroups/fintech-mesh-rg
+      roles:
+        - Monitoring Reader
+
+# Key Vault Integration
+key_vault:
+  enabled: true
+  vault_name: fintech-mesh-kv
+  secrets:
+    - name: kafka-broker-key
+      version: latest
+    - name: database-password
+      version: latest
+  access_policy: managed_identity
+
+# Cost Management
+cost:
+  reserved_instances: true  # Azure Reserved Instances
+  savings_plan: true  # Compute savings plan
+  spot_instances: false  # Currently disabled for reliability
+
+# Networking
+networking:
+  virtual_network: fintech-mesh-vnet
+  subnet: fintech-mesh-subnet
+  network_security_group: fintech-mesh-nsg
+  enable_private_cluster: false  # Set to true for production
+  authorized_ranges:
+    - 203.0.113.0/24  # Office CIDR
+    - 198.51.100.0/24  # VPN CIDR
+
+# Backup & Disaster Recovery
+backup:
+  enabled: true
+  type: azure_backup
+  recovery_vault: fintech-mesh-recovery
+  retention_days: 30
+  geo_redundant: true
+
+# Logging & Diagnostics
+logging:
+  type: log_analytics
+  workspace_name: fintech-mesh-workspace
+  log_retention_days: 30
+  diagnostic_settings:
+    - resource: api_server
+      enabled: true
+    - resource: audit
+      enabled: true
+    - resource: authenticator
+      enabled: true
+
+# Network Policies
+network_policy:
+  enabled: true
+  policy_engine: calico  # Use Calico for network policies
+
+# Pod Security Standards
+pod_security:
+  enforce: restricted
+  audit: restricted
+  warn: restricted
+
+# Azure DevOps Integration
+devops:
+  enabled: true
+  organization: my-org
+  project: fintech-mesh
+  pipeline_name: ci-cd-fintech-mesh

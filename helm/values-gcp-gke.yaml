@@ -1,0 +1,161 @@
+# GCP GKE-Specific Helm Values
+# Deploy with: helm install fintech-mesh ./helm -f helm/values-gcp-gke.yaml
+
+global:
+  cloud: gcp
+  project_id: my-fintech-project
+  region: us-central1
+  environment: production
+
+# GKE Cluster Configuration
+gke:
+  cluster_name: fintech-mesh-prod
+  network: fintech-mesh-vpc
+  subnet: fintech-mesh-subnet
+  zone: us-central1-a
+  machine_type: n1-highmem-4
+
+# Storage: Google Cloud Storage for Iceberg Warehouse
+storage:
+  type: gcs
+  bucket: fintech-mesh-warehouse
+  project_id: my-fintech-project
+  credentials: ${GOOGLE_APPLICATION_CREDENTIALS}  # Service account JSON
+
+# Kafka Configuration
+kafka:
+  brokers: 5
+  replication: 3
+  storage_class: pd-ssd  # GCP persistent disk SSD
+  storage_size: 100Gi
+  instance_type: n1-highmem-2  # 8 CPU, 13GB RAM
+
+# Iceberg REST Catalog
+iceberg_catalog:
+  replicas: 3
+  image: apache/iceberg-rest-catalog:latest
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1
+    limits:
+      memory: 4Gi
+      cpu: 2
+  storage:
+    type: cloud_sql  # Cloud SQL for metadata
+
+# Spark Configuration
+spark:
+  executors: 10
+  executor_cores: 8
+  executor_memory: 16Gi
+  driver_memory: 4Gi
+
+  # GCP-specific tuning
+  gcp_credentials:
+    type: workload_identity  # Use Workload Identity (OIDC)
+    service_account: spark@my-fintech-project.iam.gserviceaccount.com
+
+# Cloud SQL for PostgreSQL (managed)
+cloud_sql:
+  enabled: true
+  instance: cloudsql-postgres-prod
+  tier: db-custom-4-16384  # 4 CPU, 16GB RAM
+  backups:
+    enabled: true
+    automated: true
+    retention_days: 30
+
+# Prometheus + Grafana
+monitoring:
+  prometheus:
+    storage_size: 100Gi
+    storage_class: pd-ssd
+    retention: 30d
+  grafana:
+    replicas: 2
+    cloud_storage_bucket: fintech-mesh-grafana-dashboards
+
+# BigQuery Integration (Optional: for data warehouse queries)
+bigquery:
+  enabled: true
+  dataset: fintech_mesh_analytics
+  export_tables:
+    - transactions.raw_transactions
+    - risk_compliance.fraud_scores
+
+# OPA Configuration
+opa:
+  replicas: 3
+  image: openpolicyagent/opa:latest
+
+# Discovery Portal
+discovery_portal:
+  replicas: 3
+  image: fintech-mesh/discovery-portal:latest
+  ingress:
+    enabled: true
+    class: gce  # GCP Load Balancer
+    annotations:
+      kubernetes.io/ingress.class: gce
+      networking.gke.io/managed-certificates: fintech-mesh-cert
+      kubernetes.io/ingress.global-static-ip-name: fintech-mesh-ip
+
+# Auto Scaling
+autoscaling:
+  enabled: true
+  min_nodes: 3
+  max_nodes: 20
+  target_cpu: 70
+  target_memory: 80
+  auto_upgrade: true  # GKE automatic upgrades
+
+# Workload Identity (GCP-native auth)
+workload_identity:
+  enabled: true
+  service_accounts:
+    - name: spark
+      gcp_sa: spark@my-fintech-project.iam.gserviceaccount.com
+    - name: iceberg
+      gcp_sa: iceberg@my-fintech-project.iam.gserviceaccount.com
+    - name: monitoring
+      gcp_sa: monitoring@my-fintech-project.iam.gserviceaccount.com
+
+# Cost Optimization
+cost:
+  preemptible_nodes: true  # GCP preemptible (up to 80% cheaper)
+  commitment_plan: annual  # Commit 1 year for 25-30% discount
+  enable_autoscaling: true
+
+# Networking
+networking:
+  vpc_network: fintech-mesh-vpc
+  enable_private_cluster: false  # Set to true for production
+  authorized_networks:
+    - office: 203.0.113.0/24
+    - vpn: 198.51.100.0/24
+
+# Backup & Disaster Recovery
+backup:
+  enabled: true
+  type: gke-backup
+  retention_days: 30
+  backup_plan: daily  # Daily automated backups
+  restore_config: multi-cluster-aware
+
+# Logging
+logging:
+  type: cloud_logging
+  project_id: my-fintech-project
+  log_sink: fintech-mesh-logs
+  retention_days: 30
+
+# Secure Boot & Binary Authorization
+security:
+  secure_boot: true
+  binary_authorization: true
+  network_policy: true
+
+# Config Connector (optional: manage GCP resources from K8s)
+config_connector:
+  enabled: false  # Set to true to manage GCP resources via CRDs

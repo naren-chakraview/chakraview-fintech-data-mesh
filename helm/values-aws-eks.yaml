@@ -1,0 +1,139 @@
+# AWS EKS-Specific Helm Values
+# Deploy with: helm install fintech-mesh ./helm -f helm/values-aws-eks.yaml
+
+global:
+  cloud: aws
+  region: us-east-1
+  environment: production
+
+# EKS Cluster Configuration
+eks:
+  cluster_name: fintech-mesh-prod
+  vpc_id: vpc-12345678
+  subnets:
+    - subnet-11111111  # us-east-1a
+    - subnet-22222222  # us-east-1b
+    - subnet-33333333  # us-east-1c
+
+# Storage: AWS S3 for Iceberg Warehouse
+storage:
+  type: s3
+  bucket: fintech-mesh-warehouse
+  region: us-east-1
+  access_key: ${AWS_ACCESS_KEY_ID}
+  secret_key: ${AWS_SECRET_ACCESS_KEY}
+  path_style: false  # Virtual-hosted style (recommended)
+
+# Kafka Configuration
+kafka:
+  brokers: 5
+  replication: 3
+  storage_class: gp3  # AWS gp3 (SSD)
+  storage_size: 100Gi
+  instance_type: kafka.m5.large
+
+# Iceberg REST Catalog
+iceberg_catalog:
+  replicas: 3
+  image: apache/iceberg-rest-catalog:latest
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1
+    limits:
+      memory: 4Gi
+      cpu: 2
+
+# Spark Configuration
+spark:
+  executors: 10
+  executor_cores: 8
+  executor_memory: 16Gi
+  driver_memory: 4Gi
+
+  # AWS-specific tuning
+  hadoop_credentials:
+    type: iam  # Use IAM roles (safer than access keys)
+    role_arn: arn:aws:iam::ACCOUNT_ID:role/EKS-Spark-Role
+
+# MinIO Configuration (Optional: Use S3 instead)
+# minio:
+#   enabled: false  # Use AWS S3 directly
+
+# PostgreSQL for Metadata
+postgres:
+  enabled: true
+  replicas: 1
+  storage_class: gp3
+  storage_size: 50Gi
+  instance_type: db.t3.large  # RDS equivalent
+  backup:
+    enabled: true
+    retention_days: 30
+    storage: s3://fintech-mesh-backups
+
+# Prometheus + Grafana
+monitoring:
+  prometheus:
+    storage_size: 100Gi
+    retention: 30d
+  grafana:
+    replicas: 2
+    storage: ebs  # AWS EBS volumes
+
+# OPA Configuration
+opa:
+  replicas: 3
+  image: openpolicyagent/opa:latest
+
+# Discovery Portal
+discovery_portal:
+  replicas: 3
+  image: fintech-mesh/discovery-portal:latest
+  ingress:
+    enabled: true
+    class: aws-alb  # AWS ALB
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/UUID
+
+# Auto Scaling
+autoscaling:
+  enabled: true
+  min_nodes: 3
+  max_nodes: 20
+  target_cpu: 70
+  target_memory: 80
+
+# IAM Roles (IRSA - IAM Roles for Service Accounts)
+iam:
+  spark_role: arn:aws:iam::ACCOUNT_ID:role/EKS-Spark-Role
+  iceberg_catalog_role: arn:aws:iam::ACCOUNT_ID:role/EKS-Iceberg-Role
+  monitoring_role: arn:aws:iam::ACCOUNT_ID:role/EKS-Monitoring-Role
+
+# Cost Optimization
+cost:
+  use_spot_instances: true
+  spot_interruption_handler: enabled  # Graceful pod eviction
+  use_reserved_instances: 3  # 3 reserved for baseline
+
+# Networking
+networking:
+  security_group: sg-12345678
+  enable_nat_gateway: true
+  enable_vpn_endpoint: true  # For private cluster
+
+# Backup & Disaster Recovery
+backup:
+  enabled: true
+  type: aws-backup
+  retention_days: 30
+  cross_region_backup: true
+  destination_region: us-west-2
+
+# Logging
+logging:
+  type: cloudwatch
+  log_group: /aws/eks/fintech-mesh
+  retention_days: 30
