@@ -1,0 +1,84 @@
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ============================================================================
+# ACCOUNTS DOMAIN: Customer Properties (Accounts domain owns these)
+# ============================================================================
+
+fintech:customerName
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Name" ;
+  rdfs:comment "Full name of the customer" ;
+  fintech:owningDomain "accounts" .
+
+fintech:customerEmail
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Email (Normalized)" ;
+  rdfs:comment "Normalized email used for entity deduplication" ;
+  fintech:owningDomain "accounts" .
+
+fintech:customerStatus
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Status" ;
+  rdfs:comment "active, suspended, closed" ;
+  fintech:owningDomain "accounts" .
+
+fintech:hasAccount
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range fintech:Account ;
+  rdfs:label "Has Account" ;
+  rdfs:comment "Customer owns this account" ;
+  fintech:owningDomain "accounts" .
+
+# ============================================================================
+# ACCOUNTS DOMAIN: Account Properties (Accounts domain owns these)
+# ============================================================================
+
+fintech:accountId
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:string ;
+  rdfs:label "Account ID" ;
+  rdfs:comment "Globally unique account identifier" ;
+  fintech:owningDomain "accounts" .
+
+fintech:accountBalance
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Account Balance" ;
+  rdfs:comment "Current account balance in base currency" ;
+  fintech:owningDomain "accounts" .
+
+fintech:accountStatus
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:string ;
+  rdfs:label "Account Status" ;
+  rdfs:comment "active, suspended, closed" ;
+  fintech:owningDomain "accounts" .
+
+fintech:accountType
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:string ;
+  rdfs:label "Account Type" ;
+  rdfs:comment "checking, savings, credit" ;
+  fintech:owningDomain "accounts" .
+
+fintech:accountOwner
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range fintech:Customer ;
+  rdfs:label "Account Owner" ;
+  rdfs:comment "The customer who owns this account" ;
+  fintech:owningDomain "accounts" .

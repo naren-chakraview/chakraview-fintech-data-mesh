@@ -1,0 +1,27 @@
+# Domain service discovery registry
+# This registry defines all domains participating in the federated semantic graph
+# Each domain exposes a SPARQL endpoint for cross-domain queries
+
+domains:
+  accounts:
+    name: "Accounts Domain"
+    sparql_endpoint: "http://accounts-domain.internal:3030/accounts/sparql"
+    description: "Customer and Account entities"
+    owned_entities:
+      - Customer
+      - Account
+
+  transactions:
+    name: "Transactions Domain"
+    sparql_endpoint: "http://transactions-domain.internal:3030/transactions/sparql"
+    description: "Transaction and Counterparty entities"
+    owned_entities:
+      - Transaction
+      - Counterparty
+
+  risk-compliance:
+    name: "Risk/Compliance Domain"
+    sparql_endpoint: "http://risk-domain.internal:3030/risk/sparql"
+    description: "Risk profiles and compliance data"
+    owned_entities:
+      - RiskProfile

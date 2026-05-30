@@ -1,0 +1,27 @@
+# Accounts Domain IRI Minting Rules
+# Defines how to deterministically mint stable IRIs for Customer and Account entities
+
+entity_rules:
+  customer:
+    # Customers are matched across sources by email + kyc_id
+    # This ensures same customer in Salesforce, Shopify, Risk gets same IRI
+    key_fields:
+      - email
+      - kyc_id
+    normalize: "lowercase + trim + concatenate"
+    description: |
+      Customers are deduplicated by normalized email + kyc_id.
+      Same email + kyc_id across different sources → same IRI.
+      Example: john@acme.com + kyc_9999 → IRI hash
+    iri_format: "https://chakracommerce.com/customer#{hash}"
+    ttl_seconds: 3600
+
+  account:
+    # Accounts are identified by unique account_id within the domain
+    # Account IDs are globally unique, so no need for cross-domain dedup
+    key_fields:
+      - account_id
+    normalize: "identity (account IDs are globally unique)"
+    description: "Account IDs are stable within the domain, no dedup needed"
+    iri_format: "https://chakracommerce.com/account#{id}"
+    ttl_seconds: 3600
