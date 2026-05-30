@@ -132,3 +132,19 @@ class TestAccountsRdfE2E:
         ]
 
         assert len(rdf_type_triples) >= 3, f"Expected at least 3 rdf:type fintech:Customer triples, got {len(rdf_type_triples)}"
+
+    def test_account_with_missing_customer_raises_error(self, transformer, sample_customers_df):
+        """Test: Account referencing unknown customer raises clear error"""
+        # Create accounts with one that references a non-existent customer
+        invalid_accounts = pd.DataFrame({
+            'account_id': ['acct_001', 'acct_999'],
+            'customer_email': ['john@acme.com', 'unknown@missing.com'],  # Doesn't exist in customers
+            'customer_kyc_id': ['kyc_9999', 'kyc_missing'],
+            'balance': [5000.00, 9999.00],
+            'status': ['active', 'active'],
+            'account_type': ['checking', 'checking']
+        })
+
+        # Should raise ValueError with helpful message
+        with pytest.raises(ValueError, match="references unknown customer"):
+            transformer.transform_accounts_to_rdf(invalid_accounts, sample_customers_df)

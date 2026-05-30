@@ -1,3 +1,5 @@
+"""Transform Accounts Silver tables to semantic RDF triples with deterministic IRI minting."""
+
 import pandas as pd
 from rdflib import Graph, Namespace, Literal, URIRef, RDF
 from datetime import datetime
@@ -45,6 +47,9 @@ class SilverToRdfTransformer:
         """
         Transform accounts Silver table to RDF.
         Generates fintech:Account triples and links to Customer IRIs.
+
+        Raises:
+            ValueError: If an account references a customer that doesn't exist in the customer mapping.
         """
         # Build customer IRI lookup
         customer_iris = {}
@@ -61,9 +66,21 @@ class SilverToRdfTransformer:
             # Add type declaration (CRITICAL: must use standard rdf:type)
             self.g.add((account_iri, RDF.type, self.FINTECH.Account))
 
-            # Look up customer IRI
-            cust_key = (row['customer_email'].lower().strip(), row['customer_kyc_id'].lower().strip())
-            customer_iri = URIRef(customer_iris.get(cust_key))
+            # Validate and look up customer IRI
+            customer_email_normalized = row.get('customer_email', '').lower().strip()
+            customer_kyc_normalized = row.get('customer_kyc_id', '').lower().strip()
+            cust_key = (customer_email_normalized, customer_kyc_normalized)
+
+            # Validate customer exists before creating reference
+            if cust_key not in customer_iris:
+                raise ValueError(
+                    f"Account '{row['account_id']}' references unknown customer: "
+                    f"email={row.get('customer_email', 'N/A')}, "
+                    f"kyc_id={row.get('customer_kyc_id', 'N/A')}. "
+                    f"Ensure customer data includes this email and kyc_id pair."
+                )
+
+            customer_iri = URIRef(customer_iris[cust_key])
 
             # Add Account properties
             self.g.add((account_iri, self.FINTECH.accountId, Literal(row['account_id'])))
