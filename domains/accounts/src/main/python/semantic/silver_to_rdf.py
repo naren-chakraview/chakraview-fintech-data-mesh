@@ -1,5 +1,5 @@
 import pandas as pd
-from rdflib import Graph, Namespace, Literal, URIRef
+from rdflib import Graph, Namespace, Literal, URIRef, RDF
 from datetime import datetime
 
 
@@ -26,6 +26,9 @@ class SilverToRdfTransformer:
             # Mint IRI for customer
             iri = self.iri_resolver.mint_customer_iri(row['email'], row['kyc_id'])
             iri_ref = URIRef(iri)
+
+            # Add type declaration (CRITICAL: must use standard rdf:type)
+            self.g.add((iri_ref, RDF.type, self.FINTECH.Customer))
 
             # Add Customer properties
             self.g.add((iri_ref, self.FINTECH.customerName, Literal(row['name'])))
@@ -54,6 +57,9 @@ class SilverToRdfTransformer:
         for _, row in accounts_df.iterrows():
             # Mint IRI for account
             account_iri = URIRef(self.iri_resolver.mint_account_iri(row['account_id']))
+
+            # Add type declaration (CRITICAL: must use standard rdf:type)
+            self.g.add((account_iri, RDF.type, self.FINTECH.Account))
 
             # Look up customer IRI
             cust_key = (row['customer_email'].lower().strip(), row['customer_kyc_id'].lower().strip())
