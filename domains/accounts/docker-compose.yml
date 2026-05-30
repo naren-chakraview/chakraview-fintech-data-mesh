@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: accounts_db
+      POSTGRES_USER: accounts_user
+      POSTGRES_PASSWORD: accounts_pass
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accounts_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  jena-fuseki:
+    image: stain/jena-fuseki:4.9.1
+    environment:
+      FUSEKI_DATASET_1: accounts
+    ports:
+      - "3030:3030"
+    volumes:
+      - ./config/fuseki-config.ttl:/etc/fuseki/config.ttl
+      - jena_data:/fuseki-base/databases
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3030/ || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  jena_data:
