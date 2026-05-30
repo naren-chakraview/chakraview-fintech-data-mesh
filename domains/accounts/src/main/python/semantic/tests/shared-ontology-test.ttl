@@ -1,0 +1,78 @@
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Minimal test ontology for unit tests
+
+fintech:Customer
+  a rdfs:Class ;
+  rdfs:label "Customer" ;
+  rdfs:comment "A customer in the fintech system" .
+
+fintech:Account
+  a rdfs:Class ;
+  rdfs:label "Account" ;
+  rdfs:comment "An account owned by a customer" .
+
+fintech:customerName
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Name" .
+
+fintech:customerEmail
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Email" .
+
+fintech:customerStatus
+  a rdf:Property ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Status" .
+
+fintech:sourceSystem
+  a rdf:Property ;
+  rdfs:label "Source System" ;
+  rdfs:range xsd:string .
+
+fintech:sourceIngestionTime
+  a rdf:Property ;
+  rdfs:label "Source Ingestion Time" ;
+  rdfs:range xsd:string .
+
+fintech:accountId
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:string ;
+  rdfs:label "Account ID" .
+
+fintech:accountBalance
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Account Balance" .
+
+fintech:accountStatus
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:string ;
+  rdfs:label "Account Status" .
+
+fintech:accountType
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:string ;
+  rdfs:label "Account Type" .
+
+fintech:accountOwner
+  a rdf:Property ;
+  rdfs:domain fintech:Account ;
+  rdfs:range fintech:Customer ;
+  rdfs:label "Account Owner" .
+
+fintech:decimal
+  a rdfs:Datatype ;
+  rdfs:label "Decimal" .
