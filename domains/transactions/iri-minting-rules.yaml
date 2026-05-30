@@ -1,0 +1,64 @@
+# Transactions Domain IRI Minting Rules
+# Defines how to deterministically mint stable IRIs for Transaction and Counterparty entities
+# Owner: Transactions domain team
+# Purpose: Enable deterministic RDF entity identification for transactions and counterparties
+
+entity_rules:
+  transaction:
+    # Transactions are identified by transaction_id, which is globally unique
+    # No cross-domain deduplication needed
+    key_fields:
+      - transaction_id
+    normalize: "identity (transaction IDs are globally unique)"
+    description: |
+      Transactions are identified by globally unique transaction_id.
+      No normalization needed. Direct format ensures readability and traceability.
+      Example: txn_001 → https://chakracommerce.com/transaction#txn_001
+    iri_format: "https://chakracommerce.com/transaction#{id}"
+    ttl_seconds: 3600
+
+  counterparty:
+    # Counterparties are identified by counterparty_id, which is globally unique
+    # Examples: stripe, paypal, bank_acme, merchant_xyz
+    key_fields:
+      - counterparty_id
+    normalize: "identity (counterparty IDs are globally unique)"
+    description: |
+      Counterparties are identified by globally unique counterparty_id.
+      No normalization or hashing needed. Direct format.
+      Example: stripe → https://chakracommerce.com/counterparty#stripe
+    iri_format: "https://chakracommerce.com/counterparty#{id}"
+    ttl_seconds: 3600
+
+# ============================================================================
+# CROSS-DOMAIN RESOLUTION: Customer IRI Linking
+# ============================================================================
+# Transactions domain does NOT own Customer entity (Accounts domain owns it)
+# But Transactions must reference Customer IRIs for deduplication
+# This section documents how to resolve Customer IRIs from transaction records
+
+cross_domain_resolution:
+  customer_iri:
+    source_domain: "accounts"
+    source_entity: "customer"
+    key_fields:
+      - customer_email
+      - customer_kyc_id
+    normalize: "lowercase + trim + concatenate (MUST MATCH Accounts domain)"
+    hash_algorithm: "SHA-256 first 8 characters (MUST MATCH Accounts domain)"
+    iri_format: "https://chakracommerce.com/customer#{hash}"
+    description: |
+      Transaction records contain customer_email and customer_kyc_id.
+      Apply SAME normalization as Accounts domain:
+      1. Lowercase and trim both fields
+      2. Concatenate: {email}:{kyc_id}
+      3. SHA-256 hash the concatenated string
+      4. Take first 8 characters of hex digest
+      5. Result: https://chakracommerce.com/customer#{hash}
+
+      Critical: Must match Accounts domain IRI exactly for entity deduplication.
+    note: |
+      This is a LOOKUP operation, not an IRI minting operation.
+      Transaction domain does NOT mint Customer IRIs.
+      Transactions link to Customer IRIs minted by Accounts domain.
+    ttl_seconds: 3600
