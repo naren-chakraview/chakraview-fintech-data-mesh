@@ -1,0 +1,72 @@
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Test ontology for Transactions domain unit tests
+
+fintech:Transaction a rdfs:Class ;
+  rdfs:label "Transaction" ;
+  fintech:owningDomain "transactions" .
+
+fintech:Counterparty a rdfs:Class ;
+  rdfs:label "Counterparty" ;
+  fintech:owningDomain "transactions" .
+
+fintech:Customer a rdfs:Class ;
+  rdfs:label "Customer" ;
+  fintech:owningDomain "accounts" .
+
+fintech:transactionId a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionAmount a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:decimal ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionStatus a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionDate a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:dateTime ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionDebtor a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range fintech:Customer ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionCreditor a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range fintech:Counterparty ;
+  fintech:owningDomain "transactions" .
+
+fintech:counterpartyId a rdf:Property ;
+  rdfs:domain fintech:Counterparty ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "transactions" .
+
+fintech:counterpartyName a rdf:Property ;
+  rdfs:domain fintech:Counterparty ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "transactions" .
+
+fintech:counterpartyType a rdf:Property ;
+  rdfs:domain fintech:Counterparty ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "transactions" .
+
+fintech:sourceSystem a rdf:Property ;
+  rdfs:range xsd:string .
+
+fintech:sourceIngestionTime a rdf:Property ;
+  rdfs:range xsd:dateTime .
+
+fintech:Decimal a rdfs:Datatype ;
+  rdfs:label "Decimal" .

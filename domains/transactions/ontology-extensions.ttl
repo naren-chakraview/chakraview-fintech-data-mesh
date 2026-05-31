@@ -1,0 +1,84 @@
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ============================================================================
+# TRANSACTIONS DOMAIN: Transaction Properties (Transactions domain owns these)
+# ============================================================================
+
+fintech:transactionId
+  a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:string ;
+  rdfs:label "Transaction ID" ;
+  rdfs:comment "Unique transaction identifier from source system" ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionAmount
+  a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Amount" ;
+  rdfs:comment "Transaction amount in base currency" ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionStatus
+  a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:string ;
+  rdfs:label "Status" ;
+  rdfs:comment "Transaction status (executed, failed, pending, cancelled)" ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionDate
+  a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Transaction Date" ;
+  rdfs:comment "When the transaction occurred" ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionDebtor
+  a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range fintech:Customer ;
+  rdfs:label "Debtor" ;
+  rdfs:comment "Customer initiating the transaction (links to Accounts domain Customer IRI)" ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionCreditor
+  a rdf:Property ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range fintech:Counterparty ;
+  rdfs:label "Creditor" ;
+  rdfs:comment "Receiving party (counterparty)" ;
+  fintech:owningDomain "transactions" .
+
+# ============================================================================
+# TRANSACTIONS DOMAIN: Counterparty Properties (Transactions domain owns these)
+# ============================================================================
+
+fintech:counterpartyId
+  a rdf:Property ;
+  rdfs:domain fintech:Counterparty ;
+  rdfs:range xsd:string ;
+  rdfs:label "Counterparty ID" ;
+  rdfs:comment "Unique counterparty identifier" ;
+  fintech:owningDomain "transactions" .
+
+fintech:counterpartyName
+  a rdf:Property ;
+  rdfs:domain fintech:Counterparty ;
+  rdfs:range xsd:string ;
+  rdfs:label "Counterparty Name" ;
+  rdfs:comment "Name of the counterparty" ;
+  fintech:owningDomain "transactions" .
+
+fintech:counterpartyType
+  a rdf:Property ;
+  rdfs:domain fintech:Counterparty ;
+  rdfs:range xsd:string ;
+  rdfs:label "Type" ;
+  rdfs:comment "Type of counterparty (processor, merchant, bank, exchange, etc.)" ;
+  fintech:owningDomain "transactions" .
