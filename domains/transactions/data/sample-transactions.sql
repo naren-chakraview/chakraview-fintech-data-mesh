@@ -84,6 +84,26 @@ VALUES ('txn_011', 'iris@technology.jp', 'kyc_99999', 'paypal', 2100.00, 'execut
 INSERT INTO raw_transactions (transaction_id, customer_email, customer_kyc_id, counterparty_id, amount, status, transaction_date)
 VALUES ('txn_012', 'jack@manufacturing.br', 'kyc_00000', 'square', 1600.00, 'executed', '2026-05-30 17:55:00');
 
+-- Edge case: Very high-value transaction ($10,000+) - fraud scoring test
+INSERT INTO raw_transactions (transaction_id, customer_email, customer_kyc_id, counterparty_id, amount, status, transaction_date)
+VALUES ('txn_013', 'oscar@wealth.com', 'kyc_HIGH01', 'stripe', 10500.00, 'executed', '2026-05-30 18:30:00');
+
+-- Edge case: Failed transaction - settlement reconciliation test
+INSERT INTO raw_transactions (transaction_id, customer_email, customer_kyc_id, counterparty_id, amount, status, transaction_date)
+VALUES ('txn_014', 'peter@startup.io', 'kyc_START1', 'paypal', 450.25, 'failed', '2026-05-30 19:00:00');
+
+-- Edge case: Long-pending transaction (2+ hours) - delayed transaction detection
+INSERT INTO raw_transactions (transaction_id, customer_email, customer_kyc_id, counterparty_id, amount, status, transaction_date)
+VALUES ('txn_015', 'quinn@merchant.net', 'kyc_MERC01', 'bofa', 2750.00, 'pending', CURRENT_TIMESTAMP - INTERVAL '3 hours');
+
+-- Edge case: International email (with special character) - character encoding test
+INSERT INTO raw_transactions (transaction_id, customer_email, customer_kyc_id, counterparty_id, amount, status, transaction_date)
+VALUES ('txn_016', 'sophie.dupont@services.fr', 'kyc_INTL01', 'stripe', 1850.00, 'executed', '2026-05-30 20:15:00');
+
+-- Edge case: Very small amount ($0.01) - minimum transaction test
+INSERT INTO raw_transactions (transaction_id, customer_email, customer_kyc_id, counterparty_id, amount, status, transaction_date)
+VALUES ('txn_017', 'tom@micro.co', 'kyc_TINY01', 'square', 0.01, 'executed', '2026-05-30 20:45:00');
+
 -- Insert counterparty reference data
 INSERT INTO counterparties (counterparty_id, name, type)
 VALUES ('stripe', 'Stripe Inc.', 'processor');

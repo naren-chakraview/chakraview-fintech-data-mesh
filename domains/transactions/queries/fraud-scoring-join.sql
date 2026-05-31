@@ -72,7 +72,9 @@ SELECT
     ) AS customer_stddev_amount,
     -- Flag potentially suspicious transactions
     CASE
+        -- High-value transaction flag: $5,000+ (adjust for risk appetite)
         WHEN rt.amount > 5000 THEN true
+        -- Failed transaction flag: transaction execution failed
         WHEN rt.status = 'failed' THEN true
         ELSE false
     END AS risk_flag
@@ -90,8 +92,11 @@ SELECT
     rt.status,
     rt.transaction_date,
     CASE
+        -- High-value transaction flag: $5,000+ (adjust for risk appetite)
         WHEN rt.amount > 5000 THEN 'HIGH_AMOUNT'
+        -- Failed transaction flag: transaction execution failed
         WHEN rt.status = 'failed' THEN 'FAILED_TXN'
+        -- Delayed transaction flag: Pending > 2 hours (operational SLA)
         WHEN rt.status = 'pending' AND (CURRENT_TIMESTAMP - rt.transaction_date) > INTERVAL '2 hours' THEN 'DELAYED'
         ELSE 'NORMAL'
     END AS risk_category
@@ -112,7 +117,8 @@ SELECT
     COUNT(DISTINCT rt.counterparty_id) AS unique_counterparties
 FROM raw_transactions rt
 GROUP BY rt.customer_email, rt.customer_kyc_id, DATE_TRUNC('hour', rt.transaction_date)
-HAVING COUNT(*) > 3  -- Flag if >3 transactions in one hour
+-- Transaction velocity: > 3 txns/hour (anomaly detection threshold for account takeover)
+HAVING COUNT(*) > 3
 ORDER BY DATE_TRUNC('hour', rt.transaction_date) DESC;
 
 -- Counterparty risk analysis: Transactions by processor/merchant

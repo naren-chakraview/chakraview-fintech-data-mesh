@@ -35,8 +35,7 @@ fintech:Customer
   a rdfs:Class ;
   rdfs:label "Customer" ;
   rdfs:comment "A financial customer or entity that holds accounts and initiates transactions. Owned by Accounts domain. Customer IRIs are minted deterministically from email + KYC ID to enable entity deduplication across domains." ;
-  fintech:owningDomain "accounts" ;
-  owl:sameAs [ owl:onProperty fintech:email ; owl:hasValue "customer_identifier" ] .
+  fintech:owningDomain "accounts" .
 
 fintech:Account
   a rdfs:Class ;
@@ -341,11 +340,13 @@ fintech:complianceStatus
 #
 # 3. Transaction IRIs (owned by Transactions domain):
 #    Format: https://chakracommerce.com/transaction#{id}
-#    Basis: Direct identity from transaction_id field
+#    Algorithm: Direct identity-based (no hashing, no normalization)
+#    Rationale: transaction_id is globally unique in source system
 #
 # 4. Counterparty IRIs (owned by Transactions domain):
 #    Format: https://chakracommerce.com/counterparty#{id}
-#    Basis: Direct identity from counterparty_id field
+#    Algorithm: Direct identity-based (no hashing, no normalization)
+#    Rationale: counterparty_id is globally unique (e.g., 'stripe', 'paypal')
 #
 # 5. RiskProfile IRIs (owned by Risk domain):
 #    Format: https://chakracommerce.com/risk-profile#{id}

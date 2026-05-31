@@ -23,7 +23,9 @@
 -- - transaction_date: When transaction occurred
 --
 -- Example:
--- SELECT * FROM raw_transactions
+-- SELECT rt.*, cp.name AS counterparty_name
+-- FROM raw_transactions rt
+-- LEFT JOIN counterparties cp ON rt.counterparty_id = cp.counterparty_id
 -- WHERE customer_email = 'john@acme.com' AND customer_kyc_id = 'kyc_12345'
 -- ORDER BY transaction_date DESC;
 -- ============================================================================

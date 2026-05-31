@@ -344,24 +344,6 @@ WHERE {
 LIMIT 10
 ```
 
-### Example: Find Transactions for a Customer
-
-```sparql
-PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-
-SELECT ?transaction ?amount ?status ?date
-WHERE {
-  ?transaction a fintech:Transaction ;
-               fintech:transactionDebtor <https://chakracommerce.com/customer#a1b2c3d4> ;
-               fintech:transactionAmount ?amount ;
-               fintech:transactionStatus ?status ;
-               fintech:transactionDate ?date .
-}
-ORDER BY DESC(?date)
-```
-
-This query finds all transactions linked to a specific customer IRI (resolved from email + KYC ID).
-
 ## Running Tests
 
 ### Unit Tests
@@ -499,7 +481,7 @@ WHERE {
 ### Using Python with RDFLib
 
 ```python
-from rdflib import Graph, Namespace
+from rdflib import Graph, Namespace, RDF
 
 g = Graph()
 g.parse("http://localhost:3031/transactions/sparql", format="sparql")

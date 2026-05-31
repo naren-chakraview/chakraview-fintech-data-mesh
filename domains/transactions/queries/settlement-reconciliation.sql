@@ -9,6 +9,8 @@
 -- - Reconciliation team identifying discrepancies
 -- - Risk monitoring for blocked transactions
 --
+-- Parameters: None (designed for daily batch execution of all pending/failed transactions)
+--
 -- Output Columns:
 -- - transaction_id: Unique transaction identifier
 -- - counterparty_id: Which processor/bank handled the transaction
@@ -19,8 +21,12 @@
 -- - transaction_date: Original transaction timestamp
 --
 -- Example:
--- SELECT * FROM settlement_reconciliation
--- WHERE settlement_status = 'pending' AND days_pending > 2;
+-- SELECT rt.transaction_id, rt.customer_email, rt.counterparty_id,
+--        cp.name AS counterparty_name, rt.amount, rt.status,
+--        EXTRACT(DAY FROM CURRENT_TIMESTAMP - rt.transaction_date) AS days_pending
+-- FROM raw_transactions rt
+-- LEFT JOIN counterparties cp ON rt.counterparty_id = cp.counterparty_id
+-- WHERE rt.status != 'executed' AND EXTRACT(DAY FROM CURRENT_TIMESTAMP - rt.transaction_date) > 2;
 -- ============================================================================
 
 SELECT
