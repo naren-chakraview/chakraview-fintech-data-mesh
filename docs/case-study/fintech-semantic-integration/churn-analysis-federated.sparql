@@ -1,0 +1,80 @@
+PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+#
+# Churn Risk Analysis: Cross-Domain Query
+#
+# Business Question:
+# Identify customers with high churn risk based on:
+# 1. Support escalations (Accounts domain) - 3+ in last 30 days
+# 2. Failed payments (Transactions domain) - 1+ failed transactions
+# 3. Risk score (Risk/Compliance domain) - Score > 0.8
+#
+# This query demonstrates domain-driven semantic architecture:
+# - Accounts domain owns Customer entities and support metrics
+# - Transactions domain owns Transaction entities and payment status
+# - Risk/Compliance domain owns RiskProfile entities and risk scores
+# - No centralized transformation layer; each domain serves its RDF
+# - Cross-domain linking via fintech:forCustomer and fintech:transactionDebtor
+#
+
+SELECT
+  ?customer
+  ?customerName
+  ?customerEmail
+  ?riskScore
+  ?riskLevel
+  ?complianceStatus
+  (COUNT(DISTINCT ?failedTxn) AS ?failedTransactionCount)
+  (MAX(xsd:decimal(?riskScore)) AS ?maxRiskScore)
+  (IF(?riskScore > 0.95, "IMMEDIATE_OUTREACH",
+      IF(?riskScore > 0.85, "ESCALATE_TO_RETENTION",
+         "MONITOR")) AS ?recommendedAction)
+
+WHERE {
+  # Domain 1: Accounts Domain - Customer Profile
+  # Get customer name and email (customer is the entity we're analyzing)
+  SERVICE <http://accounts-domain/sparql> {
+    ?customer a fintech:Customer ;
+              fintech:customerName ?customerName ;
+              fintech:customerEmail ?customerEmail .
+  }
+
+  # Domain 2: Transactions Domain - Failed Payment Detection
+  # Find failed transactions by this customer in the last 30 days
+  # This is the debtor (payer) in the transaction
+  SERVICE <http://transactions-domain/sparql> {
+    ?failedTxn fintech:transactionDebtor ?customer ;
+               fintech:transactionStatus "failed" ;
+               fintech:transactionDate ?txnDate .
+
+    # Filter to last 30 days (adjust date as needed)
+    FILTER (?txnDate > "2026-04-30"^^xsd:dateTime)
+  }
+
+  # Domain 3: Risk/Compliance Domain - Risk Assessment
+  # Get risk score and compliance status from Risk domain
+  # Risk domain uses fintech:forCustomer to link RiskProfile to Customer
+  SERVICE <http://risk-domain/sparql> {
+    ?riskProfile fintech:forCustomer ?customer ;
+                 fintech:riskScore ?riskScore ;
+                 fintech:riskLevel ?riskLevel ;
+                 fintech:complianceStatus ?complianceStatus .
+
+    # Filter to high-risk customers (risk score > 0.8)
+    FILTER (?riskScore > 0.8)
+  }
+}
+
+# Aggregate results: group by customer, count failed transactions
+GROUP BY ?customer ?customerName ?customerEmail ?riskScore ?riskLevel ?complianceStatus
+
+# Filter: only include customers with at least 1 failed transaction
+HAVING (COUNT(DISTINCT ?failedTxn) >= 1)
+
+# Sort by risk score descending - highest risk first
+ORDER BY DESC(?riskScore)
+
+# Limit to top 50 highest-risk customers
+LIMIT 50
