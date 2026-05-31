@@ -14,7 +14,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from rdflib import Graph, Namespace, Literal, URIRef, RDF
-import importlib.util
 
 # Setup Python path to import from src modules
 # This test file is at: domains/transactions/tests/test_integration_e2e.py
@@ -36,33 +35,30 @@ from semantic.cross_domain_resolver import CrossDomainResolver
 class TestTransactionsIntegrationE2E:
     """End-to-end integration tests for Transactions domain RDF transformation."""
 
-    @pytest.fixture
-    def test_ontology_path(self):
-        """Get path to test ontology file."""
-        test_dir = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "src",
-            "main",
-            "python",
-            "semantic",
-            "tests"
-        )
-        return os.path.join(test_dir, "shared-ontology-test.ttl")
+    # Named constants for test expectations
+    MIN_TRANSACTIONS = 3
+    MIN_COUNTERPARTIES = 2
+    MIN_EXPECTED_TRIPLES = 50
 
     @pytest.fixture
-    def iri_resolver(self):
+    def test_ontology_path(self) -> str:
+        """Get path to test ontology file."""
+        test_dir = Path(__file__).parent / ".." / "src" / "main" / "python" / "semantic" / "tests"
+        return str(test_dir / "shared-ontology-test.ttl")
+
+    @pytest.fixture(scope="function")
+    def iri_resolver(self) -> TransactionsIriResolver:
         """Create Transactions domain IRI resolver."""
         return TransactionsIriResolver()
 
-    @pytest.fixture
-    def cross_domain_resolver(self):
+    @pytest.fixture(scope="function")
+    def cross_domain_resolver(self) -> CrossDomainResolver:
         """Create cross-domain resolver for linking to Accounts domain."""
         return CrossDomainResolver()
 
-    @pytest.fixture
-    def transformer(self, iri_resolver, cross_domain_resolver, test_ontology_path):
-        """Create transformer instance with resolvers and ontology."""
+    @pytest.fixture(scope="function")
+    def transformer(self, iri_resolver: TransactionsIriResolver, cross_domain_resolver: CrossDomainResolver, test_ontology_path: str) -> SilverToRdfTransformer:
+        """Create transformer instance with resolvers and ontology. Fresh graph per test."""
         return SilverToRdfTransformer(
             iri_resolver,
             cross_domain_resolver,
@@ -70,7 +66,7 @@ class TestTransactionsIntegrationE2E:
         )
 
     @pytest.fixture
-    def sample_transactions_df(self):
+    def sample_transactions_df(self) -> pd.DataFrame:
         """Sample transaction data for testing."""
         return pd.DataFrame({
             'transaction_id': [
@@ -111,7 +107,7 @@ class TestTransactionsIntegrationE2E:
         })
 
     @pytest.fixture
-    def sample_counterparties_df(self):
+    def sample_counterparties_df(self) -> pd.DataFrame:
         """Sample counterparty data for testing."""
         return pd.DataFrame({
             'counterparty_id': [
@@ -128,19 +124,82 @@ class TestTransactionsIntegrationE2E:
             ]
         })
 
+    # Helper methods for SPARQL queries
+    def _count_transactions_query(self) -> str:
+        """SPARQL query to count Transaction RDF type declarations."""
+        return """
+            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+            SELECT (COUNT(?transaction) as ?count) WHERE {
+                ?transaction rdf:type fintech:Transaction .
+            }
+        """
+
+    def _count_counterparties_query(self) -> str:
+        """SPARQL query to count Counterparty RDF type declarations."""
+        return """
+            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+            SELECT (COUNT(?counterparty) as ?count) WHERE {
+                ?counterparty rdf:type fintech:Counterparty .
+            }
+        """
+
+    def _query_debtor_links(self) -> str:
+        """SPARQL query to retrieve transaction-debtor links."""
+        return """
+            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+
+            SELECT ?transaction ?debtor WHERE {
+                ?transaction fintech:transactionDebtor ?debtor .
+            }
+        """
+
+    def _query_creditor_links(self) -> str:
+        """SPARQL query to retrieve transaction-creditor links."""
+        return """
+            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+
+            SELECT ?transaction ?creditor WHERE {
+                ?transaction fintech:transactionCreditor ?creditor .
+            }
+        """
+
+    def _query_source_system_metadata(self) -> str:
+        """SPARQL query to retrieve sourceSystem metadata on entities."""
+        return """
+            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+
+            SELECT ?entity ?system WHERE {
+                ?entity fintech:sourceSystem ?system .
+            }
+        """
+
+    def _query_ingestion_time_metadata(self) -> str:
+        """SPARQL query to retrieve sourceIngestionTime metadata on entities."""
+        return """
+            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+
+            SELECT ?entity ?timestamp WHERE {
+                ?entity fintech:sourceIngestionTime ?timestamp .
+            }
+        """
+
     def test_rdf_transformation_generates_sufficient_triples(
         self,
-        transformer,
-        sample_transactions_df,
-        sample_counterparties_df
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame,
+        sample_counterparties_df: pd.DataFrame
+    ) -> None:
         """Test: RDF transformation generates at least 50 triples from sample data.
 
         Verifies:
         - Transactions transform to RDF with type declarations
         - Counterparties transform to RDF with type declarations
         - Metadata triples are generated
-        - Total triple count >= 50
+        - Total triple count >= self.MIN_EXPECTED_TRIPLES
         """
         # Transform both transactions and counterparties
         transformer.transform_transactions_to_rdf(sample_transactions_df)
@@ -149,77 +208,63 @@ class TestTransactionsIntegrationE2E:
         graph = transformer.get_graph()
         triple_count = len(graph)
 
-        assert triple_count >= 50, (
-            f"Expected >= 50 triples (transactions + counterparties + metadata), "
-            f"got {triple_count}"
+        assert triple_count >= self.MIN_EXPECTED_TRIPLES, (
+            f"Expected >= {self.MIN_EXPECTED_TRIPLES} triples "
+            f"(transactions + counterparties + metadata), got {triple_count}"
         )
 
     def test_sparql_query_count_transaction_type(
         self,
-        transformer,
-        sample_transactions_df
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame
+    ) -> None:
         """Test: SPARQL query counts all Transaction RDF type declarations.
 
         Verifies:
         - Transactions are declared with rdf:type fintech:Transaction
         - SPARQL COUNT query returns correct results
-        - At least 3 transactions are queryable
+        - At least self.MIN_TRANSACTIONS transactions are queryable
         """
         transformer.transform_transactions_to_rdf(sample_transactions_df)
         graph = transformer.get_graph()
 
-        query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-            SELECT (COUNT(?transaction) as ?count) WHERE {
-                ?transaction rdf:type fintech:Transaction .
-            }
-        """
+        query = self._count_transactions_query()
         results = list(graph.query(query))
         count = int(results[0][0])
 
-        assert count >= 3, (
-            f"Expected >= 3 transactions via SPARQL query, got {count}"
+        assert count >= self.MIN_TRANSACTIONS, (
+            f"Expected >= {self.MIN_TRANSACTIONS} transactions via SPARQL query, got {count}"
         )
 
     def test_sparql_query_count_counterparty_type(
         self,
-        transformer,
-        sample_counterparties_df
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_counterparties_df: pd.DataFrame
+    ) -> None:
         """Test: SPARQL query counts all Counterparty RDF type declarations.
 
         Verifies:
         - Counterparties are declared with rdf:type fintech:Counterparty
         - SPARQL COUNT query returns correct results
-        - At least 2 counterparties are queryable
+        - At least self.MIN_COUNTERPARTIES counterparties are queryable
         """
         transformer.transform_counterparties_to_rdf(sample_counterparties_df)
         graph = transformer.get_graph()
 
-        query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-            SELECT (COUNT(?counterparty) as ?count) WHERE {
-                ?counterparty rdf:type fintech:Counterparty .
-            }
-        """
+        query = self._count_counterparties_query()
         results = list(graph.query(query))
         count = int(results[0][0])
 
-        assert count >= 2, (
-            f"Expected >= 2 counterparties via SPARQL query, got {count}"
+        assert count >= self.MIN_COUNTERPARTIES, (
+            f"Expected >= {self.MIN_COUNTERPARTIES} counterparties via SPARQL query, got {count}"
         )
 
     def test_transaction_links_debtor_and_creditor_properties(
         self,
-        transformer,
-        sample_transactions_df,
-        sample_counterparties_df
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame,
+        sample_counterparties_df: pd.DataFrame
+    ) -> None:
         """Test: Transaction triples link to customers and counterparties.
 
         Verifies:
@@ -232,37 +277,25 @@ class TestTransactionsIntegrationE2E:
         graph = transformer.get_graph()
 
         # Query for debtor links
-        debtor_query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+        debtor_results = list(graph.query(self._query_debtor_links()))
 
-            SELECT ?transaction ?debtor WHERE {
-                ?transaction fintech:transactionDebtor ?debtor .
-            }
-        """
-        debtor_results = list(graph.query(debtor_query))
-
-        assert len(debtor_results) >= 3, (
-            f"Expected >= 3 transaction-debtor links, got {len(debtor_results)}"
+        assert len(debtor_results) >= self.MIN_TRANSACTIONS, (
+            f"Expected >= {self.MIN_TRANSACTIONS} transaction-debtor links, "
+            f"got {len(debtor_results)}"
         )
 
         # Query for creditor links
-        creditor_query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+        creditor_results = list(graph.query(self._query_creditor_links()))
 
-            SELECT ?transaction ?creditor WHERE {
-                ?transaction fintech:transactionCreditor ?creditor .
-            }
-        """
-        creditor_results = list(graph.query(creditor_query))
-
-        assert len(creditor_results) >= 3, (
-            f"Expected >= 3 transaction-creditor links, got {len(creditor_results)}"
+        assert len(creditor_results) >= self.MIN_TRANSACTIONS, (
+            f"Expected >= {self.MIN_TRANSACTIONS} transaction-creditor links, "
+            f"got {len(creditor_results)}"
         )
 
     def test_cross_domain_customer_iri_consistency(
         self,
-        cross_domain_resolver
-    ):
+        cross_domain_resolver: CrossDomainResolver
+    ) -> None:
         """Test: Same customer (email+kyc_id) always produces same customer IRI.
 
         Verifies:
@@ -314,10 +347,10 @@ class TestTransactionsIntegrationE2E:
 
     def test_cross_domain_linking_in_rdf_graph(
         self,
-        transformer,
-        sample_transactions_df,
-        cross_domain_resolver
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame,
+        cross_domain_resolver: CrossDomainResolver
+    ) -> None:
         """Test: Transaction RDF links to customer IRIs via cross-domain resolver.
 
         Verifies:
@@ -359,10 +392,10 @@ class TestTransactionsIntegrationE2E:
 
     def test_metadata_source_system_tagging(
         self,
-        transformer,
-        sample_transactions_df,
-        sample_counterparties_df
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame,
+        sample_counterparties_df: pd.DataFrame
+    ) -> None:
         """Test: All RDF triples have sourceSystem='transactions' metadata.
 
         Verifies:
@@ -374,30 +407,24 @@ class TestTransactionsIntegrationE2E:
         transformer.transform_counterparties_to_rdf(sample_counterparties_df)
         graph = transformer.get_graph()
 
-        query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-
-            SELECT ?entity ?system WHERE {
-                ?entity fintech:sourceSystem ?system .
-            }
-        """
-        results = list(graph.query(query))
+        results = list(graph.query(self._query_source_system_metadata()))
 
         assert len(results) > 0, (
-            "Expected sourceSystem metadata on entities"
+            f"Expected sourceSystem metadata on entities. Graph has {len(graph)} total triples"
         )
 
         for result in results:
             system_value = str(result[1])
             assert system_value == "transactions", (
-                f"sourceSystem should be 'transactions', got '{system_value}'"
+                f"sourceSystem should be 'transactions', got '{system_value}'. "
+                f"Query returned {len(results)} metadata triples"
             )
 
     def test_metadata_ingestion_time_timestamp(
         self,
-        transformer,
-        sample_transactions_df
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame
+    ) -> None:
         """Test: RDF triples include sourceIngestionTime with valid timestamp.
 
         Verifies:
@@ -408,17 +435,11 @@ class TestTransactionsIntegrationE2E:
         transformer.transform_transactions_to_rdf(sample_transactions_df)
         graph = transformer.get_graph()
 
-        query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-
-            SELECT ?entity ?timestamp WHERE {
-                ?entity fintech:sourceIngestionTime ?timestamp .
-            }
-        """
-        results = list(graph.query(query))
+        results = list(graph.query(self._query_ingestion_time_metadata()))
 
         assert len(results) > 0, (
-            "Expected sourceIngestionTime metadata on transactions"
+            f"Expected sourceIngestionTime metadata on transactions. "
+            f"Graph has {len(graph)} total triples"
         )
 
         for result in results:
@@ -429,14 +450,14 @@ class TestTransactionsIntegrationE2E:
             except ValueError:
                 pytest.fail(
                     f"sourceIngestionTime should be ISO 8601 format, "
-                    f"got '{timestamp_str}'"
+                    f"got '{timestamp_str}'. Query returned {len(results)} timestamp triples"
                 )
 
     def test_multiple_transactions_same_customer_single_iri(
         self,
-        transformer,
-        cross_domain_resolver
-    ):
+        transformer: SilverToRdfTransformer,
+        cross_domain_resolver: CrossDomainResolver
+    ) -> None:
         """Test: Multiple transactions from same customer link to same customer IRI.
 
         Verifies:
@@ -517,11 +538,11 @@ class TestTransactionsIntegrationE2E:
 
     def test_full_pipeline_end_to_end(
         self,
-        transformer,
-        sample_transactions_df,
-        sample_counterparties_df,
-        cross_domain_resolver
-    ):
+        transformer: SilverToRdfTransformer,
+        sample_transactions_df: pd.DataFrame,
+        sample_counterparties_df: pd.DataFrame,
+        cross_domain_resolver: CrossDomainResolver
+    ) -> None:
         """Test: Complete end-to-end pipeline from raw data to queryable RDF.
 
         Verifies:
@@ -542,57 +563,35 @@ class TestTransactionsIntegrationE2E:
         graph = transformer.get_graph()
 
         # Verify triple count
-        assert len(graph) >= 50, (
-            f"Expected >= 50 total triples, got {len(graph)}"
+        assert len(graph) >= self.MIN_EXPECTED_TRIPLES, (
+            f"Expected >= {self.MIN_EXPECTED_TRIPLES} total triples, got {len(graph)}"
         )
 
         # Step 4: Verify transaction count via SPARQL
-        txn_count_query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-            SELECT (COUNT(?transaction) as ?count) WHERE {
-                ?transaction rdf:type fintech:Transaction .
-            }
-        """
-        txn_results = list(graph.query(txn_count_query))
+        txn_results = list(graph.query(self._count_transactions_query()))
         txn_count = int(txn_results[0][0])
 
-        assert txn_count >= 3, (
-            f"Expected >= 3 transactions in RDF, got {txn_count}"
+        assert txn_count >= self.MIN_TRANSACTIONS, (
+            f"Expected >= {self.MIN_TRANSACTIONS} transactions in RDF, got {txn_count}"
         )
 
         # Step 5: Verify counterparty count via SPARQL
-        cp_count_query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-            SELECT (COUNT(?counterparty) as ?count) WHERE {
-                ?counterparty rdf:type fintech:Counterparty .
-            }
-        """
-        cp_results = list(graph.query(cp_count_query))
+        cp_results = list(graph.query(self._count_counterparties_query()))
         cp_count = int(cp_results[0][0])
 
-        assert cp_count >= 2, (
-            f"Expected >= 2 counterparties in RDF, got {cp_count}"
+        assert cp_count >= self.MIN_COUNTERPARTIES, (
+            f"Expected >= {self.MIN_COUNTERPARTIES} counterparties in RDF, got {cp_count}"
         )
 
         # Step 6: Verify cross-domain linking
-        customer_linking_query = """
-            PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+        customer_results = list(graph.query(self._query_debtor_links()))
 
-            SELECT ?transaction ?customer WHERE {
-                ?transaction fintech:transactionDebtor ?customer .
-            }
-        """
-        customer_results = list(graph.query(customer_linking_query))
-
-        assert len(customer_results) >= 3, (
-            f"Expected >= 3 transaction-customer links, got {len(customer_results)}"
+        assert len(customer_results) >= self.MIN_TRANSACTIONS, (
+            f"Expected >= {self.MIN_TRANSACTIONS} transaction-customer links, "
+            f"got {len(customer_results)}"
         )
 
-        # Step 7: Verify metadata
+        # Step 7: Verify metadata (sourceSystem + sourceIngestionTime)
         metadata_query = """
             PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
 
@@ -604,12 +603,13 @@ class TestTransactionsIntegrationE2E:
         metadata_results = list(graph.query(metadata_query))
 
         assert len(metadata_results) > 0, (
-            "Expected metadata on RDF triples"
+            f"Expected metadata on RDF triples. Graph has {len(graph)} total triples"
         )
 
         for result in metadata_results:
             assert str(result[1]) == "transactions", (
-                f"Expected sourceSystem='transactions', got '{result[1]}'"
+                f"Expected sourceSystem='transactions', got '{result[1]}'. "
+                f"Query returned {len(metadata_results)} metadata triples"
             )
             # Verify timestamp is valid ISO format
             try:
@@ -618,5 +618,6 @@ class TestTransactionsIntegrationE2E:
                 )
             except ValueError:
                 pytest.fail(
-                    f"Invalid timestamp format: {result[2]}"
+                    f"Invalid timestamp format: {result[2]}. "
+                    f"Expected ISO 8601 format. Query returned {len(metadata_results)} results"
                 )
