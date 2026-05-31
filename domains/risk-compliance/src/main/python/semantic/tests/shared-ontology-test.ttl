@@ -1,0 +1,70 @@
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Test ontology for Risk/Compliance domain unit tests
+
+fintech:RiskProfile a rdfs:Class ;
+  rdfs:label "RiskProfile" ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:Customer a rdfs:Class ;
+  rdfs:label "Customer" ;
+  fintech:owningDomain "accounts" .
+
+fintech:riskProfileId a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:riskScore a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:decimal ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:riskLevel a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:complianceStatus a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:kycStatus a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:fraudFlagsCount a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:integer ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:lastReviewDate a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:dateTime ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:nextReviewDate a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:dateTime ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:reviewNotes a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range xsd:string ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:forCustomer a rdf:Property ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range fintech:Customer ;
+  fintech:owningDomain "risk_compliance" .
+
+fintech:sourceSystem a rdf:Property ;
+  rdfs:range xsd:string .
+
+fintech:sourceIngestionTime a rdf:Property ;
+  rdfs:range xsd:dateTime .
