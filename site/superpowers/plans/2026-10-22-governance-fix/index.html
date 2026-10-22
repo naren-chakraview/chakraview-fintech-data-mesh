@@ -1,0 +1,2157 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Production-grade data mesh reference implementation for fintech: Apache Iceberg lakehouse, decentralized domain ownership, unified analytics, federated governance, enterprise observability.
+">
+      
+      
+      
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/superpowers/plans/2026-10-22-governance-fix/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Governance Fix Implementation Plan - Chakra Commerce — Fintech Data Mesh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#governance-fix-implementation-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Chakra Commerce — Fintech Data Mesh" class="md-header__button md-logo" aria-label="Chakra Commerce — Fintech Data Mesh" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Chakra Commerce — Fintech Data Mesh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Governance Fix Implementation Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/naren-chakraview/chakraview-fintech-data-mesh" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    naren-chakraview/chakraview-fintech-data-mesh
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../architecture/00-overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../domains/transactions/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Domains
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../platform/governance/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Platform
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../production/deployment/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Production
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../case-study/fintech-semantic-integration/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Case Studies
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../adrs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Chakra Commerce — Fintech Data Mesh" class="md-nav__button md-logo" aria-label="Chakra Commerce — Fintech Data Mesh" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    Chakra Commerce — Fintech Data Mesh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/naren-chakraview/chakraview-fintech-data-mesh" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    naren-chakraview/chakraview-fintech-data-mesh
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/00-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-mesh-principles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Mesh Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/iceberg-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Iceberg Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/real-time-vs-analytics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real-Time vs Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domains
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Domains
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/transactions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transactions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/accounts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accounts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/risk-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risk & Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/counterparties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Counterparties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/market-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Market Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Platform
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Platform
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platform/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platform/discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Discovery Portal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platform/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Production
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scaling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/trade-offs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trade-offs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../case-study/fintech-semantic-integration/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Case Studies
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Case Studies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../case-study/fintech-semantic-integration/federation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Federation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../case-study/fintech-semantic-integration/BLOG-SHIFT-LEFT-SEMANTICS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shift-Left Semantics Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../adrs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADRs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0001-data-mesh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0001 Data Mesh Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0002-iceberg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0002 Iceberg Choice
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0003-governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0003 Governance Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0004-real-time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0004 Real-Time Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#global-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review Focus
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-decisions-defaults-used-in-this-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open Decisions (defaults used in this plan)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-1-rego-policies-for-opa-1x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 1: Rego policies for OPA 1.x
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-2-wire-opa-into-compose-helm-makefile-and-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 2: Wire OPA into compose, Helm, Makefile, and CI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-3-fail-closed-masking-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 3: Fail-closed masking in Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-4-evaluate-access-requests-with-opa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 4: Evaluate access requests with OPA
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-5-enforce-masking-on-read-with-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 5: Enforce masking on read, with audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-6-docs-and-role-name-sweep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 6: Docs and role-name sweep
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-7-end-to-end-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 7: End-to-end verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-review-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Review Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="governance-fix-implementation-plan">Governance Fix Implementation Plan<a class="headerlink" href="#governance-fix-implementation-plan" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Make the fintech-data-mesh governance run in code: Rego policies that load on OPA 1.x, OPA wired into compose, fail-closed masking in Python, access requests evaluated by OPA, and masked-and-audited reads.</p>
+<p><strong>Architecture:</strong> Policies live in <code>platform/governance/opa-policies/</code> and are tested with <code>opa test</code>. OPA runs in compose and Helm with those policies mounted. The discovery backend calls OPA over HTTP for access decisions. A read helper asks OPA for a masking strategy per column, applies it with <code>DataMasker</code>, and writes an audit record to Elasticsearch. Every failure path denies or masks.</p>
+<p><strong>Tech Stack:</strong> OPA 1.0.0 (Rego v1), Python 3.12, FastAPI 0.104.0, httpx (new pinned dependency), pytest 7.4.0, Docker Compose, Elasticsearch 8.11.0.</p>
+<p><strong>Spec:</strong> <code>docs/reviews/governance-fix-brief.md</code> (with <code>docs/reviews/abac.rego</code> and <code>docs/reviews/abac_test.rego</code>)</p>
+<h2 id="global-constraints">Global Constraints<a class="headerlink" href="#global-constraints" title="Permanent link">&para;</a></h2>
+<ul>
+<li>OPA version is pinned to <code>1.0.0</code> everywhere: compose, Helm values, CI. Never <code>latest</code>.</li>
+<li>Rego uses <code>import rego.v1</code>; rules use <code>if</code> and <code>contains</code>.</li>
+<li>Default masking strategy is <code>full_hash</code>. Default access decision is <code>allow := false</code>.</li>
+<li>Any OPA failure (transport error, non-200, malformed body) means deny, never a default value.</li>
+<li>Role names are the docs' names: <code>analyst</code>, <code>risk_analyst</code>, <code>external_analyst</code>, <code>contractor</code>, <code>data_owner</code>, <code>customer_privacy_officer</code>.</li>
+<li>OPA listens on <code>8181</code>. The <code>8282</code> mapping is removed.</li>
+<li>Policy path is <code>data_mesh/access</code>. Masking strategy path is <code>data_mesh/access/masking_strategy</code>.</li>
+</ul>
+<h2 id="review-focus">Review Focus<a class="headerlink" href="#review-focus" title="Permanent link">&para;</a></h2>
+<ol>
+<li>OPA unreachable, returns non-200, or returns a body without <code>result</code> → access request is denied and no rows are returned. (Task 4, Task 5)</li>
+<li>A classification value that is not one of <code>public|sensitive|confidential|pii|restricted</code> (for example <code>PII</code>, <code>Public</code>, <code>""</code>) → masked. (Task 1, Task 3)</li>
+<li>A product with no column classifications → treated as <code>restricted</code>, so a request goes to <code>pending</code>, never <code>approved</code>. (Task 4)</li>
+<li>An OPA masking strategy name that <code>DataMasker</code> does not know → <code>ValueError</code>, never the raw value. (Task 3)</li>
+<li>Audit write failure → no rows returned from the read helper. (Task 5)</li>
+</ol>
+<h2 id="open-decisions-defaults-used-in-this-plan">Open Decisions (defaults used in this plan)<a class="headerlink" href="#open-decisions-defaults-used-in-this-plan" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Fraud role:</strong> docs use both <code>fraud_analyst</code> (4 hits) and <code>fraud-team</code> (6 hits); the new Rego has no fraud role. Default: <code>fraud_analyst</code> is not granted read in <code>abac.rego</code>, so it falls to the same deny and masking defaults as any unlisted role. Confirm before Task 1 if fraud analysts should read <code>sensitive</code> data without approval.</li>
+<li><strong>Product classification:</strong> <code>DataProduct</code> has no <code>data_classification</code> field. Default: product classification is the highest column classification in <code>access_policy.columns</code>, ordered <code>public &lt; sensitive &lt; confidential &lt; pii &lt; restricted</code>; no columns → <code>restricted</code>.</li>
+<li><strong>CI:</strong> the repo has no <code>.github/workflows/</code>. Default: add one workflow that runs <code>make policy-test</code> with OPA 1.0.0.</li>
+<li><strong>Helm:</strong> <code>helm/</code> has only values files and no chart templates, so nothing mounts policies into Kubernetes. Default: pin the image in the three values files only. Mounting policies needs a ConfigMap template, which is out of scope here.</li>
+<li><strong>Deny response:</strong> default is to store the request with status <code>denied</code> and return HTTP 503.</li>
+<li><strong>Stale policy paths in docs:</strong> <code>docs/platform/discovery.md:500</code> and <code>docs/production/troubleshooting.md</code> use <code>authz/...</code> paths. Default: change them to <code>data_mesh/access</code>.</li>
+</ul>
+<hr />
+<h2 id="task-1-rego-policies-for-opa-1x">Task 1: Rego policies for OPA 1.x<a class="headerlink" href="#task-1-rego-policies-for-opa-1x" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong>
+- Modify: <code>platform/governance/opa-policies/abac.rego</code> (replace with <code>docs/reviews/abac.rego</code>)
+- Modify: <code>platform/governance/opa-policies/compliance.rego</code>
+- Create: <code>platform/governance/opa-policies/abac_test.rego</code> (copy of <code>docs/reviews/abac_test.rego</code>)
+- Create: <code>platform/governance/opa-policies/compliance_test.rego</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: none
+- Produces: package <code>data_mesh.access</code> with rules <code>allow</code>, <code>requires_approval</code>, <code>masking_strategy</code> (input keys: <code>action</code>, <code>user_role</code>, <code>data_classification</code>, <code>column_classification</code>); package <code>data_mesh.compliance</code> with <code>enforce_retention</code> and <code>enforce_masking</code> as sets of violation objects (input keys: <code>table</code>, <code>table_retention_days</code>, <code>column</code>, <code>column_classification</code>, <code>is_masked</code>).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Copy the new policy and its tests into place</strong></li>
+</ul>
+<p>Copy <code>docs/reviews/abac.rego</code> over <code>platform/governance/opa-policies/abac.rego</code>, and copy <code>docs/reviews/abac_test.rego</code> to <code>platform/governance/opa-policies/abac_test.rego</code>. Leave the <code>docs/reviews/</code> copies in place as the review record.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Write the failing compliance tests</strong></li>
+</ul>
+<p>Create <code>platform/governance/opa-policies/compliance_test.rego</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>package data_mesh.compliance_test
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>import rego.v1
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>import data.data_mesh.compliance
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>test_retention_under_one_year_violates if {
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    count(compliance.enforce_retention) == 1 with input as {&quot;table&quot;: &quot;t&quot;, &quot;table_retention_days&quot;: 180}
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>}
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>test_retention_one_year_passes if {
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    count(compliance.enforce_retention) == 0 with input as {&quot;table&quot;: &quot;t&quot;, &quot;table_retention_days&quot;: 365}
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>}
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>test_unmasked_pii_column_violates if {
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    count(compliance.enforce_masking) == 1 with input as {&quot;table&quot;: &quot;t&quot;, &quot;column&quot;: &quot;account_id&quot;, &quot;column_classification&quot;: &quot;pii&quot;, &quot;is_masked&quot;: false}
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>}
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>test_masked_pii_column_passes if {
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    count(compliance.enforce_masking) == 0 with input as {&quot;table&quot;: &quot;t&quot;, &quot;column&quot;: &quot;account_id&quot;, &quot;column_classification&quot;: &quot;pii&quot;, &quot;is_masked&quot;: true}
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>}
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>test_unmasked_public_column_passes if {
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    count(compliance.enforce_masking) == 0 with input as {&quot;table&quot;: &quot;t&quot;, &quot;column&quot;: &quot;merchant_id&quot;, &quot;column_classification&quot;: &quot;public&quot;, &quot;is_masked&quot;: false}
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>}
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Run the tests to verify they fail</strong></li>
+</ul>
+<p>Run: <code>docker run --rm -v "$PWD/platform/governance/opa-policies:/p" openpolicyagent/opa:1.0.0 test /p -v</code>
+Expected: FAIL; the compliance tests error on <code>compliance.rego</code> (old syntax, no <code>if</code>/<code>contains</code>).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Port <code>compliance.rego</code> to OPA 1.x</strong></li>
+</ul>
+<p>Rewrite with <code>import rego.v1</code>:
+- <code>enforce_retention contains violation if { input.table_retention_days &lt; 365; violation := {...} }</code> with the same message and fields as today.
+- <code>enforce_masking contains violation if { input.column_classification == "pii"; not input.is_masked; violation := {...} }</code>. This replaces the hard-coded column list. The violation object keeps <code>message</code>, <code>column</code>, <code>table</code>.
+- <code>audit_required if true</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Run the tests to verify they pass</strong></li>
+</ul>
+<p>Run: <code>docker run --rm -v "$PWD/platform/governance/opa-policies:/p" openpolicyagent/opa:1.0.0 test /p -v</code>
+Expected: PASS; 6 <code>abac</code> tests and 5 <code>compliance</code> tests pass. Then run <code>docker run --rm -v "$PWD/platform/governance/opa-policies:/p" openpolicyagent/opa:1.0.0 check --strict /p</code> and expect no output.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>add<span class="w"> </span>platform/governance/opa-policies/
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: port governance Rego to OPA 1.x and fail closed on masking&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="task-2-wire-opa-into-compose-helm-makefile-and-ci">Task 2: Wire OPA into compose, Helm, Makefile, and CI<a class="headerlink" href="#task-2-wire-opa-into-compose-helm-makefile-and-ci" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong>
+- Modify: <code>docker-compose.yml:108-113</code> (the <code>opa</code> service)
+- Modify: <code>helm/values-aws-eks.yaml:85-87</code>, <code>helm/values-gcp-gke.yaml:88-90</code>, <code>helm/values-azure-aks.yaml:90-92</code> (the <code>opa.image</code> lines)
+- Modify: <code>Makefile</code> (add <code>policy-test</code> target and <code>.PHONY</code> entry)
+- Create: <code>.github/workflows/policy-test.yml</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>platform/governance/opa-policies/</code> from Task 1
+- Produces: <code>make policy-test</code> target; OPA HTTP API on <code>localhost:8181</code> with the policies loaded from <code>/policies</code></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Verify the current compose service fails to serve policies</strong></li>
+</ul>
+<p>Run: <code>docker compose config --services | grep -x opa &amp;&amp; docker compose config | grep -A3 "opa:" | grep -c policies</code>
+Expected: prints <code>0</code>. The current service has no policy volume.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Replace the <code>opa</code> service in <code>docker-compose.yml</code></strong></li>
+</ul>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="w">  </span><span class="nt">opa</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openpolicyagent/opa:1.0.0</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chakra-opa</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;run&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--server&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--addr=0.0.0.0:8181&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;/policies&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8181:8181&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./platform/governance/opa-policies:/policies:ro</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Pin the image in the three Helm values files</strong></li>
+</ul>
+<p>Change <code>image: openpolicyagent/opa:latest</code> to <code>image: openpolicyagent/opa:1.0.0</code> in each of the three files listed above.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Add the <code>policy-test</code> Makefile target</strong></li>
+</ul>
+<p>Add <code>policy-test</code> to <code>.PHONY</code>, plus:</p>
+<div class="language-make highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nf">policy-test</span><span class="o">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span>opa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>platform/governance/opa-policies<span class="w"> </span>-v
+</span></code></pre></div>
+<p>Use the locally installed OPA 1.0.0 binary; the Docker form from Task 1 is an alternative.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Add the CI workflow</strong></li>
+</ul>
+<p>Create <code>.github/workflows/policy-test.yml</code>, triggered on <code>push</code> and <code>pull_request</code>. Its job checks out the repo, installs OPA 1.0.0 (pinned version, not latest), and runs <code>make policy-test</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Verify compose serves the policies</strong></li>
+</ul>
+<p>Run: <code>docker compose config --quiet &amp;&amp; docker compose up -d opa &amp;&amp; curl -s -X POST localhost:8181/v1/data/data_mesh/access -H 'Content-Type: application/json' -d '{"input":{"action":"read","user_role":"analyst","data_classification":"public"}}'</code>
+Expected: <code>config</code> exits 0; the curl output includes <code>"allow":true</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 7: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>add<span class="w"> </span>docker-compose.yml<span class="w"> </span>helm/<span class="w"> </span>Makefile<span class="w"> </span>.github/workflows/policy-test.yml
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;infra: load governance policies into OPA 1.0.0 in compose, Helm and CI&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="task-3-fail-closed-masking-in-python">Task 3: Fail-closed masking in Python<a class="headerlink" href="#task-3-fail-closed-masking-in-python" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong>
+- Modify: <code>shared/compliance/masking.py</code> (<code>ColumnMaskingPolicy.should_mask</code> at line 66; <code>DataMasker</code> at lines 5-42)
+- Create: <code>tests/unit/test_masking.py</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: none
+- Produces:
+  - <code>ColumnMaskingPolicy.should_mask(table: str, column: str) -&gt; bool</code>: <code>True</code> unless the column is classified exactly <code>"public"</code>.
+  - <code>DataMasker.full_hash(value: str) -&gt; str</code>: lowercase SHA-256 hex digest of <code>value</code>, matching the <code>full_hash</code> example in <code>docs/platform/governance.md</code>.
+  - <code>DataMasker.apply(strategy: str, value: str) -&gt; str</code>: dispatches <code>no_mask</code>, <code>full_hash</code>, <code>hash_mask</code>, <code>partial_mask</code>, <code>full_mask</code>. Raises <code>ValueError</code> for any other name.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span> <span class="nn">hashlib</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">import</span> <span class="nn">pytest</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="kn">from</span> <span class="nn">shared.compliance.masking</span> <span class="kn">import</span> <span class="n">ColumnMaskingPolicy</span><span class="p">,</span> <span class="n">DataMasker</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="k">def</span> <span class="nf">test_unclassified_column_is_masked</span><span class="p">():</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">policy</span> <span class="o">=</span> <span class="n">ColumnMaskingPolicy</span><span class="p">()</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="k">assert</span> <span class="n">policy</span><span class="o">.</span><span class="n">should_mask</span><span class="p">(</span><span class="s2">&quot;transactions.raw_transactions&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_col&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="k">def</span> <span class="nf">test_public_column_is_not_masked</span><span class="p">():</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">policy</span> <span class="o">=</span> <span class="n">ColumnMaskingPolicy</span><span class="p">()</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">policy</span><span class="o">.</span><span class="n">add_policy</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;merchant_id&quot;</span><span class="p">,</span> <span class="s2">&quot;public&quot;</span><span class="p">)</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="k">assert</span> <span class="n">policy</span><span class="o">.</span><span class="n">should_mask</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;merchant_id&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;classification&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;PUBLIC&quot;</span><span class="p">,</span> <span class="s2">&quot;Public&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;pii&quot;</span><span class="p">])</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="k">def</span> <span class="nf">test_non_exact_public_is_masked</span><span class="p">(</span><span class="n">classification</span><span class="p">):</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="n">policy</span> <span class="o">=</span> <span class="n">ColumnMaskingPolicy</span><span class="p">()</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="n">policy</span><span class="o">.</span><span class="n">add_policy</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">classification</span><span class="p">)</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    <span class="k">assert</span> <span class="n">policy</span><span class="o">.</span><span class="n">should_mask</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="k">def</span> <span class="nf">test_full_hash_is_sha256_hex</span><span class="p">():</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>    <span class="k">assert</span> <span class="n">DataMasker</span><span class="o">.</span><span class="n">full_hash</span><span class="p">(</span><span class="s2">&quot;John Doe&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;John Doe&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>
+</span><span id="__span-5-30"><a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="k">def</span> <span class="nf">test_apply_known_strategy</span><span class="p">():</span>
+</span><span id="__span-5-31"><a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>    <span class="k">assert</span> <span class="n">DataMasker</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;no_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;abc&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;abc&quot;</span>
+</span><span id="__span-5-32"><a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>
+</span><span id="__span-5-33"><a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>
+</span><span id="__span-5-34"><a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="k">def</span> <span class="nf">test_apply_unknown_strategy_raises</span><span class="p">():</span>
+</span><span id="__span-5-35"><a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+</span><span id="__span-5-36"><a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>        <span class="n">DataMasker</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;show_everything&quot;</span><span class="p">,</span> <span class="s2">&quot;4111111111111111&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run the tests to verify they fail</strong></li>
+</ul>
+<p>Run: <code>pytest tests/unit/test_masking.py -v</code>
+Expected: FAIL; <code>should_mask</code> returns <code>False</code> for unclassified columns, and <code>full_hash</code> and <code>apply</code> do not exist.</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement the changes in <code>shared/compliance/masking.py</code></strong></p>
+</li>
+<li>
+<p><code>should_mask</code>: <code>return self.get_column_classification(table, column) != "public"</code>.</p>
+</li>
+<li>Add <code>full_hash</code> as a <code>@staticmethod</code>: <code>hashlib.sha256(value.encode()).hexdigest()</code>.</li>
+<li>
+<p>Add <code>apply</code> as a <code>@staticmethod</code>: a dict maps each strategy name to its method; a missing key raises <code>ValueError(f"unknown masking strategy: {strategy}")</code>.</p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run the tests to verify they pass</strong></p>
+</li>
+</ul>
+<p>Run: <code>pytest tests/unit/test_masking.py -v</code>
+Expected: PASS, 8 tests (including the parametrized cases).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git<span class="w"> </span>add<span class="w"> </span>shared/compliance/masking.py<span class="w"> </span>tests/unit/test_masking.py
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: mask unclassified columns and reject unknown masking strategies&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="task-4-evaluate-access-requests-with-opa">Task 4: Evaluate access requests with OPA<a class="headerlink" href="#task-4-evaluate-access-requests-with-opa" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong>
+- Create: <code>platform/discovery/backend/opa_client.py</code>
+- Modify: <code>platform/discovery/backend/main.py:127-149</code> (<code>request_access</code>)
+- Modify: <code>requirements.txt</code> (add <code>httpx</code> pinned to a version that works with <code>fastapi==0.104.0</code>)
+- Create: <code>tests/unit/test_access_requests.py</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>data_mesh/access</code> rules from Task 1; OPA at <code>OPA_URL</code> (default <code>http://opa:8181/v1/data/data_mesh/access</code>)
+- Produces:
+  - <code>class OPAError(Exception)</code>
+  - <code>async def evaluate_access(user_id: str, user_role: str, action: str, data_classification: str) -&gt; dict</code>: returns <code>{"allow": bool, "requires_approval": bool}</code>. Raises <code>OPAError</code> on transport error, non-200, a body without <code>result</code>, or non-boolean <code>allow</code> / <code>requires_approval</code>. Timeout 2 seconds.
+  - <code>def product_classification(product: DataProduct) -&gt; str</code>: highest column classification by the ordering in Open Decisions; <code>"restricted"</code> when there are no columns or a value is unknown.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<p>In <code>tests/unit/test_access_requests.py</code>, use FastAPI's <code>TestClient</code> and <code>monkeypatch</code> the <code>evaluate_access</code> name in <code>main</code>. Look up a public-only product and a product with a <code>pii</code> column in the sample data loaded by <code>main.py</code>. Cover:</p>
+<ul>
+<li><code>test_public_read_is_approved</code>: stub returns <code>{"allow": True, "requires_approval": False}</code>, the public product, <code>user_role</code> <code>analyst</code>; response <code>status == "approved"</code>.</li>
+<li><code>test_pii_product_is_pending_with_owner_and_sla</code>: stub returns <code>{"allow": False, "requires_approval": True}</code>, the pii product; response <code>status == "pending"</code>, <code>routed_to == product.owner</code>, <code>approval_sla_hours == product.access_policy.approval_sla_hours</code>.</li>
+<li><code>test_opa_error_denies_request</code>: stub raises <code>OPAError</code>; response status code 503; the stored request has <code>status == "denied"</code>.</li>
+<li><code>test_product_without_columns_is_classified_restricted</code>: product with <code>access_policy.columns == []</code>; the stub records its arguments and returns <code>{"allow": True, "requires_approval": True}</code>. Assert the recorded <code>data_classification == "restricted"</code> and the response <code>status == "pending"</code>.</li>
+</ul>
+<p>For the <code>opa_client</code> module itself, add <code>test_evaluate_access_raises_on_non_200</code> and <code>test_evaluate_access_raises_on_missing_result</code> using <code>httpx.MockTransport</code>, pointing the client at a mock.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run the tests to verify they fail</strong></li>
+</ul>
+<p>Run: <code>pytest tests/unit/test_access_requests.py -v</code>
+Expected: FAIL; <code>opa_client</code> does not exist and the endpoint never calls OPA.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement <code>opa_client.py</code></strong></li>
+</ul>
+<p>Implement <code>evaluate_access</code> with an <code>httpx.AsyncClient</code> (2-second timeout). The request body is <code>{"input": {"user_id": ..., "user_role": ..., "action": ..., "data_classification": ...}}</code>. Validate the response before returning. Implement <code>product_classification</code> as described in Open Decisions.</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Update <code>request_access</code> in <code>main.py</code></strong></p>
+</li>
+<li>
+<p>Look up the product by <code>data_product_id</code>; return 404 if missing.</p>
+</li>
+<li>Call <code>evaluate_access</code> with <code>data_classification=product_classification(product)</code>.</li>
+<li>On <code>OPAError</code>: store the request with <code>status = "denied"</code>, then raise <code>HTTPException(503, "Policy engine unavailable; request denied")</code>.</li>
+<li>Otherwise: status <code>approved</code> when <code>allow</code> and not <code>requires_approval</code>; otherwise <code>pending</code>.</li>
+<li>
+<p>For <code>pending</code>, include <code>routed_to = product.owner</code> and <code>approval_sla_hours = product.access_policy.approval_sla_hours</code> in the response.</p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Run the tests to verify they pass</strong></p>
+</li>
+</ul>
+<p>Run: <code>pytest tests/unit/test_access_requests.py -v</code>
+Expected: PASS for all cases listed in Step 1.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>add<span class="w"> </span>platform/discovery/backend/<span class="w"> </span>requirements.txt<span class="w"> </span>tests/unit/test_access_requests.py
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: evaluate discovery access requests with OPA and deny on errors&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="task-5-enforce-masking-on-read-with-audit">Task 5: Enforce masking on read, with audit<a class="headerlink" href="#task-5-enforce-masking-on-read-with-audit" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong>
+- Create: <code>platform/governance/enforce.py</code>
+- Create: <code>tests/unit/test_enforce.py</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>ColumnMaskingPolicy.get_column_classification</code> (existing); <code>DataMasker.apply</code> (Task 3); <code>OPAError</code> (Task 4)
+- Produces:
+  - <code>async def mask_rows(rows: list[dict], table: str, columns: list[str], user_id: str, user_role: str, policy: ColumnMaskingPolicy, *, decide_strategy: Callable[[str, str | None], Awaitable[str]], write_audit: Callable[[dict], Awaitable[None]]) -&gt; list[dict]</code>
+  - Default <code>decide_strategy</code> posts <code>{"input": {"user_role": ..., "column_classification": ...}}</code> to <code>OPA_URL</code> <code>.../data_mesh/access/masking_strategy</code> and returns <code>result</code>. Raises <code>OPAError</code> on any failure.
+  - Default <code>write_audit</code> posts the record to <code>ES_URL</code> (default <code>http://elasticsearch:9200</code>) at index <code>governance-audit</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<p>In <code>tests/unit/test_enforce.py</code>, pass stub <code>decide_strategy</code> and <code>write_audit</code> callables. Cover:</p>
+<ul class="task-list">
+<li><code>test_unclassified_column_is_hashed_on_read</code>: policy has no classification for the column; stub returns <code>"full_hash"</code>; the masked value is <code>hashlib.sha256</code> of the original, not the raw value.</li>
+<li><code>test_public_column_is_returned_unchanged</code>: stub returns <code>"no_mask"</code>.</li>
+<li><code>test_one_audit_record_per_read</code>: a read of 3 rows writes exactly one audit dict containing <code>user_id</code>, <code>user_role</code>, <code>table</code>, <code>columns</code>, and <code>strategies</code>.</li>
+<li><code>test_opa_error_returns_no_rows</code>: stub raises <code>OPAError</code>; the function raises and <code>write_audit</code> is never called.</li>
+<li><code>test_audit_failure_returns_no_rows</code>: <code>write_audit</code> raises <code>RuntimeError</code>; the function raises and no rows are returned.</li>
+<li>
+<p><code>test_unknown_strategy_raises</code>: stub returns <code>"show_everything"</code>; <code>ValueError</code> propagates.</p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run the tests to verify they fail</strong></p>
+</li>
+</ul>
+<p>Run: <code>pytest tests/unit/test_enforce.py -v</code>
+Expected: FAIL; <code>platform/governance/enforce.py</code> does not exist.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement <code>enforce.py</code></strong></li>
+</ul>
+<p>For each column in <code>columns</code>, call <code>decide_strategy(user_role, policy.get_column_classification(table, column))</code>, then apply <code>DataMasker.apply(strategy, value)</code> to every row. Build the audit dict, call <code>write_audit</code> before returning, and return the masked rows. If anything raises, let the exception propagate; the function returns nothing in that case. Apply the audit write before returning rows, so a failed write denies the read.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run the tests to verify they pass</strong></li>
+</ul>
+<p>Run: <code>pytest tests/unit/test_enforce.py -v</code>
+Expected: PASS, 6 tests.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>add<span class="w"> </span>platform/governance/enforce.py<span class="w"> </span>tests/unit/test_enforce.py
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: mask and audit governed reads through OPA&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="task-6-docs-and-role-name-sweep">Task 6: Docs and role-name sweep<a class="headerlink" href="#task-6-docs-and-role-name-sweep" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong>
+- Modify: <code>docs/platform/governance.md</code> (code sample around lines 337-400; fallback at line 399; examples near 567 use <code>fraud_analyst</code>)
+- Modify: <code>docs/platform/discovery.md:500</code>
+- Modify: <code>docs/production/troubleshooting.md:272, 449, 462</code>
+- Modify: any other <code>docs/</code> file (excluding <code>docs/superpowers/</code>) that matches <code>internal-analyst|fraud-team|external-analyst|authz/</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>mask_rows</code> (Task 5); role names from Task 1
+- Produces: docs whose sample code calls the same paths and roles the code uses</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Find every stale reference</strong></li>
+</ul>
+<p>Run: <code>grep -rnE "internal-analyst|fraud-team|external-analyst|authz/" docs --exclude-dir=superpowers</code>
+Expected: the list of lines to change (at least <code>governance.md</code>, <code>discovery.md:500</code>, <code>troubleshooting.md:272,449,462</code>).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Update the masking sample</strong></li>
+</ul>
+<p>In <code>docs/platform/governance.md</code>, change the fallback in the sample at line 399 from <code>"no_mask"</code> to <code>"full_hash"</code>. Change the OPA call to <code>data_mesh/access/masking_strategy</code>. Replace the sample's raw query path with a call to <code>mask_rows</code>, so the example reads through the enforcement helper.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Update the other paths and roles</strong></li>
+</ul>
+<p>Replace <code>authz/</code> with <code>data_mesh/access</code> in the files from Step 1. Replace the old role names with the docs' names (<code>internal-analyst</code> → <code>analyst</code>, <code>external-analyst</code> → <code>external_analyst</code>, <code>fraud-team</code> → <code>fraud_analyst</code> per the Open Decisions).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Verify</strong></li>
+</ul>
+<p>Run: <code>grep -rnE "internal-analyst|fraud-team|external-analyst|authz/" docs --exclude-dir=superpowers</code>
+Expected: no output.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>git<span class="w"> </span>add<span class="w"> </span>docs/
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: point governance examples at enforced OPA paths and role names&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="task-7-end-to-end-verification">Task 7: End-to-end verification<a class="headerlink" href="#task-7-end-to-end-verification" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong> none modified</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Policies pass in CI-equivalent form</strong></li>
+</ul>
+<p>Run: <code>make policy-test</code>
+Expected: all <code>abac</code> and <code>compliance</code> tests PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Python tests pass</strong></li>
+</ul>
+<p>Run: <code>make test-unit</code>
+Expected: all unit tests PASS, including <code>test_masking.py</code>, <code>test_access_requests.py</code>, and <code>test_enforce.py</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Stack serves decisions</strong></li>
+</ul>
+<p>Run: <code>docker compose up -d opa &amp;&amp; curl -s -X POST localhost:8181/v1/data/data_mesh/access -H 'Content-Type: application/json' -d '{"input":{"action":"read","user_role":"analyst","data_classification":"public"}}'</code>
+Expected: response includes <code>"allow":true</code>.</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Check the brief's acceptance criteria</strong></p>
+</li>
+<li>
+<p><code>opa check</code> and <code>opa test</code> pass in CI on OPA 1.0.0 (Step 1 and the workflow in Task 2).</p>
+</li>
+<li><code>docker compose up</code> loads the policies (Task 2, Step 6).</li>
+<li>An unclassified column comes back masked (Task 3 test, Task 5 test).</li>
+<li>
+<p>An access request for a PII product returns <code>pending</code> with an owner and SLA; a public one for <code>analyst</code> returns <code>approved</code> (Task 4 tests).</p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Confirm the tree</strong></p>
+</li>
+</ul>
+<p>Run: <code>git status --short</code>
+Expected: only the intended files; <code>docs/reviews/</code> and <code>docs/superpowers/plans/2026-10-22-governance-fix.md</code> may remain untracked until you decide whether to commit them.</p>
+<hr />
+<h2 id="self-review-notes">Self-Review Notes<a class="headerlink" href="#self-review-notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Spec coverage: brief items 1-5 map to Tasks 1-5, the acceptance list maps to Task 7. Brief item 4 (role names) is handled by the replacement <code>abac.rego</code> (Task 1) plus the sweep (Task 6).</li>
+<li>Brief gaps found while planning: <code>DataProduct</code> has no <code>data_classification</code> (Task 4 derives it); <code>DataMasker</code> has no <code>full_hash</code> and no strategy dispatch (Task 3 adds both); <code>helm/</code> has no templates for OPA (Open Decisions); the repo has no CI config (Task 2 adds one); <code>authz/</code> paths in three docs (Task 6).</li>
+<li>Dependencies are sequential: Task 4 needs Task 1's rule names, Task 5 needs Tasks 3 and 4.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/naren-chakraview" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid-init.js"></script>
+      
+    
+  </body>
+</html>
