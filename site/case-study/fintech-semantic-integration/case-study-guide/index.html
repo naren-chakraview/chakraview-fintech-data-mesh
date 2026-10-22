@@ -1,0 +1,2819 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Production-grade data mesh reference implementation for fintech: Apache Iceberg lakehouse, decentralized domain ownership, unified analytics, federated governance, enterprise observability.
+">
+      
+      
+      
+        <link rel="canonical" href="https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/case-study-guide/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Fintech Semantic Integration: Case Study Execution Guide - Chakra Commerce — Fintech Data Mesh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fintech-semantic-integration-case-study-execution-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Chakra Commerce — Fintech Data Mesh" class="md-header__button md-logo" aria-label="Chakra Commerce — Fintech Data Mesh" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Chakra Commerce — Fintech Data Mesh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Fintech Semantic Integration: Case Study Execution Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/naren-chakraview/chakraview-fintech-data-mesh" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    naren-chakraview/chakraview-fintech-data-mesh
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../architecture/00-overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../domains/transactions/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Domains
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../platform/governance/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Platform
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../production/deployment/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Production
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Case Studies
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../adrs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  ADRs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Chakra Commerce — Fintech Data Mesh" class="md-nav__button md-logo" aria-label="Chakra Commerce — Fintech Data Mesh" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    Chakra Commerce — Fintech Data Mesh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/naren-chakraview/chakraview-fintech-data-mesh" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    naren-chakraview/chakraview-fintech-data-mesh
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/00-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-mesh-principles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Mesh Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/iceberg-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Iceberg Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/real-time-vs-analytics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real-Time vs Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domains
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Domains
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/transactions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transactions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/accounts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accounts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/risk-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risk & Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/counterparties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Counterparties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../domains/market-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Market Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Platform
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Platform
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platform/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platform/discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Discovery Portal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platform/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Production
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scaling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../production/trade-offs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trade-offs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Case Studies
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Case Studies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../federation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Federation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BLOG-SHIFT-LEFT-SEMANTICS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shift-Left Semantics Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../adrs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADRs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0001-data-mesh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0001 Data Mesh Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0002-iceberg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0002 Iceberg Choice
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0003-governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0003 Governance Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adrs/ADR-0004-real-time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0004 Real-Time Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-business-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Business Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-domain-collaboration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture &amp; Domain Collaboration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture &amp; Domain Collaboration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-domain-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three-Domain Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-domains-collaborate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Domains Collaborate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Domains Collaborate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-accounts-domain-customer-identity-ownership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Accounts Domain (Customer Identity &amp; Ownership)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-transactions-domain-payment-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Transactions Domain (Payment History)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-riskcompliance-domain-regulatory-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Risk/Compliance Domain (Regulatory &amp; Support)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-architectural-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Architectural Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#churn-signals-definition-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Churn Signals: Definition &amp; Thresholds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-start-accounts-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Start Accounts Domain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-load-accounts-sample-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Load Accounts Sample Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-start-transactions-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Start Transactions Domain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-start-riskcompliance-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Start Risk/Compliance Domain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-execute-federated-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Execute Federated Query
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expected-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Expected Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sample-output-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample Output Table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding the Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-these-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why These Results?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpreting-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpreting Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interpreting Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-churn-signals-tell-us" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Churn Signals Tell Us
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the Churn Signals Tell Us">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#failed-transactions-from-transactions-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failed Transactions (from Transactions domain)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-escalations-from-riskcompliance-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Escalations (from Risk/Compliance domain)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-risk-score-from-riskcompliance-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Risk Score (from Risk/Compliance domain)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combined-signal-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combined Signal Interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extending-the-case-study" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extending the Case Study
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extending the Case Study">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extension-1-add-counterparties-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension 1: Add Counterparties Domain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension-2-add-market-data-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension 2: Add Market Data Domain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension-3-real-time-federated-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension 3: Real-Time Federated Queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension-4-add-ontology-inference-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension 4: Add Ontology Inference Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension-5-add-query-caching-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension 5: Add Query Caching &amp; Performance Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-1-domain-endpoint-not-responding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 1: Domain Endpoint Not Responding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-2-no-results-returned-from-federated-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 2: No Results Returned from Federated Query
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-3-iri-mismatches-between-domains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 3: IRI Mismatches Between Domains
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-4-sparql-syntax-errors-in-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 4: SPARQL Syntax Errors in Query
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-5-slow-query-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 5: Slow Query Execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="fintech-semantic-integration-case-study-execution-guide">Fintech Semantic Integration: Case Study Execution Guide<a class="headerlink" href="#fintech-semantic-integration-case-study-execution-guide" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This case study demonstrates how to solve a critical business problem in fintech: <strong>identifying high-value customers with churn risk signals across three autonomous domains without centralizing data ownership or transformation logic.</strong></p>
+<h3 id="the-business-problem">The Business Problem<a class="headerlink" href="#the-business-problem" title="Permanent link">&para;</a></h3>
+<p>A fintech platform operates with three independent business domains:
+- <strong>Accounts Domain</strong>: Owns customer account information and identity
+- <strong>Transactions Domain</strong>: Owns payment and transaction history
+- <strong>Risk/Compliance Domain</strong>: Owns regulatory risk profiles and support escalations</p>
+<p>Each domain manages its own data, systems, and SPARQL endpoint. To identify customers at risk of churn, the business needs to correlate signals across all three domains:
+- Support escalation frequency (from Risk/Compliance)
+- Recent transaction failures (from Transactions)
+- Risk assessment scores (from Risk/Compliance)</p>
+<p><strong>Traditional Approach (Problematic)</strong>:
+- Copy data from each domain to a central data warehouse
+- Run transformation logic in the warehouse
+- Lose domain autonomy, increase coupling, create governance bottlenecks</p>
+<p><strong>Semantic Integration Approach</strong>:
+- Each domain maintains its own SPARQL endpoint and RDF data
+- Domains link entities via shared URIs (customer identifiers)
+- Execute federated SPARQL queries that join across endpoints
+- Zero central transformation, full domain autonomy</p>
+<h2 id="architecture-domain-collaboration">Architecture &amp; Domain Collaboration<a class="headerlink" href="#architecture-domain-collaboration" title="Permanent link">&para;</a></h2>
+<h3 id="three-domain-architecture">Three-Domain Architecture<a class="headerlink" href="#three-domain-architecture" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────────┐
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                         SPARQL Federation                             │
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  Federated Query Engine (e.g., Fuseki, GraphDB Service Endpoint)     │
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└─────────────────────────────────────────────────────────────────────┘
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                    ↓ SERVICE clauses ↓
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        ┌───────────────┬───────────────┬───────────────┐
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        │               │               │               │
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  ┌─────────────┐ ┌──────────────┐ ┌─────────────────┐
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  │  Accounts   │ │ Transactions │ │ Risk/Compliance │
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  │   Domain    │ │    Domain    │ │     Domain      │
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  │             │ │              │ │                 │
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  │ SPARQL:3030 │ │ SPARQL:3030  │ │ SPARQL:3030     │
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  │ /accounts   │ │ /transactions│ │ /risk           │
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  └─────────────┘ └──────────────┘ └─────────────────┘
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        ↓               ↓                    ↓
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    [RDF Store]    [RDF Store]          [RDF Store]
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        ↓               ↓                    ↓
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    Customer:      Transaction:        RiskProfile:
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    - Customers    - Payments          - Risk Scores
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    - Accounts     - Counterparties    - Support Tickets
+</span></code></pre></div>
+<h3 id="how-domains-collaborate">How Domains Collaborate<a class="headerlink" href="#how-domains-collaborate" title="Permanent link">&para;</a></h3>
+<h4 id="1-accounts-domain-customer-identity-ownership">1. Accounts Domain (Customer Identity &amp; Ownership)<a class="headerlink" href="#1-accounts-domain-customer-identity-ownership" title="Permanent link">&para;</a></h4>
+<p><strong>Responsibility</strong>: Owns customer master data and mints customer IRIs
+- Maintains <code>fintech:Customer</code> entities with unique IRIs
+- Example IRI: <code>&lt;https://accounts.fintech.local/customer/cust_12345&gt;</code>
+- Publishes customer attributes: name, email, account status, registration date
+- Serves SPARQL endpoint at <code>http://localhost:3030/accounts/sparql</code></p>
+<p><strong>RDF Pattern</strong>:
+<div class="language-turtle highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">@prefix</span><span class="w"> </span><span class="nn">fintech:</span><span class="w"> </span><span class="nv">&lt;https://chakracommerce.com/ontology/fintech/&gt;</span><span class="w"> </span><span class="p">.</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">&lt;https://accounts.fintech.local/customer/cust_12345&gt;</span> <span class="kt">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">Customer</span> <span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">customerName</span> <span class="s">&quot;John Doe&quot;</span> <span class="p">;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">customerEmail</span> <span class="s">&quot;john@acme.com&quot;</span> <span class="p">;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">accountStatus</span> <span class="s">&quot;active&quot;</span> <span class="p">;</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">registrationDate</span> <span class="s">&quot;2020-01-15&quot;</span><span class="p">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">date</span> <span class="p">.</span>
+</span></code></pre></div></p>
+<h4 id="2-transactions-domain-payment-history">2. Transactions Domain (Payment History)<a class="headerlink" href="#2-transactions-domain-payment-history" title="Permanent link">&para;</a></h4>
+<p><strong>Responsibility</strong>: Owns transaction data and links to customers via Accounts IRIs
+- Maintains <code>fintech:Transaction</code> entities
+- Each transaction links to customer via <code>fintech:transactionDebtor</code> property
+- Uses <strong>same customer IRI</strong> as Accounts domain for linking
+- Example: <code>?transaction fintech:transactionDebtor &lt;https://accounts.fintech.local/customer/cust_12345&gt;</code>
+- Serves SPARQL endpoint at <code>http://localhost:3030/transactions/sparql</code></p>
+<p><strong>RDF Pattern</strong>:
+<div class="language-turtle highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">&lt;https://transactions.fintech.local/txn/txn_98765&gt;</span> <span class="kt">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">Transaction</span> <span class="p">;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionDebtor</span> <span class="nv">&lt;https://accounts.fintech.local/customer/cust_12345&gt;</span> <span class="p">;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionAmount</span> <span class="mf">1500.00</span> <span class="p">;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionStatus</span> <span class="s">&quot;failed&quot;</span> <span class="p">;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionDate</span> <span class="s">&quot;2026-05-28&quot;</span><span class="p">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">dateTime</span> <span class="p">;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">failureReason</span> <span class="s">&quot;Insufficient Funds&quot;</span> <span class="p">.</span>
+</span></code></pre></div></p>
+<p><strong>Critical</strong>: The <code>?transactionDebtor</code> links to the <strong>exact same IRI</strong> that Accounts domain publishes. This shared URI enables joining across domains.</p>
+<h4 id="3-riskcompliance-domain-regulatory-support">3. Risk/Compliance Domain (Regulatory &amp; Support)<a class="headerlink" href="#3-riskcompliance-domain-regulatory-support" title="Permanent link">&para;</a></h4>
+<p><strong>Responsibility</strong>: Owns risk profiles and support escalation data, links to customers
+- Maintains <code>fintech:RiskProfile</code> entities
+- Links to customers via <code>fintech:forCustomer</code> property
+- Maintains <code>fintech:SupportTicket</code> entities for escalations
+- Computes <code>fintech:riskScore</code> based on regulatory signals
+- Serves SPARQL endpoint at <code>http://localhost:3030/risk/sparql</code></p>
+<p><strong>RDF Pattern</strong>:
+<div class="language-turtle highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">&lt;https://risk.fintech.local/profile/risk_54321&gt;</span> <span class="kt">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">RiskProfile</span> <span class="p">;</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">forCustomer</span> <span class="nv">&lt;https://accounts.fintech.local/customer/cust_12345&gt;</span> <span class="p">;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">riskScore</span> <span class="mf">0.85</span> <span class="p">;</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">riskCategory</span> <span class="s">&quot;CUSTOMER_DISSATISFACTION&quot;</span> <span class="p">;</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">lastUpdated</span> <span class="s">&quot;2026-05-30&quot;</span><span class="p">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">dateTime</span> <span class="p">.</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nv">&lt;https://risk.fintech.local/ticket/ticket_111&gt;</span> <span class="kt">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">SupportTicket</span> <span class="p">;</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">forCustomer</span> <span class="nv">&lt;https://accounts.fintech.local/customer/cust_12345&gt;</span> <span class="p">;</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">ticketReason</span> <span class="s">&quot;Billing Dispute&quot;</span> <span class="p">;</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">createdDate</span> <span class="s">&quot;2026-05-25&quot;</span><span class="p">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">dateTime</span> <span class="p">;</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="nn">fintech</span><span class="p">:</span><span class="nt">escalationFlag</span> <span class="l">true</span> <span class="p">.</span>
+</span></code></pre></div></p>
+<h3 id="key-architectural-principles">Key Architectural Principles<a class="headerlink" href="#key-architectural-principles" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Single Source of Truth for Customer Identity</strong>: Only Accounts domain mints customer IRIs</li>
+<li><strong>Shared Ontology</strong>: All domains use the same namespace (<code>https://chakracommerce.com/ontology/fintech/</code>)</li>
+<li><strong>URI-Based Linking</strong>: Cross-domain references use full, resolvable URIs (not IDs)</li>
+<li><strong>Domain Autonomy</strong>: No shared database, no replication, no ETL dependencies</li>
+<li><strong>Loose Coupling</strong>: Domains only need to know about shared entity types, not each other's implementations</li>
+<li><strong>No Central Transformation</strong>: SPARQL Federation queries handle all joining and aggregation</li>
+</ol>
+<h2 id="churn-signals-definition-thresholds">Churn Signals: Definition &amp; Thresholds<a class="headerlink" href="#churn-signals-definition-thresholds" title="Permanent link">&para;</a></h2>
+<p>A customer is identified as a <strong>churn risk</strong> when they exhibit ALL of the following signals:</p>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Source Domain</th>
+<th>Threshold</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Support Escalations</td>
+<td>Risk/Compliance</td>
+<td>3+ in last 30 days</td>
+<td>Frequent escalations indicate dissatisfaction</td>
+</tr>
+<tr>
+<td>Failed Transactions</td>
+<td>Transactions</td>
+<td>1+ in last 30 days</td>
+<td>Payment failures frustrate customers</td>
+</tr>
+<tr>
+<td>Risk Score</td>
+<td>Risk/Compliance</td>
+<td>&gt; 0.8 (high risk)</td>
+<td>Compliance system identifies unstable accounts</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Combined Signal</strong>: A customer qualifies for retention outreach if they have:
+- <strong>AND</strong>: 3+ support escalations in the last 30 days
+- <strong>AND</strong>: 1+ failed transactions in the last 30 days
+- <strong>AND</strong>: Risk score exceeding 0.8</p>
+<p>This multi-signal approach reduces false positives and focuses on genuinely at-risk customers.</p>
+<h2 id="step-by-step-execution">Step-by-Step Execution<a class="headerlink" href="#step-by-step-execution" title="Permanent link">&para;</a></h2>
+<p>This section walks through the complete process of standing up the three domains, loading data, and executing the federated query.</p>
+<h3 id="step-1-start-accounts-domain">Step 1: Start Accounts Domain<a class="headerlink" href="#step-1-start-accounts-domain" title="Permanent link">&para;</a></h3>
+<p>Start the Accounts domain SPARQL endpoint and database.</p>
+<p><strong>Prerequisites</strong>: Docker and Docker Compose installed</p>
+<p><strong>Command</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>/home/gundu/portfolio/chakraview-fintech-data-mesh/domains/accounts
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</span></code></pre></div></p>
+<p><strong>Expected Output</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Creating accounts-postgres ... done
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Creating accounts-fuseki ... done
+</span></code></pre></div></p>
+<p><strong>Verify Health</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check Postgres readiness</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>accounts-postgres<span class="w"> </span>pg_isready
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Wait for Fuseki to be ready (should return 200)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:3030/
+</span></code></pre></div></p>
+<p><strong>Success Criteria</strong>: Both containers running, Fuseki responds to HTTP requests</p>
+<h3 id="step-2-load-accounts-sample-data">Step 2: Load Accounts Sample Data<a class="headerlink" href="#step-2-load-accounts-sample-data" title="Permanent link">&para;</a></h3>
+<p>Load customer and account master data into the Accounts domain.</p>
+<p><strong>Command</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">cd</span><span class="w"> </span>/home/gundu/portfolio/chakraview-fintech-data-mesh/domains/accounts
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># Load CSV data into Postgres</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>accounts-postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>accounts_db<span class="w"> </span>-c<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="s2">&quot;\COPY customers (customer_id, name, email, status, registration_date) \</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="s2">   FROM STDIN WITH (FORMAT csv, HEADER true)&quot;</span><span class="w"> </span>&lt;<span class="w"> </span>data/accounts-customers.csv
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>accounts-postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>accounts_db<span class="w"> </span>-c<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="s2">&quot;\COPY accounts (account_id, customer_id, account_type, balance) \</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="s2">   FROM STDIN WITH (FORMAT csv, HEADER true)&quot;</span><span class="w"> </span>&lt;<span class="w"> </span>data/accounts-accounts.csv
+</span></code></pre></div></p>
+<p><strong>Data Loaded</strong>:
+- <code>accounts-customers.csv</code>: Contains 5 sample customers (john@acme.com, alice@tech.com, etc.)
+- <code>accounts-accounts.csv</code>: Contains 5 account records linked to customers</p>
+<p><strong>Trigger RDF Transformation</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Invoke transformation job (via API or message queue)</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># This converts Postgres rows to RDF and loads into Fuseki</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/transform/accounts
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># Or trigger via Kafka message</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;{&quot;type&quot;:&quot;transformation_request&quot;,&quot;domain&quot;:&quot;accounts&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>accounts-kafka<span class="w"> </span>kafka-console-producer<span class="w"> </span>--broker-list<span class="w"> </span>localhost:9092<span class="w"> </span>--topic<span class="w"> </span>transformations
+</span></code></pre></div></p>
+<p><strong>Verify Data in SPARQL</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Query the Accounts SPARQL endpoint</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;http://localhost:3030/accounts/sparql?query=\</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="s2">SELECT%20%3Fcustomer%20%3Fname%20WHERE%20%7B%0A%20%20%3Fcustomer%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FCustomer%3E%20%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FcustomerName%3E%20%3Fname%20.%0A%7D&quot;</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># Expected: 5 results with customer URIs and names</span>
+</span></code></pre></div></p>
+<p><strong>Success Criteria</strong>: SPARQL endpoint responds with 5 customer records</p>
+<h3 id="step-3-start-transactions-domain">Step 3: Start Transactions Domain<a class="headerlink" href="#step-3-start-transactions-domain" title="Permanent link">&para;</a></h3>
+<p>Start the Transactions domain SPARQL endpoint and database.</p>
+<p><strong>Command</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span>/home/gundu/portfolio/chakraview-fintech-data-mesh/domains/transactions
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</span></code></pre></div></p>
+<p><strong>Expected Output</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Creating transactions-postgres ... done
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Creating transactions-fuseki ... done
+</span></code></pre></div></p>
+<p><strong>Verify Health</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:3031/
+</span></code></pre></div></p>
+<p><strong>Load Transactions Sample Data</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Load transaction and counterparty data</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>transactions-postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>transactions_db<span class="w"> </span>-c<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="s2">&quot;\COPY payments (txn_id, customer_id, amount, status, date) \</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="s2">   FROM STDIN WITH (FORMAT csv, HEADER true)&quot;</span><span class="w"> </span>&lt;<span class="w"> </span>data/transactions-payments.csv
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>transactions-postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>transactions_db<span class="w"> </span>-c<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="s2">&quot;\COPY counterparties (cp_id, customer_id, name) \</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="s2">   FROM STDIN WITH (FORMAT csv, HEADER true)&quot;</span><span class="w"> </span>&lt;<span class="w"> </span>data/transactions-counterparties.csv
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1"># Trigger RDF transformation with customer IRI linking</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8081/transform/transactions
+</span></code></pre></div></p>
+<p><strong>Critical</strong>: During transformation, the Transactions domain must resolve <code>customer_id</code> to the customer IRIs minted by the Accounts domain.
+- Transformation queries Accounts SPARQL endpoint for each customer_id
+- Retrieves the corresponding customer IRI
+- Links all transactions to that IRI via <code>fintech:transactionDebtor</code></p>
+<p><strong>Verify Data in SPARQL</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;http://localhost:3031/transactions/sparql?query=\</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="s2">SELECT%20%3Ftxn%20%3Fcustomer%20%3Famount%20WHERE%20%7B%0A%20%20%3Ftxn%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FTransaction%3E%20%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FtransactionDebtor%3E%20%3Fcustomer%20%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FtransactionAmount%3E%20%3Famount%20.%0A%7D&quot;</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Expected: Transactions with customer IRIs that match Accounts domain IRIs</span>
+</span></code></pre></div></p>
+<p><strong>Success Criteria</strong>: SPARQL endpoint responds with transactions linked to correct customer IRIs</p>
+<h3 id="step-4-start-riskcompliance-domain">Step 4: Start Risk/Compliance Domain<a class="headerlink" href="#step-4-start-riskcompliance-domain" title="Permanent link">&para;</a></h3>
+<p>Start the Risk/Compliance domain SPARQL endpoint and database.</p>
+<p><strong>Command</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nb">cd</span><span class="w"> </span>/home/gundu/portfolio/chakraview-fintech-data-mesh/domains/risk-compliance
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</span></code></pre></div></p>
+<p><strong>Expected Output</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Creating risk-postgres ... done
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>Creating risk-fuseki ... done
+</span></code></pre></div></p>
+<p><strong>Verify Health</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:3032/
+</span></code></pre></div></p>
+<p><strong>Load Risk Sample Data</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Load risk profiles and support tickets</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>risk-postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>risk_db<span class="w"> </span>-c<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="s2">&quot;\COPY risk_profiles (profile_id, customer_id, risk_score, category) \</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="s2">   FROM STDIN WITH (FORMAT csv, HEADER true)&quot;</span><span class="w"> </span>&lt;<span class="w"> </span>data/risk-profiles.csv
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>risk-postgres<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>risk_db<span class="w"> </span>-c<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">  </span><span class="s2">&quot;\COPY support_tickets (ticket_id, customer_id, reason, created_date, escalation_flag) \</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="s2">   FROM STDIN WITH (FORMAT csv, HEADER true)&quot;</span><span class="w"> </span>&lt;<span class="w"> </span>data/support-tickets.csv
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="c1"># Trigger RDF transformation with customer IRI linking</span>
+</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8082/transform/risk
+</span></code></pre></div></p>
+<p><strong>Critical</strong>: Like the Transactions domain, Risk/Compliance must resolve customer_id to Accounts domain IRIs:
+- During RDF transformation, query Accounts SPARQL endpoint for each customer_id
+- Retrieve the corresponding customer IRI
+- Link all risk profiles and tickets via <code>fintech:forCustomer</code></p>
+<p><strong>Verify Data in SPARQL</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;http://localhost:3032/risk/sparql?query=\</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="s2">SELECT%20%3Fprofile%20%3Fcustomer%20%3FriskScore%20WHERE%20%7B%0A%20%20%3Fprofile%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FRiskProfile%3E%20%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FforCustomer%3E%20%3Fcustomer%20%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FriskScore%3E%20%3FriskScore%20.%0A%7D&quot;</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># Expected: Risk profiles with customer IRIs matching Accounts domain</span>
+</span></code></pre></div></p>
+<p><strong>Success Criteria</strong>: SPARQL endpoint responds with risk profiles linked to correct customer IRIs</p>
+<h3 id="step-5-execute-federated-query">Step 5: Execute Federated Query<a class="headerlink" href="#step-5-execute-federated-query" title="Permanent link">&para;</a></h3>
+<p>Execute the churn analysis query against all three endpoints simultaneously using SPARQL Federation.</p>
+<p><strong>Command</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Option A: Via curl (recommended for debugging)</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;http://localhost:3030/accounts/sparql?query=</span><span class="k">$(</span>cat<span class="w"> </span>domains/federation/queries/churn-analysis-federated.sparql<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-sRr<span class="w"> </span>@uri<span class="k">)</span><span class="s2">&quot;</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># Option B: Using a SPARQL client library (Python, Node.js, etc.)</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="c1"># See domains/federation/queries/run-federated-query.py for example</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="c1"># Option C: Via Apache Jena command-line tools</span>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>arq<span class="w"> </span>--query<span class="w"> </span>domains/federation/queries/churn-analysis-federated.sparql<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="w">    </span>--results<span class="w"> </span>csv
+</span></code></pre></div></p>
+<p><strong>Query File</strong>: <code>domains/federation/queries/churn-analysis-federated.sparql</code></p>
+<p><strong>Query Logic</strong>:
+<div class="language-sparql highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">PREFIX</span> <span class="nn">fintech</span><span class="p">:</span> <span class="nl">&lt;https://chakracommerce.com/ontology/fintech/&gt;</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="k">PREFIX</span> <span class="nn">xsd</span><span class="p">:</span> <span class="nl">&lt;http://www.w3.org/2001/XMLSchema#&gt;</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="k">SELECT</span> <span class="nv">?customer</span> <span class="nv">?customerName</span> <span class="nv">?failedTxnCount</span> <span class="nv">?escalationCount</span> <span class="nv">?riskScore</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="k">WHERE</span> <span class="p">{</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>  <span class="c"># SERVICE 1: Get customer information from Accounts domain</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>  <span class="k">SERVICE</span> <span class="nl">&lt;http://localhost:3030/accounts/sparql&gt;</span> <span class="p">{</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    <span class="nv">?customer</span> <span class="k">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">Customer</span> <span class="p">;</span>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>              <span class="nn">fintech</span><span class="p">:</span><span class="nt">customerName</span> <span class="nv">?customerName</span> <span class="p">;</span>
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>              <span class="nn">fintech</span><span class="p">:</span><span class="nt">customerEmail</span> <span class="nv">?email</span> <span class="p">.</span>
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>  <span class="p">}</span>
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>
+</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>  <span class="c"># SERVICE 2: Count recent failed transactions from Transactions domain</span>
+</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>  <span class="k">SERVICE</span> <span class="nl">&lt;http://localhost:3030/transactions/sparql&gt;</span> <span class="p">{</span>
+</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    <span class="nv">?txn</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionDebtor</span> <span class="nv">?customer</span> <span class="p">;</span>
+</span><span id="__span-21-16"><a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>         <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionStatus</span> <span class="s">&quot;failed&quot;</span> <span class="p">;</span>
+</span><span id="__span-21-17"><a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>         <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionDate</span> <span class="nv">?txnDate</span> <span class="p">.</span>
+</span><span id="__span-21-18"><a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>    <span class="k">FILTER</span> <span class="p">(</span><span class="nv">?txnDate</span> <span class="o">&gt;=</span> <span class="s">&quot;2026-04-30&quot;</span><span class="o">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">dateTime</span><span class="p">)</span>
+</span><span id="__span-21-19"><a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>  <span class="p">}</span>
+</span><span id="__span-21-20"><a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>
+</span><span id="__span-21-21"><a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>  <span class="c"># SERVICE 3: Get risk information from Risk/Compliance domain</span>
+</span><span id="__span-21-22"><a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>  <span class="k">SERVICE</span> <span class="nl">&lt;http://localhost:3030/risk/sparql&gt;</span> <span class="p">{</span>
+</span><span id="__span-21-23"><a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>    <span class="nv">?riskProfile</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">forCustomer</span> <span class="nv">?customer</span> <span class="p">;</span>
+</span><span id="__span-21-24"><a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>                 <span class="nn">fintech</span><span class="p">:</span><span class="nt">riskScore</span> <span class="nv">?riskScore</span> <span class="p">.</span>
+</span><span id="__span-21-25"><a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>    <span class="k">FILTER</span> <span class="p">(</span><span class="nv">?riskScore</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">)</span>
+</span><span id="__span-21-26"><a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>
+</span><span id="__span-21-27"><a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a>    <span class="c"># Count support escalations</span>
+</span><span id="__span-21-28"><a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>    <span class="nv">?ticket</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">forCustomer</span> <span class="nv">?customer</span> <span class="p">;</span>
+</span><span id="__span-21-29"><a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a>            <span class="nn">fintech</span><span class="p">:</span><span class="nt">escalationFlag</span> <span class="kc">true</span> <span class="p">;</span>
+</span><span id="__span-21-30"><a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a>            <span class="nn">fintech</span><span class="p">:</span><span class="nt">createdDate</span> <span class="nv">?ticketDate</span> <span class="p">.</span>
+</span><span id="__span-21-31"><a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a>    <span class="k">FILTER</span> <span class="p">(</span><span class="nv">?ticketDate</span> <span class="o">&gt;=</span> <span class="s">&quot;2026-04-30&quot;</span><span class="o">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">dateTime</span><span class="p">)</span>
+</span><span id="__span-21-32"><a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a>  <span class="p">}</span>
+</span><span id="__span-21-33"><a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a><span class="p">}</span>
+</span><span id="__span-21-34"><a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a><span class="k">GROUP BY</span> <span class="nv">?customer</span> <span class="nv">?customerName</span> <span class="nv">?riskScore</span>
+</span><span id="__span-21-35"><a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a><span class="k">HAVING</span> <span class="p">(</span><span class="nf">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span> <span class="nv">?txn</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nf">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span> <span class="nv">?ticket</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-21-36"><a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a><span class="k">ORDER BY</span> <span class="k">DESC</span><span class="p">(</span><span class="nv">?riskScore</span><span class="p">)</span>
+</span></code></pre></div></p>
+<p><strong>Expected Execution Flow</strong>:
+1. Query engine parses the SPARQL and identifies three SERVICE clauses
+2. Each SERVICE clause is sent to its respective endpoint in parallel (or sequentially)
+3. Accounts domain returns: customer URIs and names
+4. Transactions domain returns: failed transactions for each customer, filtered by date
+5. Risk domain returns: risk profiles and support tickets, filtered by thresholds
+6. Results are joined on <code>?customer</code> variable
+7. GROUP BY aggregates counts per customer
+8. HAVING filters for customers with 1+ failed txns AND 3+ escalations
+9. Final results sorted by risk score</p>
+<p><strong>Success Criteria</strong>: Query executes without timeout, returns churn candidates</p>
+<h2 id="expected-results">Expected Results<a class="headerlink" href="#expected-results" title="Permanent link">&para;</a></h2>
+<p>The federated query should return customers matching the churn signal criteria.</p>
+<h3 id="sample-output-table">Sample Output Table<a class="headerlink" href="#sample-output-table" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Customer IRI</th>
+<th>Customer Name</th>
+<th>Failed Txns (30d)</th>
+<th>Escalations (30d)</th>
+<th>Risk Score</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https://accounts.fintech.local/customer/cust_12345</code></td>
+<td>john@acme.com</td>
+<td>1</td>
+<td>3</td>
+<td>0.85</td>
+<td>Retention Outreach</td>
+</tr>
+<tr>
+<td><code>https://accounts.fintech.local/customer/cust_67890</code></td>
+<td>alice@tech.com</td>
+<td>2</td>
+<td>4</td>
+<td>0.92</td>
+<td>Immediate Escalation</td>
+</tr>
+<tr>
+<td><code>https://accounts.fintech.local/customer/cust_24680</code></td>
+<td>bob@startup.io</td>
+<td>1</td>
+<td>3</td>
+<td>0.81</td>
+<td>Retention Outreach</td>
+</tr>
+</tbody>
+</table>
+<h3 id="understanding-the-output">Understanding the Output<a class="headerlink" href="#understanding-the-output" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Customer IRI</strong>: The unique identifier minted by Accounts domain (resolvable to customer details)</li>
+<li><strong>Customer Name</strong>: Retrieved from Accounts domain (used for outreach teams)</li>
+<li><strong>Failed Txns (30d)</strong>: Count of failed transactions in last 30 days from Transactions domain</li>
+<li><strong>Escalations (30d)</strong>: Count of escalated support tickets in last 30 days from Risk domain</li>
+<li><strong>Risk Score</strong>: Compliance risk score from Risk domain (0-1 scale, &gt;0.8 = high risk)</li>
+<li><strong>Action</strong>: Recommended next step based on severity of signals</li>
+</ul>
+<h3 id="why-these-results">Why These Results?<a class="headerlink" href="#why-these-results" title="Permanent link">&para;</a></h3>
+<p><strong>john@acme.com</strong> (Risk Score: 0.85):
+- Recent payment failure (may indicate account issues)
+- Multiple recent support escalations (customer dissatisfaction)
+- High compliance risk score (flagged by risk model)
+- <strong>Conclusion</strong>: Customer is genuinely at risk; recommend proactive outreach</p>
+<p><strong>alice@tech.com</strong> (Risk Score: 0.92):
+- Multiple payment failures (transaction instability)
+- Most escalations of the cohort (high frustration)
+- Highest risk score (severe compliance concerns)
+- <strong>Conclusion</strong>: Most urgent case; escalate to customer success team immediately</p>
+<h2 id="interpreting-results">Interpreting Results<a class="headerlink" href="#interpreting-results" title="Permanent link">&para;</a></h2>
+<h3 id="what-the-churn-signals-tell-us">What the Churn Signals Tell Us<a class="headerlink" href="#what-the-churn-signals-tell-us" title="Permanent link">&para;</a></h3>
+<p>Each signal contributes different information about customer health:</p>
+<h4 id="failed-transactions-from-transactions-domain">Failed Transactions (from Transactions domain)<a class="headerlink" href="#failed-transactions-from-transactions-domain" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Indicates</strong>: Customer is experiencing friction with the payment system</li>
+<li><strong>Suggests</strong>: System issues, account restrictions, or insufficient funds</li>
+<li><strong>Action</strong>: Troubleshoot technical issues, verify account status</li>
+</ul>
+<h4 id="support-escalations-from-riskcompliance-domain">Support Escalations (from Risk/Compliance domain)<a class="headerlink" href="#support-escalations-from-riskcompliance-domain" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Indicates</strong>: Customer frustration has escalated beyond first-line support</li>
+<li><strong>Suggests</strong>: Unresolved issues, dissatisfaction with service</li>
+<li><strong>Action</strong>: Investigate root cause, consider service recovery</li>
+</ul>
+<h4 id="high-risk-score-from-riskcompliance-domain">High Risk Score (from Risk/Compliance domain)<a class="headerlink" href="#high-risk-score-from-riskcompliance-domain" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Indicates</strong>: Regulatory, compliance, or behavioral risk detected</li>
+<li><strong>Suggests</strong>: Account instability, policy violations, or fraud signals</li>
+<li><strong>Action</strong>: Compliance review, account audit, or monitoring escalation</li>
+</ul>
+<h3 id="combined-signal-interpretation">Combined Signal Interpretation<a class="headerlink" href="#combined-signal-interpretation" title="Permanent link">&para;</a></h3>
+<p>When all three signals are present, it indicates a <strong>systemic problem</strong>, not a transient issue:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Failed Txns + Escalations + High Risk Score = Churn Risk
+</span></code></pre></div>
+<p>This customer is likely to either:
+1. <strong>Close their account</strong> (churn)
+2. <strong>Reduce usage</strong> (negative revenue impact)
+3. <strong>Leave negative reviews</strong> (brand damage)
+4. <strong>Report issues to regulators</strong> (compliance risk)</p>
+<h3 id="decision-framework">Decision Framework<a class="headerlink" href="#decision-framework" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Risk Level</th>
+<th>Recommended Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1+ failed txn, 3+ escalations, &gt;0.8 risk</td>
+<td><strong>CRITICAL</strong></td>
+<td>Escalate to VP Customer Success immediately</td>
+</tr>
+<tr>
+<td>1+ failed txn, 3+ escalations, 0.6-0.8 risk</td>
+<td><strong>HIGH</strong></td>
+<td>Contact customer within 24 hours</td>
+</tr>
+<tr>
+<td>1+ failed txn, 2 escalations, &gt;0.8 risk</td>
+<td><strong>MEDIUM</strong></td>
+<td>Schedule followup call within 48 hours</td>
+</tr>
+<tr>
+<td>0 failed txns, 3+ escalations, &gt;0.8 risk</td>
+<td><strong>MEDIUM</strong></td>
+<td>Investigate support tickets for patterns</td>
+</tr>
+</tbody>
+</table>
+<h2 id="extending-the-case-study">Extending the Case Study<a class="headerlink" href="#extending-the-case-study" title="Permanent link">&para;</a></h2>
+<p>This case study demonstrates the core pattern of semantic integration. You can extend it in several ways:</p>
+<h3 id="extension-1-add-counterparties-domain">Extension 1: Add Counterparties Domain<a class="headerlink" href="#extension-1-add-counterparties-domain" title="Permanent link">&para;</a></h3>
+<p><strong>Motivation</strong>: Identify if transaction failures are concentrated with specific payment partners</p>
+<p><strong>Steps</strong>:
+1. Create <code>domains/counterparties</code> directory
+2. Define <code>fintech:Counterparty</code> RDF entities
+3. Link counterparties to transactions via <code>fintech:transactionCounterparty</code>
+4. Update federation query to include counterparty analysis
+5. Create new query: <code>queries/counterparty-failure-analysis.sparql</code></p>
+<p><strong>Example Query</strong>:
+<div class="language-sparql highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">SELECT</span> <span class="nv">?customer</span> <span class="nv">?counterparty</span> <span class="nv">?failureCount</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="k">WHERE</span> <span class="p">{</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>  <span class="k">SERVICE</span> <span class="nl">&lt;http://accounts/sparql&gt;</span> <span class="p">{</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="nv">?customer</span> <span class="k">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">Customer</span> <span class="p">.</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>  <span class="p">}</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>  <span class="k">SERVICE</span> <span class="nl">&lt;http://transactions/sparql&gt;</span> <span class="p">{</span>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>    <span class="nv">?txn</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionDebtor</span> <span class="nv">?customer</span> <span class="p">;</span>
+</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>         <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionStatus</span> <span class="s">&quot;failed&quot;</span> <span class="p">;</span>
+</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>         <span class="nn">fintech</span><span class="p">:</span><span class="nt">transactionCounterparty</span> <span class="nv">?counterparty</span> <span class="p">.</span>
+</span><span id="__span-23-10"><a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>  <span class="p">}</span>
+</span><span id="__span-23-11"><a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>  <span class="k">SERVICE</span> <span class="nl">&lt;http://counterparties/sparql&gt;</span> <span class="p">{</span>
+</span><span id="__span-23-12"><a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a>    <span class="nv">?counterparty</span> <span class="k">a</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">Counterparty</span> <span class="p">;</span>
+</span><span id="__span-23-13"><a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a>                  <span class="nn">fintech</span><span class="p">:</span><span class="nt">counterpartyName</span> <span class="nv">?cpName</span> <span class="p">.</span>
+</span><span id="__span-23-14"><a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a>  <span class="p">}</span>
+</span><span id="__span-23-15"><a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="p">}</span>
+</span><span id="__span-23-16"><a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="k">GROUP BY</span> <span class="nv">?customer</span> <span class="nv">?counterparty</span>
+</span><span id="__span-23-17"><a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="k">HAVING</span> <span class="p">(</span><span class="nf">COUNT</span><span class="p">(</span><span class="nv">?txn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</span></code></pre></div></p>
+<h3 id="extension-2-add-market-data-domain">Extension 2: Add Market Data Domain<a class="headerlink" href="#extension-2-add-market-data-domain" title="Permanent link">&para;</a></h3>
+<p><strong>Motivation</strong>: Correlate churn risk with external market conditions</p>
+<p><strong>Steps</strong>:
+1. Create <code>domains/market-data</code> domain
+2. Define <code>fintech:MarketEvent</code> RDF entities
+3. Link events to time periods and geographies
+4. Update federation query to correlate churn with market volatility
+5. Create new query: <code>queries/churn-vs-market-conditions.sparql</code></p>
+<h3 id="extension-3-real-time-federated-queries">Extension 3: Real-Time Federated Queries<a class="headerlink" href="#extension-3-real-time-federated-queries" title="Permanent link">&para;</a></h3>
+<p><strong>Current State</strong>: Batch queries executed on-demand</p>
+<p><strong>Enhanced State</strong>: Continuous monitoring queries</p>
+<p><strong>Implementation</strong>:
+1. Deploy query execution as a Kubernetes CronJob
+2. Execute churn query every 4 hours
+3. Write results to a cache (Redis, DynamoDB)
+4. Expose API for customer success team to query recent churn risks
+5. Send Slack/email alerts for new critical cases</p>
+<p><strong>Example</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Cron schedule: &quot;0 */4 * * *&quot; (every 4 hours)</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>arq<span class="w"> </span>--query<span class="w"> </span>churn-analysis-federated.sparql<span class="w"> </span>--results<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span>jq<span class="w"> </span><span class="s1">&#39;.results.bindings[] | select(.riskScore.value &gt; 0.8)&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">  </span>redis-cli<span class="w"> </span>-x<span class="w"> </span>SET<span class="w"> </span>churn_risks
+</span></code></pre></div></p>
+<h3 id="extension-4-add-ontology-inference-rules">Extension 4: Add Ontology Inference Rules<a class="headerlink" href="#extension-4-add-ontology-inference-rules" title="Permanent link">&para;</a></h3>
+<p><strong>Current State</strong>: Static RDF data linked by shared URIs</p>
+<p><strong>Enhanced State</strong>: Inferred relationships via OWL rules</p>
+<p><strong>Example Rules</strong>:
+<div class="language-turtle highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c"># Rule 1: If a customer has 2+ failed transactions, mark as &quot;at_risk&quot;</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="p">:</span><span class="nt">hasFailedTransaction</span> <span class="nn">rdfs</span><span class="p">:</span><span class="nt">subPropertyOf</span> <span class="p">:</span><span class="nt">hasRiskSignal</span> <span class="p">.</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="c"># Rule 2: If a customer has 3+ support escalations, infer &quot;dissatisfied&quot;</span>
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="p">:</span><span class="nt">hasEscalation</span> <span class="nn">rdfs</span><span class="p">:</span><span class="nt">subPropertyOf</span> <span class="p">:</span><span class="nt">hasDissatisfactionSignal</span> <span class="p">.</span>
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>
+</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="c"># Rule 3: If customer has risk_score &gt; 0.8 AND any risk signals, infer &quot;churn_risk&quot;</span>
+</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="p">[]</span> <span class="kt">a</span> <span class="nn">owl</span><span class="p">:</span><span class="nt">Class</span> <span class="p">;</span>
+</span><span id="__span-25-9"><a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>   <span class="nn">owl</span><span class="p">:</span><span class="nt">equivalentClass</span> <span class="p">[</span>
+</span><span id="__span-25-10"><a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>     <span class="kt">a</span> <span class="nn">owl</span><span class="p">:</span><span class="nt">Class</span> <span class="p">;</span>
+</span><span id="__span-25-11"><a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>     <span class="nn">owl</span><span class="p">:</span><span class="nt">onProperty</span> <span class="nn">fintech</span><span class="p">:</span><span class="nt">riskScore</span> <span class="p">;</span>
+</span><span id="__span-25-12"><a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a>     <span class="nn">owl</span><span class="p">:</span><span class="nt">someValuesFrom</span> <span class="p">[</span> <span class="nn">owl</span><span class="p">:</span><span class="nt">minInclusive</span> <span class="s">&quot;0.8&quot;</span><span class="p">^^</span><span class="nn">xsd</span><span class="p">:</span><span class="nt">float</span> <span class="p">]</span>
+</span><span id="__span-25-13"><a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a>   <span class="p">]</span> <span class="p">.</span>
+</span></code></pre></div></p>
+<h3 id="extension-5-add-query-caching-performance-optimization">Extension 5: Add Query Caching &amp; Performance Optimization<a class="headerlink" href="#extension-5-add-query-caching-performance-optimization" title="Permanent link">&para;</a></h3>
+<p><strong>Current State</strong>: Federated queries execute all three SERVICE clauses every time</p>
+<p><strong>Enhanced State</strong>: Smart caching of stable data</p>
+<p><strong>Implementation</strong>:
+1. Cache Accounts domain data (customer master data changes infrequently)
+2. Cache Risk domain data (risk scores updated hourly)
+3. Only fetch live Transactions data (changes constantly)
+4. Implement 15-minute TTL cache for repeated queries</p>
+<p><strong>Example Python Client</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kn">import</span> <span class="nn">requests</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="kn">import</span> <span class="nn">hashlib</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="kn">import</span> <span class="nn">json</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+</span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="kn">import</span> <span class="nn">redis</span>
+</span><span id="__span-26-6"><a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>
+</span><span id="__span-26-7"><a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a><span class="n">cache</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="__span-26-8"><a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>
+</span><span id="__span-26-9"><a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="k">def</span> <span class="nf">cached_federated_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">ttl_seconds</span><span class="o">=</span><span class="mi">900</span><span class="p">):</span>
+</span><span id="__span-26-10"><a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>    <span class="n">query_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</span><span id="__span-26-11"><a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sparql:</span><span class="si">{</span><span class="n">query_hash</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-26-12"><a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>
+</span><span id="__span-26-13"><a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a>    <span class="c1"># Check cache</span>
+</span><span id="__span-26-14"><a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a>    <span class="n">cached_result</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+</span><span id="__span-26-15"><a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a>    <span class="k">if</span> <span class="n">cached_result</span><span class="p">:</span>
+</span><span id="__span-26-16"><a id="__codelineno-26-16" name="__codelineno-26-16" href="#__codelineno-26-16"></a>        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">cached_result</span><span class="p">)</span>
+</span><span id="__span-26-17"><a id="__codelineno-26-17" name="__codelineno-26-17" href="#__codelineno-26-17"></a>
+</span><span id="__span-26-18"><a id="__codelineno-26-18" name="__codelineno-26-18" href="#__codelineno-26-18"></a>    <span class="c1"># Execute query</span>
+</span><span id="__span-26-19"><a id="__codelineno-26-19" name="__codelineno-26-19" href="#__codelineno-26-19"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span id="__span-26-20"><a id="__codelineno-26-20" name="__codelineno-26-20" href="#__codelineno-26-20"></a>        <span class="s1">&#39;http://localhost:3030/accounts/sparql&#39;</span><span class="p">,</span>
+</span><span id="__span-26-21"><a id="__codelineno-26-21" name="__codelineno-26-21" href="#__codelineno-26-21"></a>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;query&#39;</span><span class="p">:</span> <span class="n">query</span><span class="p">}</span>
+</span><span id="__span-26-22"><a id="__codelineno-26-22" name="__codelineno-26-22" href="#__codelineno-26-22"></a>    <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-26-23"><a id="__codelineno-26-23" name="__codelineno-26-23" href="#__codelineno-26-23"></a>
+</span><span id="__span-26-24"><a id="__codelineno-26-24" name="__codelineno-26-24" href="#__codelineno-26-24"></a>    <span class="c1"># Store in cache</span>
+</span><span id="__span-26-25"><a id="__codelineno-26-25" name="__codelineno-26-25" href="#__codelineno-26-25"></a>    <span class="n">cache</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">ttl_seconds</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+</span><span id="__span-26-26"><a id="__codelineno-26-26" name="__codelineno-26-26" href="#__codelineno-26-26"></a>    <span class="k">return</span> <span class="n">result</span>
+</span></code></pre></div></p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p>Common issues and how to resolve them:</p>
+<h3 id="issue-1-domain-endpoint-not-responding">Issue 1: Domain Endpoint Not Responding<a class="headerlink" href="#issue-1-domain-endpoint-not-responding" title="Permanent link">&para;</a></h3>
+<p><strong>Error Message</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>SPARQL query execution failed: Connection timeout to http://localhost:3030/accounts/sparql
+</span></code></pre></div></p>
+<p><strong>Root Causes</strong>:
+- Domain container hasn't finished startup
+- Domain port is not exposed
+- Fuseki service crashed</p>
+<p><strong>Resolution</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Check container status</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>docker<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>accounts
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="c1"># View logs</span>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>docker<span class="w"> </span>logs<span class="w"> </span>accounts-fuseki
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>
+</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="c1"># Restart the container</span>
+</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>docker<span class="w"> </span>restart<span class="w"> </span>accounts-fuseki
+</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>
+</span><span id="__span-28-10"><a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="c1"># Wait for health check to pass</span>
+</span><span id="__span-28-11"><a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>accounts-fuseki<span class="w"> </span>curl<span class="w"> </span>http://localhost:3030/
+</span></code></pre></div></p>
+<h3 id="issue-2-no-results-returned-from-federated-query">Issue 2: No Results Returned from Federated Query<a class="headerlink" href="#issue-2-no-results-returned-from-federated-query" title="Permanent link">&para;</a></h3>
+<p><strong>Error Message</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>Query executed successfully but returned 0 rows
+</span></code></pre></div></p>
+<p><strong>Root Causes</strong>:
+- Sample data not loaded
+- RDF transformation didn't complete
+- Date filters are too restrictive
+- IRIs in different domains don't match</p>
+<p><strong>Resolution</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Verify data was loaded in each domain</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3030/accounts/sparql?query=SELECT%20%28COUNT%28%3Fc%29%20AS%20%3Fcount%29%20WHERE%20%7B%3Fc%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FCustomer%3E%20%7D&quot;</span>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="c1"># Verify RDF transformation completed</span>
+</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>docker<span class="w"> </span>logs<span class="w"> </span>accounts-transformer<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Transformation complete&quot;</span>
+</span><span id="__span-30-6"><a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>
+</span><span id="__span-30-7"><a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="c1"># Check if IRIs match across domains</span>
+</span><span id="__span-30-8"><a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="c1"># Accounts domain</span>
+</span><span id="__span-30-9"><a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3030/accounts/sparql?query=SELECT%20%3Fc%20WHERE%20%7B%3Fc%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FCustomer%3E%7D&quot;</span>
+</span><span id="__span-30-10"><a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a>
+</span><span id="__span-30-11"><a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a><span class="c1"># Transactions domain - should have same customer URIs</span>
+</span><span id="__span-30-12"><a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3031/transactions/sparql?query=SELECT%20DISTINCT%20%3Fc%20WHERE%20%7B%3Ft%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FtransactionDebtor%3E%20%3Fc%20%7D&quot;</span>
+</span></code></pre></div></p>
+<h3 id="issue-3-iri-mismatches-between-domains">Issue 3: IRI Mismatches Between Domains<a class="headerlink" href="#issue-3-iri-mismatches-between-domains" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>Some queries work (when linking within one domain)
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>Federated query returns no results (when linking across domains)
+</span></code></pre></div></p>
+<p><strong>Root Causes</strong>:
+- Transformation logic in Transactions domain mints its own customer IRIs instead of resolving them from Accounts
+- Entity resolution rules not configured
+- Namespace mismatch (one domain uses <code>/customer/</code> prefix, another uses <code>/customers/</code>)</p>
+<p><strong>Resolution</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># Verify IRI format is consistent</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="c1"># Expected format: https://accounts.fintech.local/customer/cust_XXXXX</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="c1"># Check transformation configuration</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>cat<span class="w"> </span>domains/transactions/config/entity-resolution.yaml
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>
+</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="c1"># Should have:</span>
+</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="c1"># entity_resolution:</span>
+</span><span id="__span-32-9"><a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a><span class="c1">#   customer:</span>
+</span><span id="__span-32-10"><a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a><span class="c1">#     source_endpoint: &quot;http://accounts-domain:3030/accounts/sparql&quot;</span>
+</span><span id="__span-32-11"><a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a><span class="c1">#     query: &quot;SELECT ?customer_id ?iri WHERE { ?iri a fintech:Customer ; fintech:customerId ?customer_id }&quot;</span>
+</span><span id="__span-32-12"><a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a>
+</span><span id="__span-32-13"><a id="__codelineno-32-13" name="__codelineno-32-13" href="#__codelineno-32-13"></a><span class="c1"># Manually verify IRI resolution</span>
+</span><span id="__span-32-14"><a id="__codelineno-32-14" name="__codelineno-32-14" href="#__codelineno-32-14"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3030/accounts/sparql?query=SELECT%20%3Fc%20WHERE%20%7B%3Fc%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FCustomer%3E%20%3B%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FcustomerId%3E%20%22cust_12345%22%20%7D&quot;</span>
+</span></code></pre></div></p>
+<h3 id="issue-4-sparql-syntax-errors-in-query">Issue 4: SPARQL Syntax Errors in Query<a class="headerlink" href="#issue-4-sparql-syntax-errors-in-query" title="Permanent link">&para;</a></h3>
+<p><strong>Error Message</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Malformed query: Expected &quot;}&quot; at line 12, column 5
+</span></code></pre></div></p>
+<p><strong>Root Causes</strong>:
+- Typo in SPARQL syntax
+- Missing semicolons or periods
+- Unclosed braces or quotation marks</p>
+<p><strong>Resolution</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># Validate SPARQL syntax with rapper tool</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>rapper<span class="w"> </span>-c<span class="w"> </span>domains/federation/queries/churn-analysis-federated.sparql
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># Or use online validator</span>
+</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="c1"># https://www.w3.org/2001/sw/DataFormats/N3/test/query.html</span>
+</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>
+</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="c1"># Common issues to check:</span>
+</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a><span class="c1"># 1. All patterns end with . (period)</span>
+</span><span id="__span-34-9"><a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a><span class="c1"># 2. All variables start with ?</span>
+</span><span id="__span-34-10"><a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a><span class="c1"># 3. All URIs are &lt;enclosed-in-brackets&gt;</span>
+</span><span id="__span-34-11"><a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a><span class="c1"># 4. SERVICE blocks are properly paired { }</span>
+</span><span id="__span-34-12"><a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a><span class="c1"># 5. PREFIX declarations before WHERE clause</span>
+</span></code></pre></div></p>
+<h3 id="issue-5-slow-query-execution">Issue 5: Slow Query Execution<a class="headerlink" href="#issue-5-slow-query-execution" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>Query takes &gt;30 seconds to return results
+</span></code></pre></div></p>
+<p><strong>Root Causes</strong>:
+- One domain endpoint is responding slowly
+- Network latency between domains
+- Query is not pushing filters to remote endpoints
+- Cartesian product caused by missing join condition</p>
+<p><strong>Resolution</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># Optimize by pushing filters into SERVICE clauses</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="c1"># BEFORE:</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>SERVICE<span class="w"> </span>&lt;http://localhost:3030/transactions/sparql&gt;<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">  </span>?txn<span class="w"> </span>fintech:transactionDebtor<span class="w"> </span>?customer<span class="w"> </span><span class="p">;</span>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="w">       </span>fintech:transactionStatus<span class="w"> </span><span class="s2">&quot;failed&quot;</span><span class="w"> </span><span class="p">;</span>
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">       </span>fintech:transactionDate<span class="w"> </span>?txnDate<span class="w"> </span>.
+</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="w">  </span><span class="c1"># Filter applied AFTER network fetch</span>
+</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="o">}</span>
+</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
+</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="c1"># AFTER:</span>
+</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>SERVICE<span class="w"> </span>&lt;http://localhost:3030/transactions/sparql&gt;<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a><span class="w">  </span>?txn<span class="w"> </span>fintech:transactionDebtor<span class="w"> </span>?customer<span class="w"> </span><span class="p">;</span>
+</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="w">       </span>fintech:transactionStatus<span class="w"> </span><span class="s2">&quot;failed&quot;</span><span class="w"> </span><span class="p">;</span>
+</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a><span class="w">       </span>fintech:transactionDate<span class="w"> </span>?txnDate<span class="w"> </span>.
+</span><span id="__span-36-15"><a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a><span class="w">  </span>FILTER<span class="w"> </span><span class="o">(</span>?txnDate<span class="w"> </span>&gt;<span class="o">=</span><span class="w"> </span><span class="s2">&quot;2026-04-30&quot;</span>^^xsd:dateTime<span class="o">)</span><span class="w">  </span><span class="c1"># Filter applied AT endpoint</span>
+</span><span id="__span-36-16"><a id="__codelineno-36-16" name="__codelineno-36-16" href="#__codelineno-36-16"></a><span class="o">}</span>
+</span><span id="__span-36-17"><a id="__codelineno-36-17" name="__codelineno-36-17" href="#__codelineno-36-17"></a>
+</span><span id="__span-36-18"><a id="__codelineno-36-18" name="__codelineno-36-18" href="#__codelineno-36-18"></a><span class="c1"># Check individual endpoint performance</span>
+</span><span id="__span-36-19"><a id="__codelineno-36-19" name="__codelineno-36-19" href="#__codelineno-36-19"></a><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3030/accounts/sparql?query=SELECT%20%28COUNT%28%3Fc%29%20AS%20%3Fcount%29%20WHERE%20%7B%3Fc%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FCustomer%3E%7D&quot;</span>
+</span><span id="__span-36-20"><a id="__codelineno-36-20" name="__codelineno-36-20" href="#__codelineno-36-20"></a>
+</span><span id="__span-36-21"><a id="__codelineno-36-21" name="__codelineno-36-21" href="#__codelineno-36-21"></a><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3031/transactions/sparql?query=SELECT%20%28COUNT%28%3Ft%29%20AS%20%3Fcount%29%20WHERE%20%7B%3Ft%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FTransaction%3E%7D&quot;</span>
+</span><span id="__span-36-22"><a id="__codelineno-36-22" name="__codelineno-36-22" href="#__codelineno-36-22"></a>
+</span><span id="__span-36-23"><a id="__codelineno-36-23" name="__codelineno-36-23" href="#__codelineno-36-23"></a><span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span><span class="s2">&quot;http://localhost:3032/risk/sparql?query=SELECT%20%28COUNT%28%3Fr%29%20AS%20%3Fcount%29%20WHERE%20%7B%3Fr%20a%20%3Chttp%3A%2F%2Fchakracommerce.com%2Fontology%2Ffintech%2FRiskProfile%3E%7D&quot;</span>
+</span><span id="__span-36-24"><a id="__codelineno-36-24" name="__codelineno-36-24" href="#__codelineno-36-24"></a>
+</span><span id="__span-36-25"><a id="__codelineno-36-25" name="__codelineno-36-25" href="#__codelineno-36-25"></a><span class="c1"># Identify slowest endpoint and investigate its logs</span>
+</span></code></pre></div></p>
+<hr />
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This case study demonstrates a production-ready approach to cross-domain data integration in fintech:</p>
+<ul>
+<li><strong>Three autonomous domains</strong> own their data and SPARQL endpoints</li>
+<li><strong>No centralized database</strong> or transformation layer</li>
+<li><strong>SPARQL Federation</strong> enables queries that span all domains</li>
+<li><strong>Shared URI naming</strong> enables entity linking across domains</li>
+<li><strong>Business logic</strong> (churn detection) is expressed in a single federated query</li>
+<li><strong>Results drive action</strong> (customer retention outreach)</li>
+</ul>
+<p>The architecture scales to more domains, more complex queries, and more sophisticated business logic while maintaining domain autonomy and data governance.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/naren-chakraview" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid-init.js"></script>
+      
+    
+  </body>
+</html>

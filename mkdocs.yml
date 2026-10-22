@@ -111,6 +111,10 @@ nav:
       - Scaling: production/scaling.md
       - Troubleshooting: production/troubleshooting.md
       - Trade-offs: production/trade-offs.md
+  - Case Studies:
+      - Semantic Integration: case-study/fintech-semantic-integration/index.md
+      - Federation Guide: case-study/fintech-semantic-integration/federation-guide.md
+      - Shift-Left Semantics Blog: case-study/fintech-semantic-integration/BLOG-SHIFT-LEFT-SEMANTICS.md
   - ADRs:
       - adrs/README.md
       - ADR-0001 Data Mesh Pattern: adrs/ADR-0001-data-mesh.md
