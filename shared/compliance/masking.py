@@ -37,9 +37,28 @@ class DataMasker:
         return "[MASKED]"
 
     @staticmethod
+    def full_hash(value: str) -> str:
+        """Full hash: SHA-256 hex digest of the entire value"""
+        return hashlib.sha256(value.encode()).hexdigest()
+
+    @staticmethod
     def no_mask(value: str) -> str:
         """No masking"""
         return value
+
+    @staticmethod
+    def apply(strategy: str, value: str) -> str:
+        """Apply the named strategy; unknown names raise rather than pass through"""
+        methods = {
+            "no_mask": DataMasker.no_mask,
+            "full_hash": DataMasker.full_hash,
+            "hash_mask": DataMasker.hash_mask,
+            "partial_mask": DataMasker.partial_mask,
+            "full_mask": DataMasker.full_mask,
+        }
+        if strategy not in methods:
+            raise ValueError(f"unknown masking strategy: {strategy}")
+        return methods[strategy](value)
 
 
 class ColumnMaskingPolicy:
@@ -64,9 +83,8 @@ class ColumnMaskingPolicy:
         return self.policies.get(table, {}).get(column)
 
     def should_mask(self, table: str, column: str) -> bool:
-        """Check if column should be masked"""
-        classification = self.get_column_classification(table, column)
-        return classification is not None and classification != "public"
+        """Mask everything except columns explicitly classified as public"""
+        return self.get_column_classification(table, column) != "public"
 
 
 FINTECH_MASKING_POLICIES = {
