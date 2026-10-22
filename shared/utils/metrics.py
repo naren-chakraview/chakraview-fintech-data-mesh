@@ -1,12 +1,12 @@
-from prometheus_client import Counter, Histogram, Gauge, Registry
+from prometheus_client import Counter, Histogram, Gauge, CollectorRegistry
 from typing import Optional
 
 
 class MetricsCollector:
     """Prometheus metrics collector for data mesh"""
 
-    def __init__(self, registry: Optional[Registry] = None):
-        self.registry = registry or Registry()
+    def __init__(self, registry: Optional[CollectorRegistry] = None):
+        self.registry = registry or CollectorRegistry()
 
         # Ingest metrics
         self.ingest_records = Counter(

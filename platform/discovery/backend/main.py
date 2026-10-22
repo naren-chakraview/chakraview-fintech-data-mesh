@@ -5,11 +5,12 @@ import os
 from pathlib import Path
 from datetime import datetime
 from shared.utils import get_logger
-from platform.discovery.backend.models import (
+from .models import (
     DataProduct,
     AccessRequest,
     DataProductSearchResult,
 )
+from .opa_client import OPAError, evaluate_access, product_classification
 
 
 logger = get_logger(__name__)
@@ -126,27 +127,48 @@ async def get_product(product_id: str) -> dict:
 
 @app.post("/api/access-requests")
 async def request_access(request: AccessRequest) -> dict:
-    """Submit an access request"""
+    """Submit an access request; OPA decides whether it is approved, pending, or denied"""
+    product = data_products.get(request.data_product_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+
     request_id = f"req_{len(access_requests) + 1}"
     request.id = request_id
     request.requested_at = datetime.utcnow()
 
-    access_requests[request_id] = request.dict()
+    try:
+        decision = await evaluate_access(
+            user_id=request.user_id,
+            user_role=request.user_role,
+            action=request.action,
+            data_classification=product_classification(product),
+        )
+    except OPAError:
+        access_requests[request_id] = {**request.dict(), "status": "denied"}
+        raise HTTPException(status_code=503, detail="Policy engine unavailable; request denied")
+
+    approved = decision["allow"] and not decision["requires_approval"]
+    status = "approved" if approved else "pending"
+    access_requests[request_id] = {**request.dict(), "status": status}
 
     logger.info(
-        "Access request submitted",
+        "Access request evaluated",
         context={
             "request_id": request_id,
             "product_id": request.data_product_id,
             "user_id": request.user_id,
+            "status": status,
         },
     )
 
-    return {
-        "id": request_id,
-        "status": "pending",
-        "message": "Access request submitted for review",
-    }
+    response = {"id": request_id, "status": status}
+    if status == "approved":
+        response["message"] = "Access granted"
+    else:
+        response["message"] = "Access request submitted for review"
+        response["routed_to"] = product["owner"]
+        response["approval_sla_hours"] = product["access_policy"]["approval_sla_hours"]
+    return response
 
 
 @app.get("/api/access-requests/{request_id}")
