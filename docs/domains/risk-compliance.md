@@ -259,7 +259,7 @@ Logging:
 SELECT fraud_score, risk_level FROM risk_compliance.fraud_scores
 WHERE evaluated_at > now() - INTERVAL 7 days;
 
--- Fraud analyst sees (no masking)
+-- Fraud analyst, only after domain approval (fraud_score is masked by policy until then)
 fraud_score | risk_level
 ─────────────────────────
 0.95        | CRITICAL

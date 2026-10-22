@@ -497,7 +497,7 @@ async def submit_access_request(request: AccessRequest):
     
     # Evaluate OPA policy
     opa_decision = requests.post(
-        f"{OPA_URL}/v1/data/authz/evaluate",
+        f"{OPA_URL}/v1/data/data_mesh/access",
         json={
             "input": {
                 "user_id": request.user_id,

@@ -356,10 +356,10 @@ apply_masking {
   input.masking_strategy := "full_hash"
 }
 
-# Fraud analysts can see everything
-allow {
+# Fraud analysts need the owning domain's approval before reading sensitive data
+requires_approval {
   input.user_role == "fraud_analyst"
-  input.action == "read"
+  input.data_classification == "sensitive"
 }
 ```
 
@@ -414,12 +414,14 @@ curl -X POST http://localhost:8000/api/access-requests \
 
 # Response:
 {
-  "request_id": "req_9999",
-  "status": "approved",
-  "message": "Access granted (auto-approved for fraud_analyst role)"
+  "id": "req_9999",
+  "status": "pending",
+  "message": "Access request submitted for review",
+  "routed_to": "transactions-domain",
+  "approval_sla_hours": 4
 }
 
-# Step 3: Query in Spark SQL
+# Step 3 (after the transactions domain approves the request): Query in Spark SQL
 SELECT transaction_id, amount, merchant_id, status
 FROM transactions.raw_transactions
 WHERE booking_timestamp > '2026-04-23'
