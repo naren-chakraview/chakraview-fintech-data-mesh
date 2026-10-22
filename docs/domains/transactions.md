@@ -338,29 +338,19 @@ Settlement status: 7 years (aligned with raw transactions)
 ### Masking Rules (OPA Policies)
 
 ```rego
-# From platform/governance/opa-policies/abac.rego
+# Excerpt from platform/governance/opa-policies/abac.rego (the shipped policy).
+# External analysts match no allow rule, so they are denied by default.
 
-# External analysts cannot see account_id
-deny[reason] {
-  input.user_role == "external_analyst"
-  input.column == "account_id"
-  input.action == "read"
-  reason := "external_analyst cannot read PII column account_id"
+# Fraud analysts need the owning domain's approval before reading sensitive data
+requires_approval if {
+    input.user_role == "fraud_analyst"
+    input.data_classification == "sensitive"
 }
 
-# Mask account_id for external analysts
-apply_masking {
-  input.user_role == "external_analyst"
-  input.column == "account_id"
-  input.action == "read"
-  input.masking_strategy := "full_hash"
-}
+# Fail closed: every column is masked unless a rule explicitly says otherwise
+default masking_strategy := "full_hash"
 
-# Fraud analysts can see everything
-allow {
-  input.user_role == "fraud_analyst"
-  input.action == "read"
-}
+masking_strategy := "no_mask" if input.column_classification == "public"
 ```
 
 ### Query Audit Trail
@@ -414,12 +404,14 @@ curl -X POST http://localhost:8000/api/access-requests \
 
 # Response:
 {
-  "request_id": "req_9999",
-  "status": "approved",
-  "message": "Access granted (auto-approved for fraud_analyst role)"
+  "id": "req_9999",
+  "status": "pending",
+  "message": "Access request submitted for review",
+  "routed_to": "transactions-domain",
+  "approval_sla_hours": 4
 }
 
-# Step 3: Query in Spark SQL
+# Step 3 (after the transactions domain approves the request): Query in Spark SQL
 SELECT transaction_id, amount, merchant_id, status
 FROM transactions.raw_transactions
 WHERE booking_timestamp > '2026-04-23'

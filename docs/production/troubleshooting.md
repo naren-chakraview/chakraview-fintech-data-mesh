@@ -269,7 +269,7 @@ Verify Iceberg is doing pruning:
 Issue: Policy evaluation adds latency to every query
 
 Check:
-├── OPA response time: curl -X POST http://opa:8181/v1/data/authz \
+├── OPA response time: curl -X POST http://opa:8181/v1/data/data_mesh/access \
 │   (should be < 50ms)
 ├── If > 100ms: OPA policies are complex
 
@@ -446,20 +446,20 @@ curl -X POST http://localhost:8000/api/access-requests/req_12345/approve \
 
 ```bash
 # Test masking rule
-curl -X POST http://opa:8181/v1/data/authz \
+curl -X POST http://opa:8181/v1/data/data_mesh/access \
   -d '{
     "input": {
       "user_role": "external_analyst",
       "column": "account_id",
-      "classification": "pii"
+      "column_classification": "pii"
     }
   }'
 
-# Should return: apply_masking = true
+# Should return: result.masking_strategy = "full_hash"
 
 # If not working:
 ├── Check OPA logs: kubectl logs -f pod/opa-0
-├── Verify policy loaded: curl http://opa:8181/v1/data/authz
+├── Verify policy loaded: curl http://opa:8181/v1/data/data_mesh/access
 └── Reload policy: kubectl rollout restart deployment opa
 ```
 

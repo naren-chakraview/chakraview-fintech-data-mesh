@@ -1,0 +1,21 @@
+name: policy-test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  policy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA 1.0.0
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 1.0.0
+
+      - name: Check and test policies
+        run: |
+          opa check --strict platform/governance/opa-policies
+          make policy-test

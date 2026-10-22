@@ -407,7 +407,7 @@ kubectl set resources deployment spark-executor \
 kubectl logs -f pod/opa-0 -n fintech-mesh
 
 # Verify policy loaded
-curl http://localhost:8181/v1/data/authz
+curl http://localhost:8181/v1/data/data_mesh/access
 ```
 
 **3. Iceberg write timeouts**

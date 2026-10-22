@@ -234,10 +234,12 @@ Automatic deletion: None (10-year retention is enforced)
 ```
 User: "I want to query fraud_scores"
 
+(Design intent. Implemented today: the OPA allow and approval decision and the pending or approved status. Not implemented: owner review, the timeout, and any unmasking after approval.)
+
 OPA Policy Evaluation:
 ├── User role: analyst
-├── Data classification: restricted (fraud_scores)
-├── Auto-approve? NO (restricted data)
+├── Data classification: sensitive (fraud_score in risk-scores.yaml)
+├── Auto-approve? YES (analyst may read sensitive data)
 ├── Route to: Risk Compliance team (owner)
 ├── SLA: 2 hours
 
@@ -259,12 +261,8 @@ Logging:
 SELECT fraud_score, risk_level FROM risk_compliance.fraud_scores
 WHERE evaluated_at > now() - INTERVAL 7 days;
 
--- Fraud analyst sees (no masking)
-fraud_score | risk_level
-─────────────────────────
-0.95        | CRITICAL
-0.72        | HIGH
-0.15        | LOW
+-- Fraud analyst: fraud_score is full_hash-masked by policy. No approval-based
+-- unmasking is implemented yet, so the policy gives no unmasked view for this role.
 
 -- External analyst sees (with masking)
 fraud_score | risk_level

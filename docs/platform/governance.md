@@ -366,7 +366,7 @@ class OPAEvaluator:
         
         # Query OPA for policy decision
         response = requests.post(
-            f"{self.opa_url}/v1/data/authz",
+            f"{self.opa_url}/v1/data/data_mesh/access",
             json={"input": context}
         )
         
@@ -392,11 +392,39 @@ class OPAEvaluator:
         }
         
         response = requests.post(
-            f"{self.opa_url}/v1/data/authz/masking_strategy",
-            json={"input": context}
+            f"{self.opa_url}/v1/data/data_mesh/access/masking_strategy",
+            json={"input": context},
+            timeout=2,
         )
-        
-        return response.json()["result"].get("strategy", "no_mask")
+        if response.status_code != 200:
+            raise RuntimeError("OPA unavailable: denying read")
+
+        body = response.json()
+        if "result" not in body:
+            raise RuntimeError("OPA returned no decision: denying read")
+        return body["result"]
+```
+
+Reads go through `mask_rows` (`platform/governance/enforce.py`), which asks OPA for each column's strategy, applies it, and writes one audit record before returning rows:
+
+```python
+import sys
+sys.path.insert(0, "platform/governance")  # enforce.py is not importable as platform.governance
+
+from enforce import mask_rows
+from shared.compliance.masking import ColumnMaskingPolicy
+
+policy = ColumnMaskingPolicy()
+policy.add_policy("transactions.raw_transactions", "account_id", "pii")
+
+rows = await mask_rows(
+    rows,
+    "transactions.raw_transactions",
+    ["account_id", "amount"],
+    user_id="analyst_42",
+    user_role="external_analyst",
+    policy=policy,
+)
 ```
 
 ---
@@ -560,11 +588,10 @@ def test_external_analyst_pii_masked():
     }
     
     result = evaluator.evaluate_access(context)
-    assert result["allowed"] == True
-    assert result["masking_required"] == True
-    assert result["masking_strategy"] == "full_hash"
+    assert result["allowed"] == False
+    assert result["requires_approval"] == True
 
-def test_fraud_analyst_no_masking():
+def test_fraud_analyst_restricted_needs_approval():
     evaluator = OPAEvaluator()
     
     context = {
@@ -575,8 +602,8 @@ def test_fraud_analyst_no_masking():
     }
     
     result = evaluator.evaluate_access(context)
-    assert result["allowed"] == True
-    assert result["masking_required"] == False
+    assert result["allowed"] == False
+    assert result["requires_approval"] == True
 
 def test_contractor_restricted_data_denied():
     evaluator = OPAEvaluator()

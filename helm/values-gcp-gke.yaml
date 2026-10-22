@@ -87,7 +87,7 @@ bigquery:
 # OPA Configuration
 opa:
   replicas: 3
-  image: openpolicyagent/opa:latest
+  image: openpolicyagent/opa:1.0.0
 
 # Discovery Portal
 discovery_portal:

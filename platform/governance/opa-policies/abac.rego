@@ -1,32 +1,36 @@
 package data_mesh.access
 
-# Default deny
-default allow = false
+import rego.v1
 
-# Auto-approve: read-only, non-sensitive, internal user
-allow {
-    input.action == "read"
-    input.user_role in ["internal-analyst", "fraud-team"]
-    input.data_sensitivity in ["public", "public"]
-    not input.requires_approval
+# Default deny: nothing is readable unless a rule below allows it.
+default allow := false
+
+default requires_approval := false
+
+# Read access without approval: non-restricted data, internal analyst roles.
+allow if {
+	input.action == "read"
+	input.user_role in {"analyst", "risk_analyst"}
+	input.data_classification in {"public", "sensitive"}
 }
 
-# Domain owner approval required: write or sensitive data
-requires_approval {
-    input.action == "write"
+# Restricted or PII data, and every write, needs the owning domain's approval.
+requires_approval if input.action == "write"
+
+requires_approval if input.data_classification in {"pii", "confidential", "restricted"}
+
+# Fraud analysts get sensitive data only with the owning domain's approval.
+requires_approval if {
+	input.user_role == "fraud_analyst"
+	input.data_classification == "sensitive"
 }
 
-requires_approval {
-    input.data_sensitivity in ["pii", "confidential"]
-}
+# Fail closed: every column is masked unless a rule explicitly says otherwise.
+default masking_strategy := "full_hash"
 
-# PII column masking required for external users
-mask_pii {
-    input.user_role in ["external-analyst"]
-    input.target_columns[_] == "account_id"
-}
+masking_strategy := "no_mask" if input.column_classification == "public"
 
-mask_pii {
-    input.user_role in ["external-analyst"]
-    input.target_columns[_] == "account_holder_name"
+masking_strategy := "partial_mask" if {
+	input.column_classification == "sensitive"
+	input.user_role in {"analyst", "risk_analyst"}
 }

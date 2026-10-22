@@ -1,4 +1,4 @@
-.PHONY: help install test lint format clean docker-up docker-down
+.PHONY: help install test lint format clean docker-up docker-down policy-test
 
 help:
 	@echo "Available commands:"
@@ -23,6 +23,9 @@ test-unit:
 
 test-integration:
 	pytest tests/integration -v
+
+policy-test:
+	opa test platform/governance/opa-policies -v
 
 lint:
 	flake8 domains platform shared

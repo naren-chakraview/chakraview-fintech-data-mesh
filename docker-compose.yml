@@ -106,11 +106,13 @@ services:
 
   # OPA (Open Policy Agent)
   opa:
-    image: openpolicyagent/opa:latest
+    image: openpolicyagent/opa:1.0.0
     container_name: chakra-opa
+    command: ["run", "--server", "--addr=0.0.0.0:8181", "/policies"]
     ports:
-      - "8282:8282"
-    command: run --server
+      - "8181:8181"
+    volumes:
+      - ./platform/governance/opa-policies:/policies:ro
 
   # Elasticsearch (audit logs)
   elasticsearch:
