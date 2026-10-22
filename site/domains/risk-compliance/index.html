@@ -2313,43 +2313,41 @@
 <h3 id="approval-workflows">Approval Workflows<a class="headerlink" href="#approval-workflows" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>User: &quot;I want to query fraud_scores&quot;
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>OPA Policy Evaluation:
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>├── User role: analyst
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>├── Data classification: restricted (fraud_scores)
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>├── Auto-approve? NO (restricted data)
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>├── Route to: Risk Compliance team (owner)
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>├── SLA: 2 hours
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>Decision:
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>├── Owner reviews: Purpose? Risk level?
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>├── Accept: Grant access with masking
-</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>├── Reject: Deny request + log reason
-</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>└── Timeout (&gt; 2 hours): Auto-grant with max masking
-</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>Logging:
-</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>├── Request ID, timestamp, user, decision
-</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>├── Audit trail: Retained 10 years
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>(Design intent. Implemented today: the OPA allow and approval decision and the pending or approved status. Not implemented: owner review, the timeout, and any unmasking after approval.)
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>OPA Policy Evaluation:
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>├── User role: analyst
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>├── Data classification: sensitive (fraud_score in risk-scores.yaml)
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>├── Auto-approve? YES (analyst may read sensitive data)
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>├── Route to: Risk Compliance team (owner)
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>├── SLA: 2 hours
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>Decision:
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>├── Owner reviews: Purpose? Risk level?
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>├── Accept: Grant access with masking
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>├── Reject: Deny request + log reason
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>└── Timeout (&gt; 2 hours): Auto-grant with max masking
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>Logging:
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>├── Request ID, timestamp, user, decision
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>├── Audit trail: Retained 10 years
 </span></code></pre></div>
 <h3 id="masking-strategy">Masking Strategy<a class="headerlink" href="#masking-strategy" title="Permanent link">&para;</a></h3>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">-- Analyst queries fraud_scores (OPA masks automatically)</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">fraud_score</span><span class="p">,</span><span class="w"> </span><span class="n">risk_level</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">risk_compliance</span><span class="p">.</span><span class="n">fraud_scores</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">evaluated_at</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="n">days</span><span class="p">;</span>
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1">-- Fraud analyst sees (no masking)</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">fraud_score</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">risk_level</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="err">─────────────────────────</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="mi">0</span><span class="p">.</span><span class="mi">95</span><span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="n">CRITICAL</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="mi">0</span><span class="p">.</span><span class="mi">72</span><span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="n">HIGH</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="mi">0</span><span class="p">.</span><span class="mi">15</span><span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="n">LOW</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="c1">-- External analyst sees (with masking)</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="n">fraud_score</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">risk_level</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="err">─────────────────────────</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="n">REDACTED</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">CRITICAL</span>
-</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="n">REDACTED</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">MEDIUM</span><span class="o">*</span>
-</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="n">REDACTED</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">LOW</span><span class="o">*</span>
-</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>
-</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="ss">&quot;MEDIUM&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="ss">&quot;LOW&quot;</span><span class="w"> </span><span class="n">shown</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ss">&quot;NON_CRITICAL&quot;</span><span class="w"> </span><span class="p">(</span><span class="n">coarse</span><span class="o">-</span><span class="n">grained</span><span class="p">)</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1">-- Fraud analyst: fraud_score is full_hash-masked by policy. No approval-based</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1">-- unmasking is implemented yet, so the policy gives no unmasked view for this role.</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="c1">-- External analyst sees (with masking)</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="n">fraud_score</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">risk_level</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="err">─────────────────────────</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="n">REDACTED</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">CRITICAL</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="n">REDACTED</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">MEDIUM</span><span class="o">*</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="n">REDACTED</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">LOW</span><span class="o">*</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="ss">&quot;MEDIUM&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="ss">&quot;LOW&quot;</span><span class="w"> </span><span class="n">shown</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ss">&quot;NON_CRITICAL&quot;</span><span class="w"> </span><span class="p">(</span><span class="n">coarse</span><span class="o">-</span><span class="n">grained</span><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 <h2 id="time-travel-for-aml-audits">Time-Travel for AML Audits<a class="headerlink" href="#time-travel-for-aml-audits" title="Permanent link">&para;</a></h2>

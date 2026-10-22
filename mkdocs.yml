@@ -7,6 +7,10 @@ repo_name: naren-chakraview/chakraview-fintech-data-mesh
 repo_url: https://github.com/naren-chakraview/chakraview-fintech-data-mesh
 edit_uri: edit/main/docs/
 
+# Review briefs and the rego copies they reference are working files, not site content.
+exclude_docs: |
+  reviews/
+
 theme:
   name: material
   palette:
