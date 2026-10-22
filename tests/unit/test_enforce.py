@@ -93,7 +93,8 @@ def test_one_audit_record_per_read():
     assert record["user_role"] == "risk_analyst"
     assert record["table"] == TABLE
     assert record["columns"] == ["account_id"]
-    assert record["strategies"] == {"account_id": "full_hash"}
+    assert record["strategies"]["account_id"] == "full_hash"
+    assert set(record["strategies"]) == {"account_id", "balance"}
 
 
 def test_opa_error_returns_no_rows():
@@ -164,3 +165,25 @@ def test_opa_unreachable_returns_no_rows(monkeypatch):
         )
 
     assert records == []
+
+
+def test_unrequested_unclassified_column_is_masked_on_read():
+    async def decide(user_role, classification):
+        return "no_mask" if classification == "public" else "full_hash"
+
+    out = read(
+        [{"account_id": "ACC-1001", "balance": "250.00"}],
+        ["account_id"],
+        decide,
+        recording_audit([]),
+        policy=public_policy("account_id"),
+    )
+
+    assert out[0]["account_id"] == "ACC-1001"
+    assert out[0]["balance"] == hashlib.sha256(b"250.00").hexdigest()
+
+
+def public_policy(column):
+    policy = ColumnMaskingPolicy()
+    policy.add_policy(TABLE, column, "public")
+    return policy

@@ -64,17 +64,20 @@ async def mask_rows(
     Any exception (OPA failure, unknown strategy, audit failure) propagates, so no
     rows are returned when the read cannot be decided or recorded.
     """
+    # Every key in a row is decided, not only the requested columns: an unrequested
+    # column with no classification is masked like any other unclassified column.
+    keys = list(dict.fromkeys([*columns, *(key for row in rows for key in row)]))
     strategies = {}
-    for column in columns:
-        classification = policy.get_column_classification(table, column)
-        strategies[column] = await decide_strategy(user_role, classification)
+    for key in keys:
+        classification = policy.get_column_classification(table, key)
+        strategies[key] = await decide_strategy(user_role, classification)
 
     masked = []
     for row in rows:
         masked_row = {}
         for key, value in row.items():
-            strategy = strategies.get(key)
-            if strategy is None or strategy == "no_mask":
+            strategy = strategies[key]
+            if strategy == "no_mask":
                 masked_row[key] = value
             else:
                 masked_row[key] = DataMasker.apply(strategy, str(value))
