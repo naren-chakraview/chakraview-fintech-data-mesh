@@ -149,6 +149,17 @@ async def request_access(request: AccessRequest) -> dict:
 
     approved = decision["allow"] and not decision["requires_approval"]
     status = "approved" if approved else "pending"
+
+    # Build the response before storing, so a failure here never leaves a stored request
+    # the client was not told about. Products without an SLA use the model default of 4.
+    response = {"id": request_id, "status": status}
+    if status == "approved":
+        response["message"] = "Access granted"
+    else:
+        response["message"] = "Access request submitted for review"
+        response["routed_to"] = product["owner"]
+        response["approval_sla_hours"] = product["access_policy"].get("approval_sla_hours", 4)
+
     access_requests[request_id] = {**request.dict(), "status": status}
 
     logger.info(
@@ -160,14 +171,6 @@ async def request_access(request: AccessRequest) -> dict:
             "status": status,
         },
     )
-
-    response = {"id": request_id, "status": status}
-    if status == "approved":
-        response["message"] = "Access granted"
-    else:
-        response["message"] = "Access request submitted for review"
-        response["routed_to"] = product["owner"]
-        response["approval_sla_hours"] = product["access_policy"]["approval_sla_hours"]
     return response
 
 

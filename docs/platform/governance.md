@@ -399,8 +399,10 @@ class OPAEvaluator:
         if response.status_code != 200:
             raise RuntimeError("OPA unavailable: denying read")
 
-        # Unknown or missing classification is masked: the policy's own default is full_hash.
-        return response.json().get("result", "full_hash")
+        body = response.json()
+        if "result" not in body:
+            raise RuntimeError("OPA returned no decision: denying read")
+        return body["result"]
 ```
 
 Reads go through `mask_rows` (`platform/governance/enforce.py`), which asks OPA for each column's strategy, applies it, and writes one audit record before returning rows:
@@ -586,9 +588,8 @@ def test_external_analyst_pii_masked():
     }
     
     result = evaluator.evaluate_access(context)
-    assert result["allowed"] == True
-    assert result["masking_required"] == True
-    assert result["masking_strategy"] == "full_hash"
+    assert result["allowed"] == False
+    assert result["requires_approval"] == True
 
 def test_fraud_analyst_restricted_needs_approval():
     evaluator = OPAEvaluator()

@@ -135,10 +135,23 @@ def test_evaluate_access_returns_decision_and_sends_input():
 
 
 def test_evaluate_access_raises_on_non_200():
-    transport = httpx.MockTransport(lambda request: httpx.Response(500, json={"error": "boom"}))
+    # The body is a valid decision, so only the status check can make this raise.
+    body = {"result": {"allow": True, "requires_approval": False}}
+    transport = httpx.MockTransport(lambda request: httpx.Response(500, json=body))
 
     with pytest.raises(OPAError):
         asyncio.run(evaluate_access("u-1", "analyst", "read", "public", transport=transport))
+
+
+def test_evaluate_access_raises_on_transport_error():
+    def unreachable(request):
+        raise httpx.ConnectError("connection refused", request=request)
+
+    with pytest.raises(OPAError):
+        asyncio.run(
+            evaluate_access("u-1", "analyst", "read", "public",
+                            transport=httpx.MockTransport(unreachable))
+        )
 
 
 def test_evaluate_access_raises_on_missing_result():
@@ -146,3 +159,22 @@ def test_evaluate_access_raises_on_missing_result():
 
     with pytest.raises(OPAError):
         asyncio.run(evaluate_access("u-1", "analyst", "read", "public", transport=transport))
+
+
+def test_pending_product_without_sla_uses_default_and_stores_consistently(client, monkeypatch):
+    # market-feeds has no approval_sla_hours and no columns: restricted, so pending.
+    discovery.data_products["market-feeds"] = {
+        "id": "market-feeds",
+        "owner": "market-data-domain",
+        "access_policy": {"columns": []},
+    }
+    stub_opa(monkeypatch, result={"allow": False, "requires_approval": True})
+
+    r = client.post("/api/access-requests", json=request_body("market-feeds"))
+
+    assert r.status_code == 200
+    assert r.json()["approval_sla_hours"] == 4
+    stored = list(discovery.access_requests.values())
+    assert len(stored) == 1
+    assert stored[0]["status"] == "pending"
+    assert stored[0]["id"] == r.json()["id"]

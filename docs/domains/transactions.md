@@ -338,29 +338,19 @@ Settlement status: 7 years (aligned with raw transactions)
 ### Masking Rules (OPA Policies)
 
 ```rego
-# From platform/governance/opa-policies/abac.rego
-
-# External analysts cannot see account_id
-deny[reason] {
-  input.user_role == "external_analyst"
-  input.column == "account_id"
-  input.action == "read"
-  reason := "external_analyst cannot read PII column account_id"
-}
-
-# Mask account_id for external analysts
-apply_masking {
-  input.user_role == "external_analyst"
-  input.column == "account_id"
-  input.action == "read"
-  input.masking_strategy := "full_hash"
-}
+# Excerpt from platform/governance/opa-policies/abac.rego (the shipped policy).
+# External analysts match no allow rule, so they are denied by default.
 
 # Fraud analysts need the owning domain's approval before reading sensitive data
-requires_approval {
-  input.user_role == "fraud_analyst"
-  input.data_classification == "sensitive"
+requires_approval if {
+    input.user_role == "fraud_analyst"
+    input.data_classification == "sensitive"
 }
+
+# Fail closed: every column is masked unless a rule explicitly says otherwise
+default masking_strategy := "full_hash"
+
+masking_strategy := "no_mask" if input.column_classification == "public"
 ```
 
 ### Query Audit Trail

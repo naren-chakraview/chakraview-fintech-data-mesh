@@ -138,7 +138,8 @@ def test_opa_decide_returns_strategy(monkeypatch):
 
 
 def test_opa_non_200_raises(monkeypatch):
-    use_opa(monkeypatch, lambda request: httpx.Response(500, json={}))
+    # The body is a valid strategy, so only the status check can make this raise.
+    use_opa(monkeypatch, lambda request: httpx.Response(500, json={"result": "no_mask"}))
 
     with pytest.raises(OPAError):
         asyncio.run(opa_decide_strategy("analyst", "sensitive"))
