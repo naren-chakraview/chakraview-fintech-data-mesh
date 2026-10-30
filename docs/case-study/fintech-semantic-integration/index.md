@@ -199,9 +199,7 @@ chakraview-fintech-data-mesh/
 │       └── README.md
 │
 └── docs/case-study/fintech-semantic-integration/
-    ├── shared-ontology.ttl
     ├── federated-query-client.py
-    ├── churn-analysis-federated.sparql
     ├── run-churn-analysis.py
     ├── federation-guide.md
     ├── BLOG-SHIFT-LEFT-SEMANTICS.md
@@ -303,7 +301,7 @@ Every triple should carry `sourceSystem` and `sourceIngestionTime`. Makes debugg
 1. Clone the repository
 2. Read [Domain-Driven Semantic Architecture](./case-study-guide.md)
 3. Follow [Federation Guide](./federation-guide.md)
-4. Run the [Churn Analysis](./churn-analysis-federated.sparql) example
+4. Run the [Churn Analysis](https://github.com/naren-chakraview/chakraview-fintech-data-mesh/blob/main/domains/federation/queries/churn-analysis-federated.sparql) example
 5. Read [Shift-Left Semantics Blog Post](./BLOG-SHIFT-LEFT-SEMANTICS.md)
 
 ---

@@ -7,7 +7,8 @@ Transforms:
 """
 
 import pandas as pd
-from rdflib import Graph, Namespace, Literal, URIRef, RDF
+from decimal import Decimal
+from rdflib import Graph, Namespace, Literal, URIRef, RDF, XSD
 from datetime import datetime
 
 
@@ -55,14 +56,14 @@ class SilverToRdfTransformer:
             self.g.add((txn_iri, self.FINTECH.transactionId,
                        Literal(row['transaction_id'])))
             self.g.add((txn_iri, self.FINTECH.transactionAmount,
-                       Literal(float(row['amount']), datatype=self.FINTECH.decimal)))
+                       Literal(Decimal(str(row['amount'])), datatype=XSD.decimal)))
             self.g.add((txn_iri, self.FINTECH.transactionStatus,
                        Literal(row['status'])))
 
             # Add date if present
             if 'transaction_date' in row and pd.notna(row['transaction_date']):
                 self.g.add((txn_iri, self.FINTECH.transactionDate,
-                           Literal(row['transaction_date'])))
+                           Literal(pd.Timestamp(row['transaction_date']).isoformat(), datatype=XSD.dateTime)))
 
             # Link to customer (cross-domain)
             customer_iri = URIRef(
@@ -83,7 +84,7 @@ class SilverToRdfTransformer:
             self.g.add((txn_iri, self.FINTECH.sourceSystem,
                        Literal('transactions')))
             self.g.add((txn_iri, self.FINTECH.sourceIngestionTime,
-                       Literal(datetime.now().isoformat())))
+                       Literal(datetime.now().isoformat(), datatype=XSD.dateTime)))
 
         return self.g
 
@@ -118,7 +119,7 @@ class SilverToRdfTransformer:
             self.g.add((cp_iri, self.FINTECH.sourceSystem,
                        Literal('transactions')))
             self.g.add((cp_iri, self.FINTECH.sourceIngestionTime,
-                       Literal(datetime.now().isoformat())))
+                       Literal(datetime.now().isoformat(), datatype=XSD.dateTime)))
 
         return self.g
 

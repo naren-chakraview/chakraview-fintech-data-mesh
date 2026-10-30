@@ -2,118 +2,122 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/adrs/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/adrs/ADR-0001-data-mesh/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/adrs/ADR-0002-iceberg/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/adrs/ADR-0003-governance/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/adrs/ADR-0004-real-time/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/architecture/00-overview/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/architecture/data-mesh-principles/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/architecture/iceberg-design/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/architecture/real-time-vs-analytics/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/BLOG-SHIFT-LEFT-SEMANTICS/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/case-study-guide/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/federation-guide/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
+    </url>
+    <url>
+         <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/semantic-core-migration/</loc>
+         <lastmod>2026-10-30</lastmod>
+    </url>
+    <url>
+         <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/semantic-drift-after/</loc>
+         <lastmod>2026-10-30</lastmod>
+    </url>
+    <url>
+         <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/semantic-drift-before/</loc>
+         <lastmod>2026-10-30</lastmod>
+    </url>
+    <url>
+         <loc>https://naren-chakraview.github.io/fintech-data-mesh/case-study/fintech-semantic-integration/semantic-drift/</loc>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/domains/accounts/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/domains/counterparties/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/domains/market-data/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/domains/risk-compliance/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/domains/transactions/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/platform/discovery/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/platform/governance/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/platform/observability/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/production/deployment/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/production/scaling/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/production/trade-offs/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
     <url>
          <loc>https://naren-chakraview.github.io/fintech-data-mesh/production/troubleshooting/</loc>
-         <lastmod>2026-10-22</lastmod>
-    </url>
-    <url>
-         <loc>https://naren-chakraview.github.io/fintech-data-mesh/superpowers/plans/2026-04-30-fintech-data-mesh/</loc>
-         <lastmod>2026-10-22</lastmod>
-    </url>
-    <url>
-         <loc>https://naren-chakraview.github.io/fintech-data-mesh/superpowers/plans/2026-10-22-governance-fix/</loc>
-         <lastmod>2026-10-22</lastmod>
-    </url>
-    <url>
-         <loc>https://naren-chakraview.github.io/fintech-data-mesh/superpowers/specs/2026-04-30-fintech-data-mesh-design/</loc>
-         <lastmod>2026-10-22</lastmod>
+         <lastmod>2026-10-30</lastmod>
     </url>
 </urlset>

@@ -1,3 +1,4 @@
+from shared.semantic.paths import CORE_ONTOLOGY_PATH
 import pytest
 import pandas as pd
 from pathlib import Path
@@ -46,7 +47,7 @@ class TestAccountsRdfE2E:
     def test_ontology_path(self):
         """Get path to test ontology file"""
         test_dir = Path(__file__).parent.parent.parent / 'src' / 'main' / 'python' / 'semantic' / 'tests'
-        return str(test_dir / 'shared-ontology-test.ttl')
+        return str(CORE_ONTOLOGY_PATH)
 
     @pytest.fixture
     def transformer(self, iri_resolver, test_ontology_path):

@@ -15,3 +15,6 @@ spark-warehouse/
 dist/
 build/
 .claude/
+
+# Generated code knowledge graph
+graphify-out/

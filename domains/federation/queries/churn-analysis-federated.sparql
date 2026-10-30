@@ -8,7 +8,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 # 3. Querying Risk domain for customer risk scores
 # Results are joined on the ?customer entity across all three domains
 
-SELECT ?customer ?name ?ticketCount ?failedTxnCount ?riskScore
+SELECT ?customer ?name (COUNT(DISTINCT ?transaction) AS ?failedTxnCount) ?riskScore
 WHERE {
   # Query Accounts domain for customers
   SERVICE <http://accounts-domain.internal:3030/accounts/sparql> {

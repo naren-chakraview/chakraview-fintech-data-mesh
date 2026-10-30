@@ -1188,6 +1188,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1714,6 +1722,118 @@
     
   
     Shift-Left Semantics Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantic Drift: Before and After
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-drift-before/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Before: The Drifted Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-drift-after/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    After: The Fixed Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-core-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantic Core Migration and Identity Runbook
   
 
     
@@ -2354,6 +2474,9 @@
 
 
 <h1 id="federated-query-guide-cross-domain-semantic-analysis">Federated Query Guide: Cross-Domain Semantic Analysis<a class="headerlink" href="#federated-query-guide-cross-domain-semantic-analysis" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>What changed.</strong> The semantic layer was fixed. There is now one shared core, <code>semantics/core/fintech-core.ttl</code>, and customer IRIs come from one identity library, <code>shared/semantic/identity.py</code>. The drifted design is kept as a frozen, runnable reference. See <a href="../semantic-drift/">Semantic drift: before and after</a> and the <a href="../semantic-core-migration/">migration and identity runbook</a>.</p>
+</blockquote>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>This guide explains how to write and execute <strong>federated SPARQL queries</strong> across the fintech semantic mesh domains (Accounts, Transactions, Risk/Compliance). Federated queries enable unified analysis without centralizing data or semantic responsibility.</p>
 <h2 id="what-is-sparql-federation">What is SPARQL Federation?<a class="headerlink" href="#what-is-sparql-federation" title="Permanent link">&para;</a></h2>

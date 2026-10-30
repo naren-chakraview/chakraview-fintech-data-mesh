@@ -1,3 +1,4 @@
+from shared.semantic.paths import CORE_ONTOLOGY_PATH
 import pytest
 import pandas as pd
 import os
@@ -11,7 +12,7 @@ class TestSilverToRdfTransformer:
     def test_ontology_path(self):
         """Get path to test ontology file in the same directory as this test"""
         test_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(test_dir, "shared-ontology-test.ttl")
+        return str(CORE_ONTOLOGY_PATH)
 
     @pytest.fixture
     def resolver(self):

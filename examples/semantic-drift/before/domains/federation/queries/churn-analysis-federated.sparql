@@ -1,0 +1,37 @@
+PREFIX fintech: <https://chakracommerce.com/ontology/fintech/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Federated SPARQL query for churn analysis
+# This query demonstrates cross-domain semantic integration by:
+# 1. Querying Accounts domain for customer information
+# 2. Querying Transactions domain for recent failed transactions
+# 3. Querying Risk domain for customer risk scores
+# Results are joined on the ?customer entity across all three domains
+
+SELECT ?customer ?name ?ticketCount ?failedTxnCount ?riskScore
+WHERE {
+  # Query Accounts domain for customers
+  SERVICE <http://accounts-domain.internal:3030/accounts/sparql> {
+    ?customer a fintech:Customer ;
+              fintech:customerName ?name ;
+              fintech:customerEmail ?email .
+  }
+
+  # Query Transactions domain for failed transactions
+  SERVICE <http://transactions-domain.internal:3030/transactions/sparql> {
+    ?transaction fintech:transactionDebtor ?customer ;
+                 fintech:transactionStatus "failed" ;
+                 fintech:transactionDate ?txnDate .
+    FILTER (?txnDate > "2026-04-30"^^xsd:dateTime)
+  }
+
+  # Query Risk domain for risk scores
+  SERVICE <http://risk-domain.internal:3030/risk/sparql> {
+    ?riskProfile fintech:forCustomer ?customer ;
+                 fintech:riskScore ?riskScore .
+    FILTER (?riskScore > 0.8)
+  }
+}
+GROUP BY ?customer ?name ?riskScore
+HAVING (COUNT(DISTINCT ?transaction) >= 1)
+ORDER BY DESC(?riskScore)

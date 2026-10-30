@@ -1,5 +1,7 @@
 # Shift-Left Semantics: Domain Teams Own Their RDF
 
+> **What changed.** The semantic layer was fixed. There is now one shared core, `semantics/core/fintech-core.ttl`, and customer IRIs come from one identity library, `shared/semantic/identity.py`. The drifted design is kept as a frozen, runnable reference. See [Semantic drift: before and after](semantic-drift.md) and the [migration and identity runbook](semantic-core-migration.md).
+
 ## The Problem With Centralized Semantic Layers
 
 Data mesh architecture solved a critical problem: **decentralized ownership**. Instead of a monolithic data warehouse, each domain team owns its data products, runs its own pipelines, and serves its own consumers.
@@ -325,4 +327,4 @@ The lesson from data mesh applies to semantics too: **push responsibility to the
 - **Federated queries:** [SPARQL 1.1 Federated Query spec](https://www.w3.org/TR/sparql11-federated-query/)
 - **Data mesh:** [Zhamak Dehghani's original article](https://martinfowler.com/articles/data-mesh.html)
 - **RDF/Semantics:** [W3C RDF Concepts](https://www.w3.org/TR/rdf-concepts/)
-- **Case study:** [Fintech Churn Analysis Example](./churn-analysis-federated.sparql)
+- **Case study:** [Fintech Churn Analysis Example](https://github.com/naren-chakraview/chakraview-fintech-data-mesh/blob/main/domains/federation/queries/churn-analysis-federated.sparql)

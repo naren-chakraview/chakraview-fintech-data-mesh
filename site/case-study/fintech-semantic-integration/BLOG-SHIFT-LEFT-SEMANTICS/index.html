@@ -17,7 +17,7 @@
         <link rel="prev" href="../federation-guide/">
       
       
-        <link rel="next" href="../../../adrs/">
+        <link rel="next" href="../semantic-drift/">
       
       
         
@@ -1188,6 +1188,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1666,6 +1674,118 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantic Drift: Before and After
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-drift-before/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Before: The Drifted Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-drift-after/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    After: The Fixed Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-core-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantic Core Migration and Identity Runbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2242,6 +2362,9 @@
 
 
 <h1 id="shift-left-semantics-domain-teams-own-their-rdf">Shift-Left Semantics: Domain Teams Own Their RDF<a class="headerlink" href="#shift-left-semantics-domain-teams-own-their-rdf" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>What changed.</strong> The semantic layer was fixed. There is now one shared core, <code>semantics/core/fintech-core.ttl</code>, and customer IRIs come from one identity library, <code>shared/semantic/identity.py</code>. The drifted design is kept as a frozen, runnable reference. See <a href="../semantic-drift/">Semantic drift: before and after</a> and the <a href="../semantic-core-migration/">migration and identity runbook</a>.</p>
+</blockquote>
 <h2 id="the-problem-with-centralized-semantic-layers">The Problem With Centralized Semantic Layers<a class="headerlink" href="#the-problem-with-centralized-semantic-layers" title="Permanent link">&para;</a></h2>
 <p>Data mesh architecture solved a critical problem: <strong>decentralized ownership</strong>. Instead of a monolithic data warehouse, each domain team owns its data products, runs its own pipelines, and serves its own consumers.</p>
 <p>But semantic modeling—the layer that makes cross-domain queries possible—remained centralized.</p>
@@ -2516,7 +2639,7 @@ Transactions domain knows transactions best. They should own Transaction RDF ent
 <li><strong>Federated queries:</strong> <a href="https://www.w3.org/TR/sparql11-federated-query/">SPARQL 1.1 Federated Query spec</a></li>
 <li><strong>Data mesh:</strong> <a href="https://martinfowler.com/articles/data-mesh.html">Zhamak Dehghani's original article</a></li>
 <li><strong>RDF/Semantics:</strong> <a href="https://www.w3.org/TR/rdf-concepts/">W3C RDF Concepts</a></li>
-<li><strong>Case study:</strong> <a href="../churn-analysis-federated.sparql">Fintech Churn Analysis Example</a></li>
+<li><strong>Case study:</strong> <a href="https://github.com/naren-chakraview/chakraview-fintech-data-mesh/blob/main/domains/federation/queries/churn-analysis-federated.sparql">Fintech Churn Analysis Example</a></li>
 </ul>
 
 

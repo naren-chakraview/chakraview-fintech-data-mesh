@@ -1,7 +1,8 @@
 """Transform Accounts Silver tables to semantic RDF triples with deterministic IRI minting."""
 
 import pandas as pd
-from rdflib import Graph, Namespace, Literal, URIRef, RDF
+from decimal import Decimal
+from rdflib import Graph, Namespace, Literal, URIRef, RDF, XSD
 from datetime import datetime
 
 
@@ -38,7 +39,7 @@ class SilverToRdfTransformer:
             self.g.add((iri_ref, self.FINTECH.customerStatus, Literal(row['status'])))
             self.g.add((iri_ref, self.FINTECH.sourceSystem, Literal('accounts')))
             self.g.add((iri_ref, self.FINTECH.sourceIngestionTime,
-                       Literal(datetime.now().isoformat())))
+                       Literal(datetime.now().isoformat(), datatype=XSD.dateTime)))
 
         return self.g
 
@@ -85,13 +86,13 @@ class SilverToRdfTransformer:
             # Add Account properties
             self.g.add((account_iri, self.FINTECH.accountId, Literal(row['account_id'])))
             self.g.add((account_iri, self.FINTECH.accountBalance,
-                       Literal(float(row['balance']), datatype=self.FINTECH.decimal)))
+                       Literal(Decimal(str(row['balance'])), datatype=XSD.decimal)))
             self.g.add((account_iri, self.FINTECH.accountStatus, Literal(row['status'])))
             self.g.add((account_iri, self.FINTECH.accountType, Literal(row['account_type'])))
             self.g.add((account_iri, self.FINTECH.accountOwner, customer_iri))
             self.g.add((account_iri, self.FINTECH.sourceSystem, Literal('accounts')))
             self.g.add((account_iri, self.FINTECH.sourceIngestionTime,
-                       Literal(datetime.now().isoformat())))
+                       Literal(datetime.now().isoformat(), datatype=XSD.dateTime)))
 
         return self.g
 

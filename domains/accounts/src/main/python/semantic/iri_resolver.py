@@ -1,5 +1,11 @@
-import hashlib
-from typing import Optional
+"""IRI minting for the Accounts domain.
+
+Customer IRIs come from the shared identity library (owned by Accounts):
+shared/semantic/identity.py. Do not add a second copy of that rule here.
+"""
+
+from shared.semantic.identity import mint_customer_iri as _mint_customer_iri
+from shared.semantic.identity import normalize
 
 
 class IriResolver:
@@ -10,26 +16,15 @@ class IriResolver:
 
     def _normalize(self, text: str) -> str:
         """Normalize text for IRI generation (lowercase + trim)"""
-        return str(text).lower().strip()
-
-    def _hash(self, text: str) -> str:
-        """Generate stable hash from normalized text"""
-        return hashlib.sha256(text.encode()).hexdigest()[:8]
+        return normalize(text)
 
     def mint_customer_iri(self, email: str, kyc_id: str) -> str:
         """
         Mint stable IRI for customer based on email + kyc_id.
         Same email + kyc_id always produces same IRI (deterministic).
+        Requires FINTECH_IRI_KEY in the environment.
         """
-        # Normalize both fields
-        norm_email = self._normalize(email)
-        norm_kyc = self._normalize(kyc_id)
-
-        # Concatenate and hash
-        combined = f"{norm_email}|{norm_kyc}"
-        hash_id = self._hash(combined)
-
-        return f"{self.base_url}/customer#{hash_id}"
+        return _mint_customer_iri(email, kyc_id, base_url=self.base_url)
 
     def mint_account_iri(self, account_id: str) -> str:
         """

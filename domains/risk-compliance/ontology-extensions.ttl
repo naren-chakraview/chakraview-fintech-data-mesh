@@ -2,17 +2,18 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Imports the core by version IRI. Do not redefine core terms here.
+<https://chakracommerce.com/ontology/fintech/risk-compliance/extension>
+  a owl:Ontology ;
+  owl:imports <https://chakracommerce.com/ontology/fintech/core/1.0.0> .
 
 # ============================================================================
 # RISK/COMPLIANCE DOMAIN: RiskProfile Entity Type
 # ============================================================================
 
-fintech:RiskProfile
-  a rdfs:Class ;
-  rdfs:label "Risk Profile" ;
-  rdfs:comment "Risk assessment and compliance status for a customer at a point in time" ;
-  rdfs:subClassOf fintech:DomainEntity ;
-  fintech:owningDomain "risk_compliance" .
+# fintech:RiskProfile is a core class (semantics/core/fintech-core.ttl).
 
 # ============================================================================
 # RISK/COMPLIANCE DOMAIN: RiskProfile Properties (Risk/Compliance domain owns these)
@@ -94,30 +95,5 @@ fintech:reviewNotes
 # RISK/COMPLIANCE DOMAIN: Cross-Domain Linking Properties
 # ============================================================================
 
-fintech:forCustomer
-  a rdf:Property ;
-  rdfs:domain fintech:RiskProfile ;
-  rdfs:range fintech:Customer ;
-  rdfs:label "For Customer" ;
-  rdfs:comment "IRI reference to Customer entity from Accounts domain" ;
-  fintech:owningDomain "risk_compliance" .
-
-# ============================================================================
-# RISK/COMPLIANCE DOMAIN: Metadata Properties (Standard across all domains)
-# ============================================================================
-
-fintech:sourceSystem
-  a rdf:Property ;
-  rdfs:domain fintech:RiskProfile ;
-  rdfs:range xsd:string ;
-  rdfs:label "Source System" ;
-  rdfs:comment "Identifier of the system from which this data originated (e.g., 'risk_compliance')" ;
-  fintech:owningDomain "risk_compliance" .
-
-fintech:sourceIngestionTime
-  a rdf:Property ;
-  rdfs:domain fintech:RiskProfile ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Source Ingestion Time" ;
-  rdfs:comment "Timestamp when this data was ingested from the source system" ;
-  fintech:owningDomain "risk_compliance" .
+# fintech:forCustomer, sourceSystem and sourceIngestionTime are core terms
+# (semantics/core/fintech-core.ttl).

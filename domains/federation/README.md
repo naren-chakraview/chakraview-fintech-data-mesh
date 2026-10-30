@@ -124,7 +124,7 @@ Identify high-risk customers with recent failed transactions who may be candidat
 ### Query Structure
 
 ```sparql
-SELECT ?customer ?name ?ticketCount ?failedTxnCount ?riskScore
+SELECT ?customer ?name (COUNT(DISTINCT ?transaction) AS ?failedTxnCount) ?riskScore
 WHERE {
   # SERVICE 1: Get customer information from Accounts domain
   SERVICE <http://accounts-domain.internal:3030/accounts/sparql> {

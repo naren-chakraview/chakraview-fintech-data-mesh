@@ -1,6 +1,8 @@
 import requests
 from rdflib import Graph
 
+from shared.semantic.validation import assert_conforms
+
 
 class RdfWriter:
     """Write RDF triples to Jena TDB2 and Iceberg"""
@@ -19,6 +21,7 @@ class RdfWriter:
         Returns:
             True if successful, False otherwise
         """
+        assert_conforms(rdf_graph, "accounts")  # validate before writing
         # Serialize graph to N-Triples for SPARQL INSERT
         ntriples = rdf_graph.serialize(format='nt')
 
@@ -56,6 +59,7 @@ class RdfWriter:
         Returns:
             True if successful, False otherwise
         """
+        assert_conforms(rdf_graph, "accounts")  # validate before writing
         try:
             rdf_graph.serialize(destination=output_path, format=format_)
             return True
