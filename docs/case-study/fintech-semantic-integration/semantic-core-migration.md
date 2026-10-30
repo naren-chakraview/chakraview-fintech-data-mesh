@@ -120,6 +120,9 @@ Each domain has its own `semantic` package, and they cannot share one pytest ses
 make test-semantic
 ```
 
+CI runs the same two targets on every push and pull request
+(`.github/workflows/semantic-layer.yml`).
+
 That runs the three domain semantic suites, the three integration suites, and the
 contract tests in `tests/contract/`:
 
