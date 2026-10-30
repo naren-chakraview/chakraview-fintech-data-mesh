@@ -1,5 +1,6 @@
 """Unit tests for Risk/Compliance domain Silver-to-RDF transformation."""
 
+from shared.semantic.paths import CORE_ONTOLOGY_PATH
 import pytest
 import pandas as pd
 import os
@@ -16,7 +17,7 @@ class TestSilverToRdfTransformer:
     def test_ontology_path(self):
         """Get path to test ontology file in the same directory as this test."""
         test_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(test_dir, "shared-ontology-test.ttl")
+        return str(CORE_ONTOLOGY_PATH)
 
     @pytest.fixture
     def resolver(self):
@@ -396,7 +397,7 @@ class TestSilverToRdfTransformer:
             assert "T" in next_date_str, "Next review date should be in ISO format"
 
     def test_customer_iri_hash_consistency(self, transformer, sample_risk_profiles_df):
-        """Test: Customer IRIs use 8-character hash format."""
+        """Test: Customer IRIs use the 64-character HMAC-SHA256 hash format."""
         graph = transformer.transform_risk_profiles_to_rdf(sample_risk_profiles_df)
 
         # Query for customer links
@@ -415,5 +416,5 @@ class TestSilverToRdfTransformer:
             assert customer_iri.startswith("https://chakracommerce.com/customer#"), \
                 f"Customer IRI format check: {customer_iri}"
             hash_part = customer_iri.split("#")[1]
-            assert len(hash_part) == 8, \
-                f"Customer hash should be 8 chars, got {len(hash_part)}: {hash_part}"
+            assert len(hash_part) == 64, \
+                f"Customer hash should be 64 chars, got {len(hash_part)}: {hash_part}"

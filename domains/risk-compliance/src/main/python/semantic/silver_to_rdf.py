@@ -6,6 +6,7 @@ Transforms:
 """
 
 import pandas as pd
+from decimal import Decimal
 from rdflib import Graph, Namespace, Literal, URIRef, RDF, XSD
 from datetime import datetime
 
@@ -61,7 +62,7 @@ class SilverToRdfTransformer:
             self.g.add((risk_iri, self.FINTECH.riskProfileId,
                        Literal(row['risk_id'])))
             self.g.add((risk_iri, self.FINTECH.riskScore,
-                       Literal(float(row['risk_score']), datatype=XSD.decimal)))
+                       Literal(Decimal(str(row['risk_score'])), datatype=XSD.decimal)))
             self.g.add((risk_iri, self.FINTECH.riskLevel,
                        Literal(row['risk_level'])))
             self.g.add((risk_iri, self.FINTECH.complianceStatus,
@@ -106,7 +107,7 @@ class SilverToRdfTransformer:
             self.g.add((risk_iri, self.FINTECH.sourceSystem,
                        Literal('risk_compliance')))
             self.g.add((risk_iri, self.FINTECH.sourceIngestionTime,
-                       Literal(datetime.now().isoformat())))
+                       Literal(datetime.now().isoformat(), datatype=XSD.dateTime)))
 
         return self.g
 

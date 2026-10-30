@@ -119,6 +119,8 @@ nav:
       - Semantic Integration: case-study/fintech-semantic-integration/index.md
       - Federation Guide: case-study/fintech-semantic-integration/federation-guide.md
       - Shift-Left Semantics Blog: case-study/fintech-semantic-integration/BLOG-SHIFT-LEFT-SEMANTICS.md
+      - "Semantic Drift: Before and After": case-study/fintech-semantic-integration/semantic-drift.md
+      - "Semantic Core Migration and Identity Runbook": case-study/fintech-semantic-integration/semantic-core-migration.md
   - ADRs:
       - adrs/README.md
       - ADR-0001 Data Mesh Pattern: adrs/ADR-0001-data-mesh.md

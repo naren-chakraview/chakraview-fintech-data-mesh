@@ -91,7 +91,6 @@ domains/transactions/
 │       ├── test_iri_resolver.py        # Unit tests for IRI minting
 │       ├── test_cross_domain_resolver.py # Unit tests for cross-domain resolution
 │       ├── test_silver_to_rdf.py       # Unit tests for RDF transformation
-│       └── shared-ontology-test.ttl    # Test ontology fixture
 │
 ├── tests/
 │   └── test_integration_e2e.py         # End-to-end integration tests
@@ -288,7 +287,7 @@ All RDF entities include source system metadata:
 
 For complete ontology details including class definitions, property domains/ranges, and shared properties, see:
 - `ontology-extensions.ttl` (Transactions domain-specific definitions)
-- `../../docs/case-study/fintech-semantic-integration/shared-ontology.ttl` (Shared fintech ontology)
+- `../../semantics/core/fintech-core.ttl` (Shared fintech ontology)
 
 ## Cross-Domain Integration
 
@@ -631,7 +630,7 @@ WHERE {
 
 - **[Accounts Domain README](../accounts/README.md)** — Customer entity owner, IRI minting for customers
 - **[Fintech Semantic Integration Case Study](../../docs/case-study/fintech-semantic-integration/case-study-guide.md)** — Overall semantic layer architecture, cross-domain patterns, federation examples
-- **Shared Ontology** — `../../docs/case-study/fintech-semantic-integration/shared-ontology.ttl` (fintech ontology with all entity and property definitions)
+- **Shared Ontology** — `../../semantics/core/fintech-core.ttl` (fintech ontology with all entity and property definitions)
 
 ## Query Examples
 

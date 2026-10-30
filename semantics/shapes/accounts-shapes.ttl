@@ -1,0 +1,29 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Accounts domain output. Customers and accounts are owned here.
+
+fintech:AccountsAccountShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:Account ;
+  sh:property [
+    sh:path fintech:accountId ; sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path fintech:accountBalance ; sh:minCount 1 ; sh:datatype xsd:decimal ;
+    sh:message "accountBalance must be xsd:decimal (not float, not fintech:decimal)."
+  ] ;
+  sh:property [
+    sh:path fintech:accountOwner ; sh:minCount 1 ; sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:pattern "^https://chakracommerce.com/customer#[0-9a-f]{64}$" ;
+    sh:message "accountOwner must point at a Customer IRI minted by the identity library."
+  ] .
+
+fintech:AccountsCustomerShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:Customer ;
+  sh:property [
+    sh:path fintech:customerEmail ; sh:minCount 1 ;
+  ] .

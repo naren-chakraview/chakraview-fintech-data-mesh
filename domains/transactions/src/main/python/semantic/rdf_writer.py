@@ -2,7 +2,10 @@
 
 import requests
 from rdflib import Graph
+
 from typing import Optional
+
+from shared.semantic.validation import assert_conforms
 
 
 class RdfWriter:
@@ -25,6 +28,7 @@ class RdfWriter:
         Returns:
             True if successful, False otherwise
         """
+        assert_conforms(rdf_graph, "transactions")  # validate before writing
         if not self.jena_endpoint:
             return False
 
@@ -66,6 +70,7 @@ class RdfWriter:
         Returns:
             True if successful, False otherwise
         """
+        assert_conforms(rdf_graph, "transactions")  # validate before writing
         try:
             rdf_graph.serialize(destination=output_path, format=format_)
             return True

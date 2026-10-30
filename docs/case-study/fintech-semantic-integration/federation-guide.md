@@ -1,5 +1,7 @@
 # Federated Query Guide: Cross-Domain Semantic Analysis
 
+> **What changed.** The semantic layer was fixed. There is now one shared core, `semantics/core/fintech-core.ttl`, and customer IRIs come from one identity library, `shared/semantic/identity.py`. The drifted design is kept as a frozen, runnable reference. See [Semantic drift: before and after](semantic-drift.md) and the [migration and identity runbook](semantic-core-migration.md).
+
 ## Overview
 
 This guide explains how to write and execute **federated SPARQL queries** across the fintech semantic mesh domains (Accounts, Transactions, Risk/Compliance). Federated queries enable unified analysis without centralizing data or semantic responsibility.

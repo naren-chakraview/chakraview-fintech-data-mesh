@@ -38,10 +38,10 @@ class TestCrossDomainResolver:
         """Test: Customer IRI has correct format."""
         iri = resolver.resolve_customer_iri("john@acme.com", "kyc_123")
 
-        # Should be 8-char hash
+        # Should be a 64-char HMAC-SHA256 hex digest
         assert iri.startswith("https://chakracommerce.com/customer#"), "IRI prefix"
         hash_part = iri.split("#")[1]
-        assert len(hash_part) == 8, "Hash should be 8 characters"
+        assert len(hash_part) == 64, "Hash should be 64 characters"
 
     def test_resolve_customer_iri_with_spaces(self, resolver):
         """Test: Customer IRI resolution handles whitespace."""
@@ -86,7 +86,7 @@ class TestCrossDomainResolver:
         iri = resolver.resolve_customer_iri("test@example.com", "kyc_001")
 
         assert iri.startswith("https://chakracommerce.com/customer#"), "Format matches"
-        assert len(iri.split("#")[1]) == 8, "Hash length matches (8 chars)"
+        assert len(iri.split("#")[1]) == 64, "Hash length matches (64 chars)"
 
     def test_custom_base_url(self):
         """Test: Custom base URL is respected."""

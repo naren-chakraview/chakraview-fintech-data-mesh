@@ -2,6 +2,12 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Imports the core by version IRI. Do not redefine core terms here.
+<https://chakracommerce.com/ontology/fintech/transactions/extension>
+  a owl:Ontology ;
+  owl:imports <https://chakracommerce.com/ontology/fintech/core/1.0.0> .
 
 # ============================================================================
 # TRANSACTIONS DOMAIN: Transaction Properties (Transactions domain owns these)
@@ -39,21 +45,8 @@ fintech:transactionDate
   rdfs:comment "When the transaction occurred" ;
   fintech:owningDomain "transactions" .
 
-fintech:transactionDebtor
-  a rdf:Property ;
-  rdfs:domain fintech:Transaction ;
-  rdfs:range fintech:Customer ;
-  rdfs:label "Debtor" ;
-  rdfs:comment "Customer initiating the transaction (links to Accounts domain Customer IRI)" ;
-  fintech:owningDomain "transactions" .
-
-fintech:transactionCreditor
-  a rdf:Property ;
-  rdfs:domain fintech:Transaction ;
-  rdfs:range fintech:Counterparty ;
-  rdfs:label "Creditor" ;
-  rdfs:comment "Receiving party (counterparty)" ;
-  fintech:owningDomain "transactions" .
+# fintech:transactionDebtor and fintech:transactionCreditor are core link
+# properties (semantics/core/fintech-core.ttl).
 
 # ============================================================================
 # TRANSACTIONS DOMAIN: Counterparty Properties (Transactions domain owns these)

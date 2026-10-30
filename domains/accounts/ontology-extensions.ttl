@@ -2,6 +2,12 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Imports the core by version IRI. Do not redefine core terms here.
+<https://chakracommerce.com/ontology/fintech/accounts/extension>
+  a owl:Ontology ;
+  owl:imports <https://chakracommerce.com/ontology/fintech/core/1.0.0> .
 
 # ============================================================================
 # ACCOUNTS DOMAIN: Customer Properties (Accounts domain owns these)
@@ -75,10 +81,4 @@ fintech:accountType
   rdfs:comment "checking, savings, credit" ;
   fintech:owningDomain "accounts" .
 
-fintech:accountOwner
-  a rdf:Property ;
-  rdfs:domain fintech:Account ;
-  rdfs:range fintech:Customer ;
-  rdfs:label "Account Owner" ;
-  rdfs:comment "The customer who owns this account" ;
-  fintech:owningDomain "accounts" .
+# fintech:accountOwner is a core link property (semantics/core/fintech-core.ttl).

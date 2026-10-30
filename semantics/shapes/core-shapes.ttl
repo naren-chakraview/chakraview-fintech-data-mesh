@@ -1,0 +1,62 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ============================================================================
+# Core SHACL shapes. Every domain's producer output must conform to these.
+# Run by shared/semantic/validation.py before any graph is written.
+# ============================================================================
+
+# Customer IRIs come only from shared/semantic/identity.py: 64 lowercase hex.
+# A 32-bit (8-hex) IRI from the drifted design fails here.
+fintech:CustomerIriShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:Customer ;
+  sh:nodeKind sh:IRI ;
+  sh:pattern "^https://chakracommerce.com/customer#[0-9a-f]{64}$" ;
+  sh:message "Customer IRI must be https://chakracommerce.com/customer# followed by a 64-character lowercase hex HMAC digest." .
+
+# Every entity carries provenance.
+fintech:ProvenanceShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:Customer, fintech:Account, fintech:Transaction,
+                 fintech:Counterparty, fintech:RiskProfile ;
+  sh:property [
+    sh:path fintech:sourceSystem ;
+    sh:minCount 1 ;
+    sh:message "Every entity needs fintech:sourceSystem."
+  ] ;
+  sh:property [
+    sh:path fintech:sourceIngestionTime ;
+    sh:minCount 1 ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Every entity needs fintech:sourceIngestionTime typed xsd:dateTime."
+  ] .
+
+# Deprecated names are rejected in producer output. Each property shape stays
+# quiet unless its predicate is present, because sh:targetSubjectsOf selects
+# only subjects that already use one of these predicates.
+fintech:NoDeprecatedTermsShape
+  a sh:NodeShape ;
+  sh:targetSubjectsOf fintech:riskCustomer, fintech:accountCustomer,
+                      fintech:email, fintech:name, fintech:currentBalance ;
+  sh:property [
+    sh:path fintech:riskCustomer ; sh:maxCount 0 ;
+    sh:message "fintech:riskCustomer is deprecated. Use fintech:forCustomer."
+  ] ;
+  sh:property [
+    sh:path fintech:accountCustomer ; sh:maxCount 0 ;
+    sh:message "fintech:accountCustomer is deprecated. Use fintech:accountOwner."
+  ] ;
+  sh:property [
+    sh:path fintech:email ; sh:maxCount 0 ;
+    sh:message "fintech:email is deprecated. Use fintech:customerEmail."
+  ] ;
+  sh:property [
+    sh:path fintech:name ; sh:maxCount 0 ;
+    sh:message "fintech:name is deprecated. Use fintech:customerName."
+  ] ;
+  sh:property [
+    sh:path fintech:currentBalance ; sh:maxCount 0 ;
+    sh:message "fintech:currentBalance is deprecated. Use fintech:accountBalance."
+  ] .

@@ -1,0 +1,78 @@
+{
+  "description": "Golden vectors for the customer IRI rule in shared/semantic/identity.py. Expected values come from an independent stdlib reference (HMAC-SHA256), not from the library.",
+  "rule": "IRI = base_url + '/customer#' + HMAC-SHA256(key, normalize(email) + '|' + normalize(kyc_id)) as 64 lowercase hex; normalize(x) = str(x).lower().strip()",
+  "base_url": "https://chakracommerce.com",
+  "test_only_key": "test-only-iri-key-do-not-use-in-production",
+  "vectors": [
+    {
+      "id": "basic",
+      "email": "john@acme.com",
+      "kyc_id": "kyc_123",
+      "expected_iri": "https://chakracommerce.com/customer#4c7f150ac13c85a55b14838fe75055c6848a93b8ca3255dc968013cb0323c00f",
+      "note": "Baseline identity"
+    },
+    {
+      "id": "case-variant-email-and-kyc",
+      "email": "JOHN@ACME.COM",
+      "kyc_id": "KYC_123",
+      "expected_iri": "https://chakracommerce.com/customer#4c7f150ac13c85a55b14838fe75055c6848a93b8ca3255dc968013cb0323c00f",
+      "note": "Must equal 'basic'"
+    },
+    {
+      "id": "whitespace-variant",
+      "email": "  john@acme.com \t",
+      "kyc_id": " kyc_123\n",
+      "expected_iri": "https://chakracommerce.com/customer#4c7f150ac13c85a55b14838fe75055c6848a93b8ca3255dc968013cb0323c00f",
+      "note": "Must equal 'basic'"
+    },
+    {
+      "id": "same-email-different-kyc",
+      "email": "john@acme.com",
+      "kyc_id": "kyc_999",
+      "expected_iri": "https://chakracommerce.com/customer#86e04e71dc90c12c8936b732df7f758a00d7dce0641a0eb0888f44e2b29ca631",
+      "note": "Different customer"
+    },
+    {
+      "id": "different-customer",
+      "email": "jane@acme.com",
+      "kyc_id": "kyc_456",
+      "expected_iri": "https://chakracommerce.com/customer#b6f44a7f06f758f88af1ba726bae6bccd6a77afdea1d10ddb577fd06a65fbba1",
+      "note": "Different customer"
+    },
+    {
+      "id": "pipe-in-kyc",
+      "email": "john@acme.com",
+      "kyc_id": "kyc|123",
+      "expected_iri": "https://chakracommerce.com/customer#55820042a2dd32c1a93c651c378b495d03239ee71c1b632eca1dcafad314666f",
+      "note": "Separator must not collide with 'basic'"
+    },
+    {
+      "id": "d4-collision-pair-a",
+      "email": "customer111830@example.com",
+      "kyc_id": "KYC0111830",
+      "expected_iri": "https://chakracommerce.com/customer#db7b1a733ccff1beef5c70fb3e43b3539bea248ad8574aaa0043a505fcc82b03",
+      "note": "32-bit collision pair A; must differ from B"
+    },
+    {
+      "id": "d4-collision-pair-b",
+      "email": "customer130865@example.com",
+      "kyc_id": "KYC0130865",
+      "expected_iri": "https://chakracommerce.com/customer#a11611927ada9abe956c4433e44657e12f1cf52f8a0954b1eac24609fcaf7b52",
+      "note": "32-bit collision pair B; must differ from A"
+    },
+    {
+      "id": "non-ascii-email",
+      "email": "Zoë@Example.com",
+      "kyc_id": "kyc_42",
+      "expected_iri": "https://chakracommerce.com/customer#8e0bfad25d460bde11d2f33aae73165369911f2a1c1f48448f10c3a64a8380f9",
+      "note": "Non-ASCII normalization"
+    },
+    {
+      "id": "long-kyc",
+      "email": "risk.user@bank.example",
+      "kyc_id": "KYC-9999999999999999999999999999999999999999",
+      "expected_iri": "https://chakracommerce.com/customer#285cbf3a1dd1adfa6038a35d0677fafefd1dd2bda7afbe834e67bec0658f4b77",
+      "note": "Long identifier"
+    }
+  ]
+}

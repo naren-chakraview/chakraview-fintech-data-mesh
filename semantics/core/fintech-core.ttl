@@ -1,0 +1,162 @@
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ============================================================================
+# Fintech Core Ontology, version 1.0.0
+# ============================================================================
+# The ONLY shared ontology in this repo. Domain extensions import it by version
+# IRI and may not redefine any term defined here. Tests, shapes and docs load
+# this file; no copy exists anywhere else.
+#
+# Contents:
+#   1. Entity classes (Customer, Account, Transaction, Counterparty, RiskProfile)
+#   2. Cross-domain link properties (accountOwner, transactionDebtor,
+#      transactionCreditor, forCustomer)
+#   3. Provenance properties (sourceSystem, sourceIngestionTime)
+#   4. Deprecated aliases kept so old queries can be migrated (end of file)
+#
+# Attribute properties (customerName, accountBalance, ...) live in the owning
+# domain's extension, not here.
+
+<https://chakracommerce.com/ontology/fintech/core>
+  a owl:Ontology ;
+  rdfs:label "Fintech core ontology" ;
+  owl:versionIRI <https://chakracommerce.com/ontology/fintech/core/1.0.0> ;
+  owl:versionInfo "1.0.0" .
+
+# ============================================================================
+# 1. ENTITY CLASSES
+# ============================================================================
+
+fintech:Customer
+  a rdfs:Class ;
+  rdfs:label "Customer" ;
+  rdfs:comment "A financial customer that holds accounts and initiates transactions. Owned by the Accounts domain. Identity rule (identity library, shared/semantic/identity.py): IRI = https://chakracommerce.com/customer# + HMAC-SHA256(key, normalize(email) + '|' + normalize(kyc_id)) as 64 lowercase hex characters. The key is FINTECH_IRI_KEY." ;
+  fintech:owningDomain "accounts" .
+
+fintech:Account
+  a rdfs:Class ;
+  rdfs:label "Account" ;
+  rdfs:comment "A financial account. Owned by the Accounts domain. Every account has exactly one owner (fintech:accountOwner)." ;
+  fintech:owningDomain "accounts" .
+
+fintech:Transaction
+  a rdfs:Class ;
+  rdfs:label "Transaction" ;
+  rdfs:comment "A payment between a Customer (debtor) and a Counterparty (creditor). Owned by the Transactions domain." ;
+  fintech:owningDomain "transactions" .
+
+fintech:Counterparty
+  a rdfs:Class ;
+  rdfs:label "Counterparty" ;
+  rdfs:comment "A payment processor, merchant, bank or other external party to a transaction. Owned by the Transactions domain." ;
+  fintech:owningDomain "transactions" .
+
+fintech:RiskProfile
+  a rdfs:Class ;
+  rdfs:label "Risk Profile" ;
+  rdfs:comment "A risk assessment for one Customer at a point in time. Owned by the Risk/Compliance domain." ;
+  fintech:owningDomain "risk-compliance" .
+
+# ============================================================================
+# 2. CROSS-DOMAIN LINK PROPERTIES
+# ============================================================================
+# Each link has exactly one name. Producers and consumers both use these.
+
+fintech:accountOwner
+  a rdf:Property ;
+  rdfs:label "Account Owner" ;
+  rdfs:comment "The Customer who owns an Account." ;
+  rdfs:domain fintech:Account ;
+  rdfs:range fintech:Customer ;
+  fintech:owningDomain "accounts" .
+
+fintech:transactionDebtor
+  a rdf:Property ;
+  rdfs:label "Debtor" ;
+  rdfs:comment "The Customer who initiates a Transaction." ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range fintech:Customer ;
+  fintech:owningDomain "transactions" .
+
+fintech:transactionCreditor
+  a rdf:Property ;
+  rdfs:label "Creditor" ;
+  rdfs:comment "The Counterparty that receives a Transaction." ;
+  rdfs:domain fintech:Transaction ;
+  rdfs:range fintech:Counterparty ;
+  fintech:owningDomain "transactions" .
+
+fintech:forCustomer
+  a rdf:Property ;
+  rdfs:label "For Customer" ;
+  rdfs:comment "The Customer a RiskProfile describes." ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range fintech:Customer ;
+  fintech:owningDomain "risk-compliance" .
+
+# ============================================================================
+# 3. PROVENANCE PROPERTIES (required on every entity)
+# ============================================================================
+
+fintech:sourceSystem
+  a rdf:Property ;
+  rdfs:label "Source System" ;
+  rdfs:comment "The system that produced this triple set, e.g. 'accounts'." ;
+  rdfs:range xsd:string .
+
+fintech:sourceIngestionTime
+  a rdf:Property ;
+  rdfs:label "Source Ingestion Time" ;
+  rdfs:comment "When this record was converted into the semantic layer." ;
+  rdfs:range xsd:dateTime .
+
+# ============================================================================
+# 4. DEPRECATED ALIASES
+# ============================================================================
+# Each name below competed with a core or domain name. The name in
+# owl:equivalentProperty is the one to use. SHACL shapes in semantics/shapes/
+# reject these names in producer output.
+
+fintech:riskCustomer
+  a owl:DeprecatedProperty , rdf:Property ;
+  owl:deprecated true ;
+  owl:equivalentProperty fintech:forCustomer ;
+  rdfs:comment "DEPRECATED. Use fintech:forCustomer." ;
+  rdfs:domain fintech:RiskProfile ;
+  rdfs:range fintech:Customer .
+
+fintech:accountCustomer
+  a owl:DeprecatedProperty , rdf:Property ;
+  owl:deprecated true ;
+  owl:equivalentProperty fintech:accountOwner ;
+  rdfs:comment "DEPRECATED. Use fintech:accountOwner." ;
+  rdfs:domain fintech:Account ;
+  rdfs:range fintech:Customer .
+
+fintech:email
+  a owl:DeprecatedProperty , rdf:Property ;
+  owl:deprecated true ;
+  owl:equivalentProperty fintech:customerEmail ;
+  rdfs:comment "DEPRECATED. Use fintech:customerEmail (Accounts extension)." ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string .
+
+fintech:name
+  a owl:DeprecatedProperty , rdf:Property ;
+  owl:deprecated true ;
+  owl:equivalentProperty fintech:customerName ;
+  rdfs:comment "DEPRECATED. Use fintech:customerName (Accounts extension)." ;
+  rdfs:domain fintech:Customer ;
+  rdfs:range xsd:string .
+
+fintech:currentBalance
+  a owl:DeprecatedProperty , rdf:Property ;
+  owl:deprecated true ;
+  owl:equivalentProperty fintech:accountBalance ;
+  rdfs:comment "DEPRECATED. Use fintech:accountBalance (Accounts extension). Typed xsd:decimal." ;
+  rdfs:domain fintech:Account ;
+  rdfs:range xsd:decimal .

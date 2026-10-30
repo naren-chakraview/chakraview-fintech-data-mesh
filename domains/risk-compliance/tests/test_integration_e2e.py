@@ -8,6 +8,7 @@ Tests the complete RDF transformation pipeline including:
 - Enum validation for risk levels, KYC status, compliance status
 """
 
+from shared.semantic.paths import CORE_ONTOLOGY_PATH
 import pytest
 import pandas as pd
 import os
@@ -44,7 +45,7 @@ class TestRiskComplianceIntegrationE2E:
     def test_ontology_path(self) -> str:
         """Get path to test ontology file."""
         test_dir = Path(__file__).parent / ".." / "src" / "main" / "python" / "semantic" / "tests"
-        return str(test_dir / "shared-ontology-test.ttl")
+        return str(CORE_ONTOLOGY_PATH)
 
     @pytest.fixture(scope="function")
     def iri_resolver(self) -> RiskComplianceIriResolver:
