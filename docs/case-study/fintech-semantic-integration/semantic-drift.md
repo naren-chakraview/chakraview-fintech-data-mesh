@@ -8,6 +8,9 @@ now catches it.
 The drifted design is kept on purpose. It is frozen, runnable, and documented, so you
 can compare it with the fix.
 
+See [Before: the drifted design](semantic-drift-before.md) and
+[After: the fixed design](semantic-drift-after.md) for each side on its own.
+
 !!! tip "Reproduce the before state"
     ```bash
     git checkout semantic-drift-before     # the whole repo as it was at 44f2cba
