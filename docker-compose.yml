@@ -191,14 +191,14 @@ services:
       DOMAINS_DIR: /app/domains
       POLICY_ROOT: /app
       LINEAGE_DIR: /app/platform/lineage/attestations
-      LINEAGE_TRUST_DIR: /app/platform/lineage/trust
+      LINEAGE_TRUST_DIR: /app/platform/lineage/trust-config
     command: ["uvicorn", "--factory", "boundary.main:get_app", "--app-dir", "platform",
               "--host", "0.0.0.0", "--port", "8443",
               "--ssl-keyfile", "/certs/server.key", "--ssl-certfile", "/certs/server.pem",
               "--ssl-ca-certs", "/certs/ca.pem", "--ssl-cert-reqs", "2"]
     volumes:
       - ./platform/lineage/attestations:/app/platform/lineage/attestations:ro
-      - ./platform/lineage/trust:/app/platform/lineage/trust:ro
+      - ./platform/lineage/trust-config:/app/platform/lineage/trust-config:ro
       - ./tools/dev-ca/out/services/boundary:/certs:ro
     networks: [internal, fuseki-risk]
     depends_on:

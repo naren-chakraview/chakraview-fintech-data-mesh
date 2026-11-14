@@ -45,3 +45,23 @@ test_masking_floor_sensitive_is_partial if {
 test_masking_floor_public_is_no_mask if {
 	guardrails.masking_floor == "no_mask" with input as {"column_classification": "public"}
 }
+
+test_provenance_required_and_unverified_read_fails_platform if {
+	not guardrails.platform_allow with input as {"action": "read", "principal": person, "workload": {"spiffe_id": "spiffe://x/y"}, "product": {"require_provenance": true}, "lineage_verified": false}
+}
+
+test_provenance_required_and_missing_lineage_fails_platform if {
+	not guardrails.platform_allow with input as {"action": "read", "principal": person, "workload": {"spiffe_id": "spiffe://x/y"}, "product": {"require_provenance": true}}
+}
+
+test_provenance_required_and_verified_read_passes_platform if {
+	guardrails.platform_allow with input as {"action": "read", "principal": person, "workload": {"spiffe_id": "spiffe://x/y"}, "product": {"require_provenance": true}, "lineage_verified": true}
+}
+
+test_product_without_provenance_requirement_ignores_lineage if {
+	guardrails.platform_allow with input as {"action": "read", "principal": person, "workload": {"spiffe_id": "spiffe://x/y"}, "product": {"require_provenance": false}, "lineage_verified": false}
+}
+
+test_access_request_is_not_gated_by_provenance if {
+	guardrails.platform_allow with input as {"action": "request_access", "principal": person, "workload": {"spiffe_id": "spiffe://x/y"}, "product": {"require_provenance": true}}
+}

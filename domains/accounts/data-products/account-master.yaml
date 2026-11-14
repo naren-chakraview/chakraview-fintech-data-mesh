@@ -38,6 +38,8 @@ access_policy:
   default: deny
   approval_required: true
   approval_sla_hours: 4
+  # Reads are refused unless the snapshot's lineage attestation verifies (see the guardrail).
+  require_provenance: true
   columns:
     - name: account_id
       classification: pii

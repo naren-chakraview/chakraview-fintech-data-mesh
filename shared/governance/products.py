@@ -39,6 +39,7 @@ def product_policy_input(product: dict) -> dict:
         "classification": product_classification(product),
         "approval_required": bool(access.get("approval_required", True)),
         "approval_sla_hours": int(access.get("approval_sla_hours", 4)),
+        "require_provenance": bool(access.get("require_provenance", False)),
     }
 
 

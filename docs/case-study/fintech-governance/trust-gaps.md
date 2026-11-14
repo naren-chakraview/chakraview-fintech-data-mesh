@@ -97,17 +97,20 @@ An independent review (`trust-fix-review.md`) found four issues. Each is fixed h
   network (`fuseki-risk`), reachable only from the boundary, so even a forwarded `SERVICE` cannot reach another
   domain's Fuseki. Tests: `tests/unit/test_compose_doors.py`.
 - **R3, lineage proved only that someone held the shared key.** Each producer now has its own key. A trust
-  configuration (`platform/lineage/trust/`, mounted read-only and separate from the attestations) names the expected
+  configuration (`platform/lineage/trust-config/`, mounted read-only and separate from the attestations) names the expected
   producer and its public key for each product. A statement verifies only under that key and only if it names that
   producer. The demo shows an attacker who re-signs a tampered snapshot failing verification.
 - **R4, any internal peer could present a certificate.** The services now require a client certificate from the
   internal CA, and the gateway holds the only one. The gateway verifies each service's certificate. Live check: a
   workload certificate and no certificate both get no HTTP response from the boundary.
 
-Open, and not done in this change:
+Status and open items (R5 is closed; the others remain):
 
-- **R5, unverified lineage still serves data.** A read with `lineage_verified: false` returns 200. A product contract
-  flag such as `require_provenance: true`, enforced by the guardrail, would make this a per-product choice. Not built.
+- **R5, unverified lineage still serves data (closed).** A product contract can now set `require_provenance: true`.
+  The guardrail then refuses reads whose snapshot does not verify, with an audited reason. `account-master` is set this
+  way. `risk-scores` keeps the default and only reports `lineage_verified`. A SPARQL read has no single snapshot, so it
+  is refused for a product that requires provenance. Tests: `tests/trust/test_provenance.py`,
+  `tests/unit/test_lineage.py`, and the guardrail rules in `guardrails_test.rego`.
 - **Per-product named graphs.** A query reads the domain's default graph. Each domain currently has one product, so
   this is latent. Scoping each product to its named graph is the next step.
 - **Fuseki's own `SERVICE` switch.** The boundary refuses `SERVICE`, and the network isolates the risk Fuseki. The Jena
@@ -123,6 +126,8 @@ These are deliberate, and each one is a production decision that this repo does 
 - **Workload identity.** The dev CA (`tools/dev-ca/`) issues client certificates with SPIFFE URI SANs. Production uses
   SPIRE. The gateway is nginx here; production would use Envoy with the same check. The internal CA that secures the
   gateway-to-service hop is also a dev CA.
+- **Provenance on SPARQL.** A product that requires provenance cannot be read over SPARQL, because a query result
+  is not one snapshot. Per-triple provenance is not built.
 - **Lineage keys.** Each producer has its own dev key, generated locally and never committed. The trust configuration
   is a dev file written by the setup script. Production uses KMS or Sigstore keyless signing, where the signature is
   bound to the workload identity.

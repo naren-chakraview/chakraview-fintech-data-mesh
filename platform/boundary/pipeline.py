@@ -74,17 +74,28 @@ async def _deny(services: Services, caller: Caller, product_id: str, columns: Li
 
 
 async def authorize(services: Services, caller: Caller, product_id: str, action: str,
-                    columns: List[str], purpose: str) -> tuple:
-    """Return (product, grant or None). Raises Denied for a refusal and OPAError/other errors for a broken dependency."""
+                    columns: List[str], purpose: str,
+                    lineage_verified: Optional[bool] = None) -> tuple:
+    """Return (product, grant or None). Raises Denied for a refusal and OPAError/other errors for a broken dependency.
+
+    lineage_verified is the snapshot's provenance result for a row read. It is left out for SPARQL, which has no
+    single snapshot, so a product that requires provenance is refused on that path.
+    """
     product = services.products.get(product_id)
     if product is None:
         raise Denied(404, "product not found")
 
     policy_input = _base_input(caller, product_policy_input(product), action)
+    if lineage_verified is not None:
+        policy_input["lineage_verified"] = lineage_verified
     decision = await services.decide(policy_input)
     if not decision.allow:
-        raise await _deny(services, caller, product_id, columns, purpose,
-                          "policy denies this read", 403)
+        if product.get("access_policy", {}).get("require_provenance") and lineage_verified is not True:
+            reason = ("provenance required: lineage did not verify" if lineage_verified is False
+                      else "provenance required: this path has no verified snapshot")
+        else:
+            reason = "policy denies this read"
+        raise await _deny(services, caller, product_id, columns, purpose, reason, 403)
 
     grant: Optional[Grant] = None
     if decision.requires_approval:
@@ -131,11 +142,13 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
     if unknown:
         raise Denied(400, f"unknown columns: {', '.join(unknown)}")
 
-    product, grant = await authorize(services, caller, product_id, "read", columns, purpose)
-    rows = services.reader.read(product_id, columns)
-
+    # Provenance is checked before the decision, so the guardrail can require it.
     snapshot = services.reader.snapshot(product_id)
     lineage_verified = services.lineage_check(product_id, snapshot)
+
+    product, grant = await authorize(services, caller, product_id, "read", columns, purpose,
+                                     lineage_verified=lineage_verified)
+    rows = services.reader.read(product_id, columns)
 
     base = _base_input(caller, product_policy_input(product), "read")
     masked = await mask_rows(
