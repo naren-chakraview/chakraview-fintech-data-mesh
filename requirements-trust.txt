@@ -1,0 +1,14 @@
+# Runtime and test deps for the trust services (boundary, discovery, dev IdP, lineage tools, demos).
+# Pinned to versions with CPython 3.12 wheels, which is what CI and the trust Docker image use.
+fastapi==0.104.0
+uvicorn==0.24.0
+httpx==0.25.2
+pydantic==2.5.0
+PyYAML==6.0.1
+PyJWT==2.8.0
+cryptography==42.0.8
+rdflib==7.6.0
+psycopg[binary]==3.1.18
+prometheus-client==0.19.0
+pytest==7.4.0
+pytest-mock==3.12.0

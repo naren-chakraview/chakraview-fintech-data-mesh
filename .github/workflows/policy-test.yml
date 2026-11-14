@@ -15,7 +15,5 @@ jobs:
         with:
           version: 1.0.0
 
-      - name: Check and test policies
-        run: |
-          opa check --strict platform/governance/opa-policies
-          make policy-test
+      - name: Check and test policies (platform guardrails and every domain policy)
+        run: make policy-test

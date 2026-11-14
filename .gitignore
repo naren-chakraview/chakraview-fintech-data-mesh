@@ -18,3 +18,11 @@ build/
 
 # Generated code knowledge graph
 graphify-out/
+
+# Trust-fix development material. Never committed; see tools/dev-*/ and .env.example.
+tools/dev-idp/keys/
+tools/dev-ca/out/
+platform/lineage/keys/
+platform/lineage/attestations/
+.env
+.venv*/

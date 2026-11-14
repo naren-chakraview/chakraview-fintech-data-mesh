@@ -125,12 +125,12 @@ WHERE r.evaluated_at > '2026-04-30 00:00:00'
 # Self-service discovery
 curl http://localhost:8000/api/products?query=fraud_scores
 
-# Request access (with justification)
-curl -X POST http://localhost:8000/api/access-requests \
+# Request access (with justification). Identity comes from the token and client certificate, not the body.
+curl -X POST https://localhost:8443/api/access-requests \
+  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "user_id": "analyst_42",
-    "user_role": "risk_analyst",
     "data_product_id": "fraud-scoring",
     "action": "read",
     "justification": "Weekly fraud analysis for executive report"

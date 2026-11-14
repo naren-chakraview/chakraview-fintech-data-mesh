@@ -1,62 +1,37 @@
-import os
+"""Discovery's access decisions come from the same OPA decision the boundary uses."""
+
+import sys
+from pathlib import Path
 from typing import Optional
 
 import httpx
 
-OPA_URL = os.getenv("OPA_URL", "http://opa:8181/v1/data/data_mesh/access")
+from shared.governance.products import product_classification, product_policy_input  # noqa: F401
+from shared.identity import Caller
 
-# Lowest to highest sensitivity; a product is classified by its most sensitive column.
-CLASSIFICATION_ORDER = ["public", "sensitive", "confidential", "pii", "restricted"]
+# The boundary's OPA client lives in platform/boundary, imported as the `boundary` package.
+_PLATFORM = Path(__file__).resolve().parents[2]
+if str(_PLATFORM) not in sys.path:
+    sys.path.insert(0, str(_PLATFORM))
 
+from boundary.policy import Decision, OPAError, decide  # noqa: E402
 
-class OPAError(Exception):
-    """OPA gave no valid decision; the caller must deny the request."""
+__all__ = ["Decision", "OPAError", "evaluate_access", "product_classification"]
 
 
 async def evaluate_access(
-    user_id: str,
-    user_role: str,
+    caller: Caller,
+    product: dict,
     action: str,
-    data_classification: str,
     *,
     transport: Optional[httpx.AsyncBaseTransport] = None,
-) -> dict:
-    """Ask OPA for an access decision. Raises OPAError on any failure."""
-    payload = {
-        "input": {
-            "user_id": user_id,
-            "user_role": user_role,
-            "action": action,
-            "data_classification": data_classification,
-        }
+) -> Decision:
+    """Ask OPA for an access decision for a verified caller. Raises OPAError on any failure."""
+    policy_input = {
+        "action": action,
+        "principal": {"subject": caller.principal.subject, "roles": sorted(caller.principal.roles)},
+        "workload": {"spiffe_id": caller.spiffe_id},
+        "product": product_policy_input(product),
     }
-    try:
-        async with httpx.AsyncClient(timeout=2.0, transport=transport) as client:
-            response = await client.post(OPA_URL, json=payload)
-    except httpx.HTTPError as exc:
-        raise OPAError(f"OPA unreachable: {exc}") from exc
-
-    if response.status_code != 200:
-        raise OPAError(f"OPA returned HTTP {response.status_code}")
-
-    try:
-        result = response.json()["result"]
-    except (ValueError, KeyError, TypeError) as exc:
-        raise OPAError("OPA response has no result") from exc
-
-    if not isinstance(result, dict) or not (
-        isinstance(result.get("allow"), bool)
-        and isinstance(result.get("requires_approval"), bool)
-    ):
-        raise OPAError("OPA decision is malformed")
-
-    return {"allow": result["allow"], "requires_approval": result["requires_approval"]}
-
-
-def product_classification(product: dict) -> str:
-    """Highest column classification; restricted when there are no columns or a value is unknown."""
-    columns = (product.get("access_policy") or {}).get("columns") or []
-    levels = [column.get("classification") for column in columns]
-    if not levels or any(level not in CLASSIFICATION_ORDER for level in levels):
-        return "restricted"
-    return max(levels, key=CLASSIFICATION_ORDER.index)
+    kwargs = {"transport": transport} if transport is not None else {}
+    return await decide(policy_input, **kwargs)

@@ -6,9 +6,7 @@ import httpx
 
 from shared.compliance.masking import ColumnMaskingPolicy, DataMasker
 
-OPA_MASKING_URL = os.getenv(
-    "OPA_MASKING_URL", "http://opa:8181/v1/data/data_mesh/access/masking_strategy"
-)
+DEFAULT_OPA_MASKING_URL = "http://opa:8181/v1/data/data_mesh/access/masking_strategy"
 ES_URL = os.getenv("ES_URL", "http://elasticsearch:9200")
 AUDIT_INDEX = "governance-audit"
 
@@ -17,14 +15,16 @@ class OPAError(Exception):
     """OPA gave no valid masking decision; the read must fail."""
 
 
-async def opa_decide_strategy(user_role: str, column_classification: Optional[str]) -> str:
-    """Ask OPA which masking strategy applies. Raises OPAError on any failure."""
-    payload = {
-        "input": {"user_role": user_role, "column_classification": column_classification}
-    }
+async def opa_decide_strategy(policy_input: dict) -> str:
+    """Ask OPA which masking strategy applies to one column. Raises OPAError on any failure.
+
+    policy_input carries the full decision input (principal, workload, product, action)
+    plus `column` and `column_classification`.
+    """
+    url = os.getenv("OPA_MASKING_URL", DEFAULT_OPA_MASKING_URL)
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
-            response = await client.post(OPA_MASKING_URL, json=payload)
+            response = await client.post(url, json={"input": policy_input})
     except httpx.HTTPError as exc:
         raise OPAError(f"OPA unreachable: {exc}") from exc
 
@@ -56,21 +56,26 @@ async def mask_rows(
     user_role: str,
     policy: ColumnMaskingPolicy,
     *,
-    decide_strategy: Callable[[str, Optional[str]], Awaitable[str]] = opa_decide_strategy,
+    decide_strategy: Callable[[str, Optional[str]], Awaitable[str]] = None,
     write_audit: Callable[[dict], Awaitable[None]] = elasticsearch_write_audit,
+    extra_audit: Optional[dict] = None,
 ) -> list:
     """Mask the requested columns of each row, then audit the read before returning.
 
+    decide_strategy(column, classification) returns the masking strategy for one column.
     Any exception (OPA failure, unknown strategy, audit failure) propagates, so no
     rows are returned when the read cannot be decided or recorded.
     """
+    if decide_strategy is None:
+        raise ValueError("decide_strategy is required")
+
     # Every key in a row is decided, not only the requested columns: an unrequested
     # column with no classification is masked like any other unclassified column.
     keys = list(dict.fromkeys([*columns, *(key for row in rows for key in row)]))
     strategies = {}
     for key in keys:
         classification = policy.get_column_classification(table, key)
-        strategies[key] = await decide_strategy(user_role, classification)
+        strategies[key] = await decide_strategy(key, classification)
 
     masked = []
     for row in rows:
@@ -83,15 +88,16 @@ async def mask_rows(
                 masked_row[key] = DataMasker.apply(strategy, str(value))
         masked.append(masked_row)
 
-    await write_audit(
-        {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "user_id": user_id,
-            "user_role": user_role,
-            "table": table,
-            "columns": columns,
-            "strategies": strategies,
-            "row_count": len(rows),
-        }
-    )
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "user_id": user_id,
+        "user_role": user_role,
+        "table": table,
+        "columns": columns,
+        "strategies": strategies,
+        "row_count": len(rows),
+    }
+    if extra_audit:
+        record.update(extra_audit)
+    await write_audit(record)
     return masked

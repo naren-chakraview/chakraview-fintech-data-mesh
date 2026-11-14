@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Dict, Any
 from pyiceberg.catalog import load_catalog
 from pyiceberg.schema import Schema
@@ -24,8 +25,9 @@ class IcebergCatalog:
         self.config = {
             "uri": catalog_uri,
             "s3.endpoint": s3_endpoint or "http://localhost:9000",
-            "s3.access-key-id": "minioadmin",
-            "s3.secret-access-key": "minioadmin",
+            # Credentials come from the environment only. There is no default.
+            "s3.access-key-id": os.environ["MINIO_ROOT_USER"],
+            "s3.secret-access-key": os.environ["MINIO_ROOT_PASSWORD"],
         }
 
         try:

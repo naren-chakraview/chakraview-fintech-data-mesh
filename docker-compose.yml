@@ -1,4 +1,13 @@
-version: '3.8'
+# Fintech data mesh platform.
+#
+# Trust boundary: storage (MinIO, Iceberg catalog, Postgres, Fuseki, OPA, Elasticsearch) sits on the
+# `internal` network with no published ports. Clients reach product data only through the mTLS gateway,
+# which forwards to the boundary and discovery services. Credentials come from .env (see .env.example).
+networks:
+  internal:
+    internal: true
+  edge:
+    driver: bridge
 
 services:
   # Kafka
@@ -37,44 +46,40 @@ services:
     depends_on:
       - kafka
 
-  # PostgreSQL (for Iceberg catalog metadata)
+  # PostgreSQL: Iceberg catalog metadata and the grant store. Internal only.
   postgres:
     image: postgres:15
     container_name: chakra-postgres
     environment:
-      POSTGRES_USER: iceberg
-      POSTGRES_PASSWORD: iceberg
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: iceberg
-    ports:
-      - "5432:5432"
+    networks: [internal]
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # Iceberg REST Catalog
+  # Iceberg REST Catalog. Internal only; it has no authentication of its own.
   iceberg-catalog:
     image: tabulario/iceberg-rest:latest
     container_name: chakra-iceberg-catalog
     environment:
       CATALOG_S3_ENDPOINT: http://minio:9000
-      CATALOG_S3_ACCESS_KEY_ID: minioadmin
-      CATALOG_S3_SECRET_ACCESS_KEY: minioadmin
+      CATALOG_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      CATALOG_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
       CATALOG_WAREHOUSE: s3://data/warehouse
-    ports:
-      - "8181:8181"
+    networks: [internal]
     depends_on:
       - postgres
       - minio
 
-  # MinIO (S3-compatible object storage)
+  # MinIO (S3-compatible object storage). Internal only.
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-10-02T17-50-41Z
     container_name: chakra-minio
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9000:9000"
-      - "9001:9001"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+    networks: [internal]
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -96,7 +101,7 @@ services:
     image: grafana/grafana:latest
     container_name: chakra-grafana
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
     ports:
       - "3000:3000"
     depends_on:
@@ -104,27 +109,126 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
-  # OPA (Open Policy Agent)
+  # OPA: internal only. The boundary and discovery are its only callers. Policies are mounted from the repo.
   opa:
     image: openpolicyagent/opa:1.0.0
     container_name: chakra-opa
-    command: ["run", "--server", "--addr=0.0.0.0:8181", "/policies"]
-    ports:
-      - "8181:8181"
+    command: ["run", "--server", "--addr=0.0.0.0:8181",
+              "/policies/platform", "/policies/domains"]
+    networks: [internal]
     volumes:
-      - ./platform/governance/opa-policies:/policies:ro
+      - ./platform/governance/opa-policies:/policies/platform:ro
+      - ./domains/risk-compliance/policy:/policies/domains/risk-compliance:ro
+      - ./domains/accounts/policy:/policies/domains/accounts:ro
+      - ./domains/transactions/policy:/policies/domains/transactions:ro
+      - ./domains/market-data/policy:/policies/domains/market-data:ro
+      - ./domains/counterparties/policy:/policies/domains/counterparties:ro
 
-  # Elasticsearch (audit logs)
+  # Elasticsearch (audit logs). Internal only.
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: chakra-elasticsearch
     environment:
       discovery.type: single-node
       xpack.security.enabled: "false"
-    ports:
-      - "9200:9200"
+    networks: [internal]
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+
+  # Fuseki for the risk-compliance domain. Internal only. Runs the locked-down config:
+  # query and read-only graph store, no update and no read-write graph store.
+  risk-compliance-fuseki-init:
+    image: busybox:1.36
+    command: ["sh", "-c", "mkdir -p /fuseki-base/databases/risk_compliance && chown -R 100:101 /fuseki-base/databases"]
+    volumes:
+      - risk_compliance_fuseki:/fuseki-base/databases
+
+  risk-compliance-fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: chakra-risk-compliance-fuseki
+    command: ["/jena-fuseki/fuseki-server", "--conf", "/fuseki/config.ttl"]
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD:?set FUSEKI_ADMIN_PASSWORD in .env}
+    networks: [internal]
+    depends_on:
+      risk-compliance-fuseki-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./domains/risk-compliance/config/fuseki-config.ttl:/fuseki/config.ttl:ro
+      - risk_compliance_fuseki:/fuseki-base/databases
+
+  # Dev identity provider (development only). Mints RS256 tokens for named test users.
+  dev-idp:
+    build:
+      context: .
+      dockerfile: platform/Dockerfile
+    container_name: chakra-dev-idp
+    command: ["uvicorn", "serve:app", "--app-dir", "tools/dev-idp", "--host", "0.0.0.0", "--port", "8090"]
+    volumes:
+      - ./tools/dev-idp/keys:/app/tools/dev-idp/keys:ro
+    ports:
+      - "127.0.0.1:8090:8090"
+    networks: [internal, edge]
+
+  # Boundary: the only network path to product data. Internal only; the gateway publishes.
+  boundary:
+    build:
+      context: .
+      dockerfile: platform/Dockerfile
+    container_name: chakra-boundary
+    environment:
+      OPA_DECISION_URL: http://opa:8181/v1/data/data_mesh/access
+      OPA_MASKING_URL: http://opa:8181/v1/data/data_mesh/access/masking_strategy
+      ES_URL: http://elasticsearch:9200
+      IDP_JWKS_URL: http://dev-idp:8090/.well-known/jwks.json
+      IDP_ISSUER: http://dev-idp:8090
+      IDP_AUDIENCE: data-mesh
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/iceberg
+      FUSEKI_ENDPOINTS: '{"risk-compliance": "http://risk-compliance-fuseki:3030/risk_compliance/sparql"}'
+      DOMAINS_DIR: /app/domains
+      POLICY_ROOT: /app
+      LINEAGE_DIR: /app/platform/lineage/attestations
+    volumes:
+      - ./platform/lineage/attestations:/app/platform/lineage/attestations:ro
+    networks: [internal]
+    depends_on:
+      - opa
+      - postgres
+      - dev-idp
+      - elasticsearch
+
+  discovery:
+    build:
+      context: .
+      dockerfile: platform/Dockerfile
+    container_name: chakra-discovery
+    command: ["uvicorn", "backend.main:app", "--app-dir", "platform/discovery", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      IDP_JWKS_URL: http://dev-idp:8090/.well-known/jwks.json
+      IDP_ISSUER: http://dev-idp:8090
+      IDP_AUDIENCE: data-mesh
+      OPA_DECISION_URL: http://opa:8181/v1/data/data_mesh/access
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/iceberg
+      DOMAINS_DIR: /app/domains
+    networks: [internal]
+    depends_on:
+      - opa
+      - postgres
+      - dev-idp
+
+  # mTLS gateway: verifies client certificates, forwards the verified cert to the services.
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: chakra-gateway
+    volumes:
+      - ./platform/boundary/gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./tools/dev-ca/out:/certs:ro
+    ports:
+      - "127.0.0.1:8443:8443"
+    networks: [internal, edge]
+    depends_on:
+      - boundary
+      - discovery
 
 volumes:
   postgres_data:
@@ -132,3 +236,4 @@ volumes:
   prometheus_data:
   grafana_data:
   elasticsearch_data:
+  risk_compliance_fuseki:

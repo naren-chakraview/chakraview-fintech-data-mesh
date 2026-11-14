@@ -1,17 +1,17 @@
-from fastapi import FastAPI, HTTPException, Query
-from typing import List, Optional
-import yaml
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
-from datetime import datetime
-from shared.utils import get_logger
-from .models import (
-    DataProduct,
-    AccessRequest,
-    DataProductSearchResult,
-)
-from .opa_client import OPAError, evaluate_access, product_classification
+from typing import List, Optional
 
+import httpx
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+
+from shared.utils import get_logger
+from shared.governance.grants import GrantStore, PostgresGrantStore, utc_now
+from shared.governance.products import load_products
+from shared.identity import AuthError, Caller, CallerVerifier, JWKSCache
+from .models import AccessRequest, DataProductSearchResult
+from .opa_client import OPAError, evaluate_access
 
 logger = get_logger(__name__)
 
@@ -21,46 +21,57 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# In-memory store for demo (replace with database)
+REPO_ROOT = Path(__file__).resolve().parents[3]
+IDENTITY_FIELDS = {"user_id", "user_role"}
+
+# Demo storage. Products come from YAML; requests are in memory; grants are stored in Postgres.
 data_products: dict = {}
 access_requests: dict = {}
+verifier: Optional[CallerVerifier] = None
+grants: Optional[GrantStore] = None
+clock = utc_now
+
+
+def configure(*, caller_verifier: CallerVerifier, grant_store: GrantStore) -> None:
+    """Set the identity verifier and grant store. Tests and the demos call this before the first request."""
+    global verifier, grants
+    verifier = caller_verifier
+    grants = grant_store
 
 
 def load_data_products():
     """Load data products from YAML files"""
-    global data_products
-    domains_path = Path("/home/gundu/portfolio/chakraview-fintech-data-mesh/domains")
-
-    for domain_path in domains_path.iterdir():
-        if domain_path.is_dir():
-            data_products_dir = domain_path / "data-products"
-            if data_products_dir.exists():
-                for yaml_file in data_products_dir.glob("*.yaml"):
-                    try:
-                        with open(yaml_file, 'r') as f:
-                            product_data = yaml.safe_load(f)
-                            product_id = f"{product_data['domain']}.{product_data['name']}"
-                            data_products[product_id] = product_data
-                            logger.info(
-                                "Loaded data product",
-                                context={"product_id": product_id},
-                            )
-                    except Exception as e:
-                        logger.error(
-                            "Failed to load data product",
-                            error=e,
-                            context={"file": yaml_file},
-                        )
+    domains_path = Path(os.getenv("DOMAINS_DIR", REPO_ROOT / "domains"))
+    loaded = load_products(domains_path)
+    data_products.clear()
+    data_products.update(loaded)
+    for product_id in loaded:
+        logger.info("Loaded data product", context={"product_id": product_id})
 
 
 @app.on_event("startup")
 async def startup():
-    """Load data products on startup"""
+    """Load data products and wire identity and grants from the environment"""
+    global verifier, grants
     load_data_products()
-    logger.info(
-        "Discovery portal started",
-        context={"products_loaded": len(data_products)},
-    )
+    if verifier is None:
+        verifier = CallerVerifier(
+            jwks=JWKSCache(os.getenv("IDP_JWKS_URL", "http://dev-idp:8090/.well-known/jwks.json")),
+            issuer=os.getenv("IDP_ISSUER", "http://dev-idp:8090"),
+            audience=os.getenv("IDP_AUDIENCE", "data-mesh"),
+        )
+    if grants is None:
+        grants = PostgresGrantStore()
+    logger.info("Discovery portal started", context={"products_loaded": len(data_products)})
+
+
+async def get_caller(request: Request) -> Caller:
+    try:
+        return await verifier.verify(request.headers)
+    except AuthError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail="identity provider unavailable") from exc
 
 
 @app.get("/api/products", response_model=List[DataProductSearchResult])
@@ -73,15 +84,12 @@ async def search_products(
     results = []
 
     for product_id, product_data in data_products.items():
-        # Filter by domain
         if domain and product_data.get("domain") != domain:
             continue
 
-        # Filter by tag
         if tag and tag not in product_data.get("tags", []):
             continue
 
-        # Filter by search query
         if query:
             query_lower = query.lower()
             searchable = (
@@ -126,32 +134,38 @@ async def get_product(product_id: str) -> dict:
 
 
 @app.post("/api/access-requests")
-async def request_access(request: AccessRequest) -> dict:
-    """Submit an access request; OPA decides whether it is approved, pending, or denied"""
-    product = data_products.get(request.data_product_id)
+async def request_access(request: Request, caller: Caller = Depends(get_caller)) -> dict:
+    """Submit an access request. The subject and role come from the verified token, not the body."""
+    body = await request.json()
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="body must be a JSON object")
+    sent = IDENTITY_FIELDS & set(body)
+    if sent:
+        raise HTTPException(
+            status_code=400,
+            detail=f"identity comes from the verified token; remove: {', '.join(sorted(sent))}",
+        )
+    try:
+        access = AccessRequest(**body)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    product = data_products.get(access.data_product_id)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
 
     request_id = f"req_{len(access_requests) + 1}"
-    request.id = request_id
-    request.requested_at = datetime.utcnow()
+    now = clock()
 
     try:
-        decision = await evaluate_access(
-            user_id=request.user_id,
-            user_role=request.user_role,
-            action=request.action,
-            data_classification=product_classification(product),
-        )
+        decision = await evaluate_access(caller, product, "request_access")
     except OPAError:
-        access_requests[request_id] = {**request.dict(), "status": "denied"}
+        access_requests[request_id] = _stored(request_id, caller, access, now, "denied")
         raise HTTPException(status_code=503, detail="Policy engine unavailable; request denied")
 
-    approved = decision["allow"] and not decision["requires_approval"]
+    approved = decision.allow and not decision.requires_approval
     status = "approved" if approved else "pending"
 
-    # Build the response before storing, so a failure here never leaves a stored request
-    # the client was not told about. Products without an SLA use the model default of 4.
     response = {"id": request_id, "status": status}
     if status == "approved":
         response["message"] = "Access granted"
@@ -160,18 +174,82 @@ async def request_access(request: AccessRequest) -> dict:
         response["routed_to"] = product["owner"]
         response["approval_sla_hours"] = product["access_policy"].get("approval_sla_hours", 4)
 
-    access_requests[request_id] = {**request.dict(), "status": status}
-
+    access_requests[request_id] = _stored(request_id, caller, access, now, status)
     logger.info(
         "Access request evaluated",
         context={
             "request_id": request_id,
-            "product_id": request.data_product_id,
-            "user_id": request.user_id,
+            "product_id": access.data_product_id,
+            "subject": caller.principal.subject,
             "status": status,
         },
     )
     return response
+
+
+def _stored(request_id: str, caller: Caller, access: AccessRequest, now, status: str) -> dict:
+    return {
+        "id": request_id,
+        "subject": caller.principal.subject,
+        "workload_spiffe_id": caller.spiffe_id,
+        "data_product_id": access.data_product_id,
+        "action": access.action,
+        "justification": access.justification,
+        "purpose": access.purpose or access.justification,
+        "requested_columns": access.requested_columns,
+        "requested_at": now.isoformat(),
+        "status": status,
+        "grant_id": None,
+    }
+
+
+@app.post("/api/access-requests/{request_id}/approve")
+async def approve_access(
+    request_id: str,
+    caller: Caller = Depends(get_caller),
+    ttl_days: int = Query(1, ge=1, le=30, description="grant lifetime in days"),
+) -> dict:
+    """Approve a request as the product's owner. Creates a stored, expiring, scoped grant.
+
+    The approver must own the product: the owner name must appear in the token's `owns` claim.
+    Approval is refused after the product's approval_sla_hours window.
+    """
+    stored = access_requests.get(request_id)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if stored["status"] != "pending":
+        raise HTTPException(status_code=409, detail=f"request is {stored['status']}")
+
+    product = data_products[stored["data_product_id"]]
+    if product["owner"] not in set(caller.principal.claims.get("owns", [])):
+        raise HTTPException(status_code=403, detail="only the product owner can approve")
+
+    now = clock()
+    sla = timedelta(hours=int(product["access_policy"].get("approval_sla_hours", 4)))
+    requested_at = datetime_from_iso(stored["requested_at"])
+    if now - requested_at > sla:
+        raise HTTPException(status_code=409, detail="approval window has closed")
+
+    if not stored["requested_columns"]:
+        raise HTTPException(status_code=409, detail="request names no columns to grant")
+
+    grant = grants.create(
+        subject=stored["subject"],
+        workload_spiffe_id=stored["workload_spiffe_id"],
+        product_id=stored["data_product_id"],
+        columns=stored["requested_columns"],
+        purpose=stored["purpose"],
+        expires_at=now + timedelta(days=ttl_days),
+    )
+    stored["status"] = "approved"
+    stored["grant_id"] = grant.id
+    stored["approved_by"] = caller.principal.subject
+    logger.info("Grant created", context={"grant_id": grant.id, "request_id": request_id})
+    return {"request_id": request_id, "grant": grant.to_dict()}
+
+
+def datetime_from_iso(value: str) -> datetime:
+    return datetime.fromisoformat(value)
 
 
 @app.get("/api/access-requests/{request_id}")
@@ -194,8 +272,3 @@ async def health_check():
             if r.get("status") == "pending"
         ]),
     }
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
