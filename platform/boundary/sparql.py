@@ -18,6 +18,7 @@ import httpx
 from rdflib.plugins.sparql import parser as sparql_parser
 from rdflib.plugins.sparql.algebra import translateQuery, traverse
 from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.paths import Path as PropertyPath
 from rdflib.term import Variable
 
 # Predicates whose object values are personal data.
@@ -85,7 +86,23 @@ def parse_read_only(query: str) -> CompValue:
     refused = sorted({node.name for node in _walk(algebra)} & REFUSED_NODES)
     if refused:
         raise ReadOnlyViolation(f"not allowed on the read path: {', '.join(refused)}")
+    pattern_predicates(algebra)  # refuses variable predicates and property paths
     return algebra
+
+
+def pattern_predicates(algebra: CompValue) -> Set[str]:
+    """Every predicate local name in every triple pattern, whether projected, filtered, constant or not.
+
+    A pattern whose predicate is a variable or a property path could reach any predicate, so it is refused.
+    """
+    predicates: Set[str] = set()
+    for node in _walk(algebra):
+        if node.name == "BGP":
+            for _, predicate, _ in node.triples:
+                if isinstance(predicate, (Variable, PropertyPath)):
+                    raise ReadOnlyViolation("variable predicates and property paths are not allowed")
+                predicates.add(_local_name(predicate))
+    return predicates
 
 
 def projected_predicates(algebra: CompValue) -> Dict[str, Set[str]]:

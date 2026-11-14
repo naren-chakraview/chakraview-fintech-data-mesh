@@ -106,6 +106,12 @@ An independent review (`trust-fix-review.md`) found four issues. Each is fixed h
 
 Status and open items (R5 is closed; the others remain):
 
+- **R6, predicates that were tested but not projected.** A constant object (`f:customerEmail "john@acme.com"`) or a
+  `FILTER` on a PII predicate was never checked against the grant, so it could answer "does this email have rows?".
+  Now every predicate in every triple pattern is checked against the contract and the grant, projected or not. Variable
+  predicates and property paths are refused, since they could reach any predicate. SPARQL audit records, allowed and
+  refused, carry the SHA-256 of the query text, so an oracle attack leaves a trail. Tests: `tests/unit/test_sparql_guard.py`
+  and `tests/trust/test_sparql.py`.
 - **R5, unverified lineage still serves data (closed).** A product contract can now set `require_provenance: true`.
   The guardrail then refuses reads whose snapshot does not verify, with an audited reason. `account-master` is set this
   way. `risk-scores` keeps the default and only reports `lineage_verified`. A SPARQL read has no single snapshot, so it
@@ -126,6 +132,9 @@ These are deliberate, and each one is a production decision that this repo does 
 - **Workload identity.** The dev CA (`tools/dev-ca/`) issues client certificates with SPIFFE URI SANs. Production uses
   SPIRE. The gateway is nginx here; production would use Envoy with the same check. The internal CA that secures the
   gateway-to-service hop is also a dev CA.
+- **Row counts and timing.** Any query interface can leak a little through how many rows match and how long a query
+  takes, even when every value is masked. The guard limits what a query can test, and the audit (with the query hash)
+  records each attempt. It does not remove the channel. Rate limits per grant are not built.
 - **Provenance on SPARQL.** A product that requires provenance cannot be read over SPARQL, because a query result
   is not one snapshot. Per-triple provenance is not built.
 - **Lineage keys.** Each producer has its own dev key, generated locally and never committed. The trust configuration
