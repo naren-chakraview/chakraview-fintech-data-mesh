@@ -127,7 +127,7 @@ curl http://localhost:8000/api/products?query=fraud_scores
 
 # Request access (with justification). Identity comes from the token and client certificate, not the body.
 curl -X POST https://localhost:8443/api/access-requests \
-  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  --cacert tools/dev-ca/out/ca/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

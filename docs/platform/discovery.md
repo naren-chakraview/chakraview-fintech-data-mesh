@@ -379,7 +379,7 @@ curl 'http://localhost:8000/api/products/fraud-scores'
 # Step 3: Request access. The role comes from the token; the body names no identity.
 #         Fraud scores are sensitive, so the request is pending until the domain owner approves it.
 curl -X POST 'https://localhost:8443/api/access-requests' \
-  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  --cacert tools/dev-ca/out/ca/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
@@ -390,7 +390,7 @@ curl -X POST 'https://localhost:8443/api/access-requests' \
 
 # Step 4: Check status (pending until the owner approves; see the trust-gaps page)
 curl 'https://localhost:8443/api/access-requests/req_12345' \
-  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  --cacert tools/dev-ca/out/ca/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
   -H "Authorization: Bearer $TOKEN"
 
 # Step 5: Query (in Spark SQL)
@@ -414,7 +414,7 @@ curl 'http://localhost:8000/api/products/transaction-feed'
 
 # Step 3: Request access (identity from the verified token, not the body)
 curl -X POST 'https://localhost:8443/api/access-requests' \
-  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  --cacert tools/dev-ca/out/ca/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{

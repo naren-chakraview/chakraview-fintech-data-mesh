@@ -94,3 +94,59 @@ def test_statement_has_the_predicate_type_and_digest(keys):
     assert statement["predicateType"] == "https://chakracommerce.com/data-provenance/v1"
     assert statement["subject"][0]["name"] == PRODUCT
     assert len(statement["subject"][0]["digest"]["sha256"]) == 64
+
+
+# R3: the trust configuration, not the attestation directory, decides the key and the producer.
+import json as _json  # noqa: E402
+
+from lineage.attest import publish_attestation  # noqa: E402
+from lineage.trust import load_trust, verify_product  # noqa: E402
+
+REAL_PRODUCER = PRODUCER
+FORGED_PRODUCER = "spiffe://chakracommerce.com/ns/evil/sa/x"
+
+
+def trust_dir(tmp_path, public_pem, producer=REAL_PRODUCER):
+    (tmp_path / "trust").mkdir()
+    (tmp_path / "trust" / "risk-producer.pub").write_bytes(public_pem)
+    (tmp_path / "trust" / "producers.json").write_text(_json.dumps({"products": {PRODUCT: {
+        "producer": producer, "public_key": "risk-producer.pub"}}}))
+    return tmp_path / "trust"
+
+
+def sign_into(directory, private_pem, producer=REAL_PRODUCER, snapshot=SNAPSHOT):
+    publish_attestation(PRODUCT, snapshot, private_key_pem=private_pem, keyid="risk-producer",
+                        producer_spiffe_id=producer, code_commit="abc", input_snapshots=[], out_dir=directory)
+
+
+def test_attestation_under_the_expected_key_and_producer_verifies(tmp_path):
+    private_pem, public_pem = generate_signing_key()
+    trust = load_trust(trust_dir(tmp_path, public_pem))
+    sign_into(tmp_path, private_pem)
+
+    assert verify_product(PRODUCT, SNAPSHOT, tmp_path, trust) is True
+
+
+def test_wrong_producer_under_the_right_key_fails(tmp_path):
+    private_pem, public_pem = generate_signing_key()
+    trust = load_trust(trust_dir(tmp_path, public_pem))
+    sign_into(tmp_path, private_pem, producer=FORGED_PRODUCER)
+
+    assert verify_product(PRODUCT, SNAPSHOT, tmp_path, trust) is False
+
+
+def test_attacker_who_rewrites_the_attestation_with_their_own_key_fails(tmp_path):
+    _, public_pem = generate_signing_key()
+    trust = load_trust(trust_dir(tmp_path, public_pem))
+    attacker_private, _ = generate_signing_key()
+    sign_into(tmp_path, attacker_private)
+
+    assert verify_product(PRODUCT, SNAPSHOT, tmp_path, trust) is False
+
+
+def test_product_with_no_trust_entry_fails(tmp_path):
+    private_pem, public_pem = generate_signing_key()
+    trust = load_trust(trust_dir(tmp_path, public_pem))
+    sign_into(tmp_path, private_pem)
+
+    assert verify_product("accounts.account-master", SNAPSHOT, tmp_path, trust) is False

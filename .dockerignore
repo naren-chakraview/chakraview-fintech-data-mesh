@@ -12,3 +12,4 @@ tools/dev-ca/out
 platform/lineage/keys
 platform/lineage/attestations
 **/.env
+platform/lineage/trust
