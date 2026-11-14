@@ -1,4 +1,4 @@
-.PHONY: help install test lint format clean docker-up docker-down policy-test
+.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke
 
 help:
 	@echo "Available commands:"
@@ -11,6 +11,10 @@ help:
 	@echo "  make docker-up      Start Docker Compose services"
 	@echo "  make docker-down    Stop Docker Compose services"
 	@echo "  make clean          Remove build artifacts"
+	@echo "  make trust-keys     Create dev IdP/CA/signing keys and signed fixture attestations (gitignored)"
+	@echo "  make trust-test     Run the trust unit and integration tests (needs the opa binary)"
+	@echo "  make trust-demo     Run the before/after trust demos (needs Docker for the side-door demo)"
+	@echo "  make trust-smoke    Smoke-test the running stack through the mTLS gateway (run docker compose up first)"
 
 install:
 	pip install -r requirements.txt
@@ -31,7 +35,23 @@ semantic-drift-demo:
 	for d in examples/semantic-drift/demo_*.py; do python3 $$d || exit 1; done
 
 policy-test:
-	opa test platform/governance/opa-policies -v
+	opa check --strict platform/governance/opa-policies domains/*/policy
+	opa test platform/governance/opa-policies domains/*/policy -v
+
+trust-keys:
+	python3 tools/dev-idp/make_keys.py
+	python3 tools/dev-ca/make_ca.py
+	python3 tools/dev-keys/make_signing_key.py
+	python3 tools/dev-keys/publish_attestations.py
+
+trust-test:
+	python3 -m pytest tests/unit tests/trust -q
+
+trust-demo:
+	for d in examples/trust-gaps/demo_*.py; do python3 $$d || exit 1; done
+
+trust-smoke:
+	bash tools/smoke/gateway_smoke.sh
 
 lint:
 	flake8 domains platform shared

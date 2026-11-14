@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
-from datetime import datetime
+from pydantic import BaseModel
+from typing import List, Optional
 
 
 class DataProductSLA(BaseModel):
@@ -26,39 +25,18 @@ class AccessPolicy(BaseModel):
     columns: List[ColumnAccess] = []
 
 
-class DataProduct(BaseModel):
-    """Data product definition"""
-    id: str = Field(..., description="Unique product ID")
-    name: str
-    version: str
-    domain: str
-    owner: str
-    owner_email: str
-    description: str
-    tables: List[str]
-    sla: DataProductSLA
-    access_policy: AccessPolicy
-    tags: List[str] = []
-    use_cases: List[str] = []
-    upstream_lineage: List[str] = []
-    downstream_lineage: List[str] = []
-    retention_years: int
-
-
 class AccessRequest(BaseModel):
-    """Request for data product access"""
-    id: Optional[str] = None
-    user_id: str
-    user_role: str
+    """Request for data product access.
+
+    The requester is the verified token subject and the workload is the verified SPIFFE ID.
+    Neither is read from this body. The endpoint rejects bodies that carry user_id or user_role.
+    """
     data_product_id: str
-    action: str
+    action: str = "read"
     justification: str
+    purpose: Optional[str] = None
     requested_columns: List[str] = []
     time_limit_days: Optional[int] = None
-    requested_at: Optional[datetime] = None
-    status: str = "pending"
-    approved_by: Optional[str] = None
-    approved_at: Optional[datetime] = None
 
 
 class DataProductSearchResult(BaseModel):

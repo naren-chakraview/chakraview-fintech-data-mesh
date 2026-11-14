@@ -1,180 +1,216 @@
-import asyncio
+"""Discovery access requests: identity comes from the verified token, decisions from OPA (stubbed here).
+
+The end-to-end path with a real OPA is in tests/trust/test_discovery.py.
+"""
+
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-# The discovery backend is a package named `backend` inside platform/discovery.
-# Importing it from there avoids the stdlib `platform` module shadowing it.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "platform" / "discovery"))
+REPO = Path(__file__).resolve().parents[2]
+for entry in (REPO, REPO / "platform", REPO / "platform" / "discovery"):
+    if str(entry) not in sys.path:
+        sys.path.insert(0, str(entry))
 
 from backend import main as discovery  # noqa: E402
-from backend.opa_client import OPAError, evaluate_access, product_classification  # noqa: E402
+from backend.opa_client import OPAError, evaluate_access  # noqa: E402
+from boundary.policy import Decision  # noqa: E402
+from shared.governance.grants import MemoryGrantStore  # noqa: E402
+from shared.governance.products import product_classification  # noqa: E402
+from shared.identity import CallerVerifier, JWKSCache  # noqa: E402
+from shared.identity.devtools import generate_rsa_keypair, mint_token  # noqa: E402
+
+IDP = "http://dev-idp"
+PRIVATE, JWK = generate_rsa_keypair()
+WORKLOAD = "spiffe://chakracommerce.com/ns/analytics/sa/notebook"
+CERT = "-----BEGIN CERTIFICATE-----\nnot-used-here\n-----END CERTIFICATE-----"
 
 
-def make_product(product_id, owner, columns):
+def product(product_id, owner, columns, approval=True, sla=4):
+    domain, name = product_id.split(".", 1)
     return {
-        "id": product_id,
-        "owner": owner,
-        "access_policy": {
-            "approval_sla_hours": 4,
-            "columns": [{"name": name, "classification": cls} for name, cls in columns],
+        "domain": domain, "name": name, "owner": owner, "access_policy": {
+            "approval_required": approval, "approval_sla_hours": sla,
+            "columns": [{"name": n, "classification": c} for n, c in columns],
         },
     }
 
 
-PUBLIC = make_product("merchant-catalog", "market-data-domain", [("merchant_id", "public")])
-PII = make_product("account-master", "accounts-domain", [("account_id", "pii")])
-NO_COLUMNS = make_product("no-columns", "risk-compliance-domain", [])
+PUBLIC = product("market-data.merchant-catalog", "market-data-domain", [("merchant_id", "public")], approval=False)
+PII = product("accounts.account-master", "accounts-domain", [("account_id", "pii")], sla=4)
+NO_COLUMNS = product("risk-compliance.no-columns", "risk-compliance-domain", [])
+
+
+async def fetch_jwks(url):
+    return {"keys": [JWK]}
+
+
+def token(subject="analyst@chakra.fintech", roles=("analyst",), owns=(), issued=None):
+    return mint_token(PRIVATE, JWK["kid"], issuer=IDP, audience="data-mesh", subject=subject,
+                      roles=roles, owns=owns, now=issued)
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(
-        discovery, "data_products", {p["id"]: p for p in (PUBLIC, PII, NO_COLUMNS)}
-    )
+    products = {p["domain"] + "." + p["name"]: p for p in (PUBLIC, PII, NO_COLUMNS)}
+    monkeypatch.setattr(discovery, "data_products", products)
     monkeypatch.setattr(discovery, "access_requests", {})
-    return TestClient(discovery.app)
+    grants = MemoryGrantStore()
+    monkeypatch.setattr(discovery, "grants", grants)
+    monkeypatch.setattr(discovery, "verifier", CallerVerifier(
+        jwks=JWKSCache("unused", fetch=fetch_jwks), issuer=IDP, audience="data-mesh"))
+    monkeypatch.setattr(discovery, "clock", lambda: datetime.now(timezone.utc))
+    return TestClient(discovery.app, raise_server_exceptions=False)
 
 
-def request_body(product_id, role="analyst"):
-    return {
-        "user_id": "u-1",
-        "user_role": role,
-        "data_product_id": product_id,
-        "action": "read",
-        "justification": "quarterly review",
-    }
+def headers(tok=None):
+    tok = tok or token()
+    return {"Authorization": f"Bearer {tok}", "X-Client-Cert": CERT_FOR_TESTS}
 
 
-def stub_opa(monkeypatch, result=None, exc=None, calls=None):
-    async def fake(user_id, user_role, action, data_classification):
-        if calls is not None:
-            calls.append({"data_classification": data_classification})
+def stub_opa(monkeypatch, decision=None, exc=None):
+    async def fake(caller, product, action, **kwargs):
         if exc is not None:
             raise exc
-        return result
+        return decision
 
     monkeypatch.setattr(discovery, "evaluate_access", fake)
 
 
-def test_public_read_is_approved(client, monkeypatch):
-    stub_opa(monkeypatch, result={"allow": True, "requires_approval": False})
+def body(product_id, **extra):
+    return {"data_product_id": product_id, "justification": "quarterly review",
+            "requested_columns": ["merchant_id"], **extra}
 
-    r = client.post("/api/access-requests", json=request_body("merchant-catalog"))
+
+CERT_FOR_TESTS = None
+
+
+@pytest.fixture(autouse=True)
+def workload_cert(monkeypatch):
+    global CERT_FOR_TESTS
+    from shared.identity.devtools import issue_workload_cert, make_ca
+    from urllib.parse import quote
+    ca_key, ca_cert = make_ca()
+    _, cert_pem = issue_workload_cert(ca_key, ca_cert, WORKLOAD)
+    CERT_FOR_TESTS = quote(cert_pem.decode())
+    yield
+
+
+def test_public_product_is_approved(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=False))
+
+    r = client.post("/api/access-requests", json=body("market-data.merchant-catalog"), headers=headers())
 
     assert r.status_code == 200
     assert r.json()["status"] == "approved"
 
 
 def test_pii_product_is_pending_with_owner_and_sla(client, monkeypatch):
-    stub_opa(monkeypatch, result={"allow": False, "requires_approval": True})
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=True))
 
-    r = client.post("/api/access-requests", json=request_body("account-master"))
+    r = client.post("/api/access-requests", json=body("accounts.account-master"), headers=headers())
 
-    body = r.json()
-    assert body["status"] == "pending"
-    assert body["routed_to"] == "accounts-domain"
-    assert body["approval_sla_hours"] == 4
+    body_json = r.json()
+    assert body_json["status"] == "pending"
+    assert body_json["routed_to"] == "accounts-domain"
+    assert body_json["approval_sla_hours"] == 4
+
+
+def test_user_id_in_body_is_rejected(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=False))
+
+    r = client.post("/api/access-requests", json=body("market-data.merchant-catalog", user_id="x"), headers=headers())
+
+    assert r.status_code == 400
+    assert "user_id" in r.json()["detail"]
+
+
+def test_user_role_in_body_is_rejected_even_for_risk_analyst(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=False))
+
+    r = client.post("/api/access-requests", json=body("accounts.account-master", user_role="risk_analyst"),
+                    headers=headers(token(roles=("analyst",))))
+
+    assert r.status_code == 400
+
+
+def test_missing_token_is_401(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=False))
+
+    r = client.post("/api/access-requests", json=body("market-data.merchant-catalog"))
+
+    assert r.status_code == 401
 
 
 def test_opa_error_denies_request(client, monkeypatch):
-    stub_opa(monkeypatch, exc=OPAError("connection refused"))
+    stub_opa(monkeypatch, exc=OPAError("down"))
 
-    r = client.post("/api/access-requests", json=request_body("account-master"))
+    r = client.post("/api/access-requests", json=body("market-data.merchant-catalog"), headers=headers())
 
     assert r.status_code == 503
-    stored = list(discovery.access_requests.values())
-    assert len(stored) == 1
-    assert stored[0]["status"] == "denied"
+    assert discovery.access_requests["req_1"]["status"] == "denied"
 
 
-def test_product_without_columns_is_classified_restricted(client, monkeypatch):
-    calls = []
-    stub_opa(monkeypatch, result={"allow": True, "requires_approval": True}, calls=calls)
-
-    r = client.post("/api/access-requests", json=request_body("no-columns"))
-
-    assert calls[0]["data_classification"] == "restricted"
-    assert r.json()["status"] == "pending"
+def test_product_without_columns_is_classified_restricted():
+    assert product_classification(NO_COLUMNS) == "restricted"
 
 
-def test_unknown_product_returns_404(client, monkeypatch):
-    stub_opa(monkeypatch, result={"allow": True, "requires_approval": False})
+def test_owner_can_approve_and_grant_is_stored(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=True))
+    created = client.post("/api/access-requests", json=body("accounts.account-master"), headers=headers())
+    assert created.json()["status"] == "pending"
 
-    r = client.post("/api/access-requests", json=request_body("does-not-exist"))
-
-    assert r.status_code == 404
-
-
-def test_product_classification_is_highest_column():
-    product = make_product("p", "o", [("a", "public"), ("b", "pii"), ("c", "sensitive")])
-    assert product_classification(product) == "pii"
-
-
-def test_unknown_classification_value_is_restricted():
-    product = make_product("p", "o", [("a", "PII")])
-    assert product_classification(product) == "restricted"
-
-
-def test_evaluate_access_returns_decision_and_sends_input():
-    seen = {}
-
-    def handler(request):
-        seen["body"] = request.read().decode()
-        return httpx.Response(200, json={"result": {"allow": True, "requires_approval": False}})
-
-    decision = asyncio.run(
-        evaluate_access("u-1", "analyst", "read", "public", transport=httpx.MockTransport(handler))
-    )
-
-    assert decision == {"allow": True, "requires_approval": False}
-    assert '"data_classification": "public"' in seen["body"]
-
-
-def test_evaluate_access_raises_on_non_200():
-    # The body is a valid decision, so only the status check can make this raise.
-    body = {"result": {"allow": True, "requires_approval": False}}
-    transport = httpx.MockTransport(lambda request: httpx.Response(500, json=body))
-
-    with pytest.raises(OPAError):
-        asyncio.run(evaluate_access("u-1", "analyst", "read", "public", transport=transport))
-
-
-def test_evaluate_access_raises_on_transport_error():
-    def unreachable(request):
-        raise httpx.ConnectError("connection refused", request=request)
-
-    with pytest.raises(OPAError):
-        asyncio.run(
-            evaluate_access("u-1", "analyst", "read", "public",
-                            transport=httpx.MockTransport(unreachable))
-        )
-
-
-def test_evaluate_access_raises_on_missing_result():
-    transport = httpx.MockTransport(lambda request: httpx.Response(200, json={}))
-
-    with pytest.raises(OPAError):
-        asyncio.run(evaluate_access("u-1", "analyst", "read", "public", transport=transport))
-
-
-def test_pending_product_without_sla_uses_default_and_stores_consistently(client, monkeypatch):
-    # market-feeds has no approval_sla_hours and no columns: restricted, so pending.
-    discovery.data_products["market-feeds"] = {
-        "id": "market-feeds",
-        "owner": "market-data-domain",
-        "access_policy": {"columns": []},
-    }
-    stub_opa(monkeypatch, result={"allow": False, "requires_approval": True})
-
-    r = client.post("/api/access-requests", json=request_body("market-feeds"))
+    owner = token("owner@accounts", roles=("data_owner",), owns=["accounts-domain"])
+    r = client.post("/api/access-requests/req_1/approve", headers=headers(owner))
 
     assert r.status_code == 200
-    assert r.json()["approval_sla_hours"] == 4
-    stored = list(discovery.access_requests.values())
-    assert len(stored) == 1
-    assert stored[0]["status"] == "pending"
-    assert stored[0]["id"] == r.json()["id"]
+    grant = r.json()["grant"]
+    assert grant["columns"] == ["merchant_id"]
+    assert discovery.access_requests["req_1"]["status"] == "approved"
+
+
+def test_non_owner_cannot_approve(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=True))
+    client.post("/api/access-requests", json=body("accounts.account-master"), headers=headers())
+
+    r = client.post("/api/access-requests/req_1/approve",
+                    headers=headers(token("other@x", roles=("data_owner",), owns=["risk-compliance-domain"])))
+
+    assert r.status_code == 403
+
+
+def test_approval_after_sla_window_is_refused(client, monkeypatch):
+    stub_opa(monkeypatch, Decision(allow=True, requires_approval=True))
+    client.post("/api/access-requests", json=body("accounts.account-master"), headers=headers())
+    later = datetime.now(timezone.utc) + timedelta(hours=5)
+    monkeypatch.setattr(discovery, "clock", lambda: later)
+
+    owner = token("owner@accounts", roles=("data_owner",), owns=["accounts-domain"])
+    r = client.post("/api/access-requests/req_1/approve", headers=headers(owner))
+
+    assert r.status_code == 409
+    assert "window" in r.json()["detail"]
+
+
+def test_evaluate_access_uses_verified_caller(monkeypatch):
+    seen = {}
+
+    async def fake_decide(policy_input, **kwargs):
+        seen.update(policy_input)
+        return Decision(allow=True, requires_approval=False)
+
+    import backend.opa_client as client_module
+    monkeypatch.setattr(client_module, "decide", fake_decide)
+    from shared.identity import Caller
+    from shared.identity.tokens import Principal
+
+    caller = Caller(principal=Principal(subject="s", roles=frozenset({"analyst"})), spiffe_id=WORKLOAD)
+    import asyncio
+    asyncio.run(evaluate_access(caller, PII, "request_access"))
+
+    assert seen["principal"] == {"subject": "s", "roles": ["analyst"]}
+    assert seen["workload"] == {"spiffe_id": WORKLOAD}
+    assert seen["product"]["id"] == "accounts.account-master"

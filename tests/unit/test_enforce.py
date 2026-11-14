@@ -1,5 +1,6 @@
 import asyncio
 import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -23,9 +24,9 @@ ROWS = [
 
 
 def stub_decide(strategy, seen=None):
-    async def decide(user_role, classification):
+    async def decide(column, classification):
         if seen is not None:
-            seen.append((user_role, classification))
+            seen.append((column, classification))
         if isinstance(strategy, Exception):
             raise strategy
         return strategy
@@ -57,6 +58,9 @@ def read(rows, columns, decide, audit, policy=None):
     )
 
 
+POLICY_INPUT = {"action": "read", "product": {"id": "accounts.account-master"}}
+
+
 def test_unclassified_column_is_hashed_on_read():
     seen, records = [], []
 
@@ -68,7 +72,7 @@ def test_unclassified_column_is_hashed_on_read():
     )
 
     assert out[0]["account_id"] == hashlib.sha256(b"ACC-1001").hexdigest()
-    assert seen == [("risk_analyst", None)]
+    assert seen == [("account_id", None)]
 
 
 def test_public_column_is_returned_unchanged():
@@ -134,7 +138,7 @@ def use_opa(monkeypatch, handler):
 def test_opa_decide_returns_strategy(monkeypatch):
     use_opa(monkeypatch, lambda request: httpx.Response(200, json={"result": "partial_mask"}))
 
-    assert asyncio.run(opa_decide_strategy("analyst", "sensitive")) == "partial_mask"
+    assert asyncio.run(opa_decide_strategy(POLICY_INPUT)) == "partial_mask"
 
 
 def test_opa_non_200_raises(monkeypatch):
@@ -142,14 +146,32 @@ def test_opa_non_200_raises(monkeypatch):
     use_opa(monkeypatch, lambda request: httpx.Response(500, json={"result": "no_mask"}))
 
     with pytest.raises(OPAError):
-        asyncio.run(opa_decide_strategy("analyst", "sensitive"))
+        asyncio.run(opa_decide_strategy(POLICY_INPUT))
 
 
 def test_opa_missing_result_raises(monkeypatch):
     use_opa(monkeypatch, lambda request: httpx.Response(200, json={}))
 
     with pytest.raises(OPAError):
-        asyncio.run(opa_decide_strategy("analyst", "sensitive"))
+        asyncio.run(opa_decide_strategy(POLICY_INPUT))
+
+
+def test_opa_sends_full_policy_input(monkeypatch):
+    seen = {}
+
+    def handler(request):
+        seen.update(json.loads(request.content))
+        return httpx.Response(200, json={"result": "full_hash"})
+
+    use_opa(monkeypatch, handler)
+    asyncio.run(opa_decide_strategy({**POLICY_INPUT, "column": "account_id"}))
+
+    assert seen["input"]["column"] == "account_id"
+    assert seen["input"]["product"]["id"] == "accounts.account-master"
+
+
+async def real_decider(column, classification):
+    return await opa_decide_strategy({"column": column, "column_classification": classification})
 
 
 def test_opa_unreachable_returns_no_rows(monkeypatch):
@@ -162,14 +184,15 @@ def test_opa_unreachable_returns_no_rows(monkeypatch):
     with pytest.raises(OPAError):
         asyncio.run(
             mask_rows(ROWS, TABLE, ["account_id"], "u-1", "risk_analyst",
-                      ColumnMaskingPolicy(), write_audit=recording_audit(records))
+                      ColumnMaskingPolicy(), decide_strategy=real_decider,
+                      write_audit=recording_audit(records))
         )
 
     assert records == []
 
 
 def test_unrequested_unclassified_column_is_masked_on_read():
-    async def decide(user_role, classification):
+    async def decide(column, classification):
         return "no_mask" if classification == "public" else "full_hash"
 
     out = read(

@@ -223,12 +223,15 @@ curl 'http://localhost:8000/api/products?access_required=false'
 
 ### Endpoint: POST /api/access-requests
 
+The requester is the **verified token subject** and the **verified workload** (the SPIFFE ID in the client
+certificate, forwarded by the mTLS gateway). Neither is read from the body. A body that carries `user_id` or
+`user_role` is rejected with 400. A request with no valid token and certificate is 401.
+
+**Headers**: `Authorization: Bearer <JWT>`. The gateway adds the client certificate.
+
 **Request Body**:
 ```json
 {
-  "user_id": "analyst_42",
-  "user_email": "analyst.42@company.com",
-  "user_role": "external_analyst",
   "data_product_id": "transaction-feed",
   "action": "read",
   "justification": "Weekly fraud pattern analysis for risk committee",
@@ -373,19 +376,22 @@ curl 'http://localhost:8000/api/products?query=fraud'
 # Step 2: Get details
 curl 'http://localhost:8000/api/products/fraud-scores'
 
-# Step 3: Request access (auto-approved for risk analysts)
-curl -X POST 'http://localhost:8000/api/access-requests' \
+# Step 3: Request access. The role comes from the token; the body names no identity.
+#         Fraud scores are sensitive, so the request is pending until the domain owner approves it.
+curl -X POST 'https://localhost:8443/api/access-requests' \
+  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
-    "user_id": "risk_analyst_5",
-    "user_role": "risk_analyst",
     "data_product_id": "fraud-scores",
     "action": "read",
     "justification": "Daily fraud monitoring"
   }'
 
-# Step 4: Check status (immediately approved)
-curl 'http://localhost:8000/api/access-requests/req_12345'
+# Step 4: Check status (pending until the owner approves; see the trust-gaps page)
+curl 'https://localhost:8443/api/access-requests/req_12345' \
+  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  -H "Authorization: Bearer $TOKEN"
 
 # Step 5: Query (in Spark SQL)
 spark.sql("""
@@ -406,12 +412,12 @@ curl 'http://localhost:8000/api/products?query=transaction&access_required=false
 # Step 2: Get details (note: masking_required = true for account_id)
 curl 'http://localhost:8000/api/products/transaction-feed'
 
-# Step 3: Request access
-curl -X POST 'http://localhost:8000/api/access-requests' \
+# Step 3: Request access (identity from the verified token, not the body)
+curl -X POST 'https://localhost:8443/api/access-requests' \
+  --cacert tools/dev-ca/out/ca.pem --cert tools/dev-ca/out/notebook.pem --key tools/dev-ca/out/notebook.key \
+  -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
-    "user_id": "external_analyst_8",
-    "user_role": "external_analyst",
     "data_product_id": "transaction-feed",
     "action": "read",
     "justification": "Custom analytics report for management"
@@ -492,25 +498,13 @@ async def list_products(
     }
 
 @app.post("/api/access-requests")
-async def submit_access_request(request: AccessRequest):
-    """Submit an access request"""
-    
-    # Evaluate OPA policy
-    opa_decision = requests.post(
-        f"{OPA_URL}/v1/data/data_mesh/access",
-        json={
-            "input": {
-                "user_id": request.user_id,
-                "user_role": request.user_role,
-                "action": request.action,
-                "domain": request.domain,
-                "table": request.table,
-                "data_classification": request.data_classification
-            }
-        }
-    ).json()
-    
-    if opa_decision["result"]["allow"]:
+async def submit_access_request(request: AccessRequest, caller: Caller = Depends(get_caller)):
+    """Submit an access request. The caller comes from the verified token and client certificate."""
+
+    # Evaluate the policy on the verified principal, the workload and the product (fail closed on any OPA error)
+    decision = await evaluate_access(caller, product, "request_access")
+
+    if decision.allow:
         if not opa_decision["result"].get("requires_approval"):
             # Auto-approve
             return {

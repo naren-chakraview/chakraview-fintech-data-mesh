@@ -1,0 +1,32 @@
+name: trust-tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  trust-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install OPA 1.0.0
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 1.0.0
+
+      - name: Install trust dependencies
+        run: pip install -r requirements-trust.txt
+
+      - name: Create dev keys, CA and signed fixture attestations
+        run: make trust-keys
+
+      - name: Unit and trust tests
+        run: make trust-test
+
+      - name: Before and after demos (side-door demo starts Fuseki in Docker)
+        run: make trust-demo

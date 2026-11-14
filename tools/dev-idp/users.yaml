@@ -1,0 +1,23 @@
+# Named dev users. Development only. Production uses the company IdP (OIDC).
+# `owns` lists the owning domains. An approver must own the product's domain.
+users:
+  analyst:
+    subject: analyst@chakra.fintech
+    roles: [analyst]
+    owns: []
+  risk-analyst:
+    subject: risk.analyst@chakra.fintech
+    roles: [risk_analyst]
+    owns: []
+  fraud-analyst:
+    subject: fraud.analyst@chakra.fintech
+    roles: [fraud_analyst]
+    owns: []
+  risk-owner:
+    subject: owner@risk-compliance.chakra.fintech
+    roles: [data_owner]
+    owns: [risk-compliance-domain]
+  accounts-owner:
+    subject: owner@accounts.chakra.fintech
+    roles: [data_owner]
+    owns: [accounts-domain]

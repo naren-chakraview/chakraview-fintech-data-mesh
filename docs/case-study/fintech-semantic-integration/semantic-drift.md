@@ -183,9 +183,9 @@ the current after code on the same data.
 | `demo_decimal_sum.py` | D6: `SUM` fails before and returns the total after |
 | `demo_shacl_catches_drift.py` | D1, D4, D6, D7: the shapes report the before drift and pass the after output |
 
-## Known gap (article 3)
+## Known gap (article 3): now addressed
 
-The Fuseki configs expose open SPARQL update and graph-store read/write endpoints, and
-the Accounts graph serves customer names and emails unmasked. This change does not fix
-either one. It is a second read path that governance must cover, and it is tracked for
-article 3.
+The Fuseki configs exposed SPARQL update and graph-store read/write endpoints, and the
+Accounts graph served customer names and emails. Article 3 covers the governance side of
+that second read path. See [Trust gaps: before and after](../fintech-governance/trust-gaps.md)
+for the boundary, the closed Fuseki endpoints, and the demos.

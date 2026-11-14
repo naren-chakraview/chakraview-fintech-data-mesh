@@ -4,11 +4,9 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-transactions_db}
-      POSTGRES_USER: ${POSTGRES_USER:-transactions_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transactions_pass}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     env_file:
       - .env
     healthcheck:
@@ -19,20 +17,28 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # One-shot: Fuseki runs as uid 100 and TDB2 needs its database directory to exist.
+  fuseki-init:
+    image: busybox:1.36
+    command: ["sh", "-c", "mkdir -p /fuseki-base/databases/transactions && chown -R 100:101 /fuseki-base/databases"]
+    volumes:
+      - jena_data:/fuseki-base/databases
+
   jena-fuseki:
-    image: stain/jena-fuseki:4.9.1
+    image: stain/jena-fuseki:5.1.0
+    command: ["/jena-fuseki/fuseki-server", "--conf", "/fuseki/config.ttl"]
     environment:
-      FUSEKI_DATASET_1: ${JENA_DATASET:-transactions}
-    ports:
-      - "${JENA_PORT:-3031}:3030"
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD:?set FUSEKI_ADMIN_PASSWORD in .env}
     env_file:
       - .env
     volumes:
-      - ./config/fuseki-config.ttl:/etc/fuseki/config.ttl
+      - ./config/fuseki-config.ttl:/fuseki/config.ttl:ro
       - jena_data:/fuseki-base/databases
     depends_on:
       postgres:
         condition: service_healthy
+      fuseki-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3030/ || exit 1"]
       interval: 5s

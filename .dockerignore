@@ -1,0 +1,14 @@
+.git
+.venv
+**/venv
+**/__pycache__
+**/.pytest_cache
+site
+graphify-out
+docs
+writing
+tools/dev-idp/keys
+tools/dev-ca/out
+platform/lineage/keys
+platform/lineage/attestations
+**/.env

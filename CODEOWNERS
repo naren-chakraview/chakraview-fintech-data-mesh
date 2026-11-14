@@ -1,0 +1,18 @@
+# Reference pattern. The owner is the only collaborator, so every path names the same handle.
+# Split these lines across real teams if this pattern is adopted by a team.
+#
+# Each domain owns its data product policies. The platform owns the guardrails that every policy must satisfy.
+#
+# Platform: guardrails, the decision point, the boundary, identity and lineage.
+/platform/governance/opa-policies/guardrails*.rego   @naren-chakraview
+/platform/governance/opa-policies/abac*.rego         @naren-chakraview
+/platform/boundary/                                  @naren-chakraview
+/shared/identity/                                    @naren-chakraview
+/platform/lineage/                                   @naren-chakraview
+
+# Domains: each domain's product policies (who may read, which columns, which workloads).
+/domains/risk-compliance/policy/   @naren-chakraview
+/domains/accounts/policy/          @naren-chakraview
+/domains/transactions/policy/      @naren-chakraview
+/domains/market-data/policy/       @naren-chakraview
+/domains/counterparties/policy/    @naren-chakraview
