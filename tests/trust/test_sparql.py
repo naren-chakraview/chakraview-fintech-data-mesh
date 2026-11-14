@@ -148,3 +148,54 @@ def test_fuseki_outage_returns_503(sparql_stack):
 
     assert r.status_code == 503
     assert "results" not in r.json()
+
+
+# R6 regression: a constant object or a FILTER on a PII predicate needs that predicate's grant, even though the
+# query does not project it. Each request is refused before Fuseki sees it.
+CONSTANT = PREFIX + 'SELECT ?score WHERE { ?c f:fraudScore ?score ; f:customerEmail "john@acme.com" }'
+FILTERED = PREFIX + 'SELECT ?score WHERE { ?c f:fraudScore ?score ; f:customerEmail ?e . FILTER(STRSTARTS(?e, "j")) }'
+
+
+def test_constant_object_on_pii_needs_the_pii_grant(sparql_stack):
+    stack, seen = sparql_stack
+    grant(stack, ["fraudScore"])
+
+    assert post(stack, CONSTANT).status_code == 403
+    assert seen == []
+
+
+def test_filter_on_pii_needs_the_pii_grant(sparql_stack):
+    stack, seen = sparql_stack
+    grant(stack, ["fraudScore"])
+
+    assert post(stack, FILTERED).status_code == 403
+    assert seen == []
+
+
+def test_constant_object_with_the_pii_grant_is_answered(sparql_stack):
+    stack, seen = sparql_stack
+    grant(stack, ["fraudScore", "customerEmail"])
+
+    assert post(stack, CONSTANT).status_code == 200
+    assert len(seen) == 1
+
+
+def test_variable_predicate_is_refused_before_fuseki(sparql_stack):
+    stack, seen = sparql_stack
+    grant(stack, ["customerEmail", "fraudScore"])
+
+    assert post(stack, PREFIX + "SELECT ?v WHERE { ?c ?p ?v . ?c f:customerEmail ?e }").status_code == 400
+    assert seen == []
+
+
+def test_sparql_audit_records_the_query_hash_for_allowed_and_refused_reads(sparql_stack):
+    import hashlib
+
+    stack, _ = sparql_stack
+    grant(stack, ["fraudScore"])
+    post(stack, CONSTANT)  # refused: no PII grant
+    refused = stack.audit_records[-1]
+    expected = hashlib.sha256(CONSTANT.encode()).hexdigest()
+
+    assert refused["decision"] == "deny"
+    assert refused["query_sha256"] == expected

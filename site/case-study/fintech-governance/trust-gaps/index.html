@@ -2080,6 +2080,12 @@ config, and the compose excerpt). Nothing in the platform imports it. The same s
 </ul>
 <p>Status and open items (R5 is closed; the others remain):</p>
 <ul>
+<li><strong>R6, predicates that were tested but not projected.</strong> A constant object (<code>f:customerEmail "john@acme.com"</code>) or a
+  <code>FILTER</code> on a PII predicate was never checked against the grant, so it could answer "does this email have rows?".
+  Now every predicate in every triple pattern is checked against the contract and the grant, projected or not. Variable
+  predicates and property paths are refused, since they could reach any predicate. SPARQL audit records, allowed and
+  refused, carry the SHA-256 of the query text, so an oracle attack leaves a trail. Tests: <code>tests/unit/test_sparql_guard.py</code>
+  and <code>tests/trust/test_sparql.py</code>.</li>
 <li><strong>R5, unverified lineage still serves data (closed).</strong> A product contract can now set <code>require_provenance: true</code>.
   The guardrail then refuses reads whose snapshot does not verify, with an audited reason. <code>account-master</code> is set this
   way. <code>risk-scores</code> keeps the default and only reports <code>lineage_verified</code>. A SPARQL read has no single snapshot, so it
@@ -2099,6 +2105,9 @@ config, and the compose excerpt). Nothing in the platform imports it. The same s
 <li><strong>Workload identity.</strong> The dev CA (<code>tools/dev-ca/</code>) issues client certificates with SPIFFE URI SANs. Production uses
   SPIRE. The gateway is nginx here; production would use Envoy with the same check. The internal CA that secures the
   gateway-to-service hop is also a dev CA.</li>
+<li><strong>Row counts and timing.</strong> Any query interface can leak a little through how many rows match and how long a query
+  takes, even when every value is masked. The guard limits what a query can test, and the audit (with the query hash)
+  records each attempt. It does not remove the channel. Rate limits per grant are not built.</li>
 <li><strong>Provenance on SPARQL.</strong> A product that requires provenance cannot be read over SPARQL, because a query result
   is not one snapshot. Per-triple provenance is not built.</li>
 <li><strong>Lineage keys.</strong> Each producer has its own dev key, generated locally and never committed. The trust configuration

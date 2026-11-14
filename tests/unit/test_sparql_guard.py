@@ -12,7 +12,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "platform"))
 sys.path.insert(0, str(REPO))
 
-from boundary.sparql import (QueryParseError, ReadOnlyViolation, parse_read_only,  # noqa: E402
+from boundary.sparql import (QueryParseError, ReadOnlyViolation, parse_read_only, pattern_predicates,  # noqa: E402
                              projected_predicates)
 
 PREFIX = "PREFIX f: <http://jena.apache.org/fintech#>\n"
@@ -93,7 +93,7 @@ def test_select_star_is_refused_for_classification():
 
 
 def test_projected_variable_with_no_predicate_is_refused():
-    algebra = parse_read_only(PREFIX + "SELECT ?c WHERE { ?c ?p ?o . ?x f:customerEmail ?e }")
+    algebra = parse_read_only(PREFIX + "SELECT ?c WHERE { ?x f:customerEmail ?e }")
     with pytest.raises(ReadOnlyViolation):
         projected_predicates(algebra)
 
@@ -101,3 +101,27 @@ def test_projected_variable_with_no_predicate_is_refused():
 def test_garbage_is_a_parse_error():
     with pytest.raises(QueryParseError):
         parse_read_only("this is not sparql at all")
+
+
+# R6: every predicate a query tests is visible to the guard, projected or not, constant or not.
+def test_variable_predicate_is_refused():
+    with pytest.raises(ReadOnlyViolation):
+        pattern_predicates(parse_read_only(PREFIX + "SELECT ?v WHERE { ?c ?p ?v . ?c f:customerEmail ?e }"))
+
+
+def test_property_path_is_refused():
+    with pytest.raises(ReadOnlyViolation):
+        pattern_predicates(parse_read_only(PREFIX + "SELECT ?v WHERE { ?c f:customerEmail/f:x ?v }"))
+
+
+def test_constant_object_predicate_is_reported():
+    algebra = parse_read_only(PREFIX + 'SELECT ?amount WHERE { ?c f:amount ?amount ; f:customerEmail "john@acme.com" }')
+
+    assert pattern_predicates(algebra) == {"amount", "customerEmail"}
+
+
+def test_filter_only_predicate_is_reported():
+    algebra = parse_read_only(PREFIX + 'SELECT ?amount WHERE { ?c f:amount ?amount ; f:customerEmail ?e . '
+                                      'FILTER(STRSTARTS(?e, "j")) }')
+
+    assert "customerEmail" in pattern_predicates(algebra)

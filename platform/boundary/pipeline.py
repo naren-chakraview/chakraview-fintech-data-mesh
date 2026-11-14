@@ -1,5 +1,6 @@
 """The read path. Every step fails closed: no verified caller, no decision, no grant, no audit means no data."""
 
+import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Awaitable, Callable, Dict, List, Optional
@@ -14,7 +15,7 @@ from shared.identity import Caller
 from .policy import Decision
 from .reader import FixtureReader
 from .sparql import (PII_PREDICATE_NAMES, QueryParseError, ReadOnlyViolation, forward_read,
-                     parse_read_only, projected_predicates)
+                     parse_read_only, pattern_predicates, projected_predicates)
 
 
 class Denied(Exception):
@@ -53,10 +54,11 @@ def _base_input(caller: Caller, product: dict, action: str) -> dict:
 
 
 async def _deny(services: Services, caller: Caller, product_id: str, columns: List[str],
-                purpose: str, reason: str, status: int) -> Denied:
+                purpose: str, reason: str, status: int, extra: Optional[dict] = None) -> Denied:
     """Audit the refusal. If the audit write fails, the refusal still stands."""
     try:
         await services.audit({
+            **(extra or {}),
             "timestamp": services.clock().isoformat(),
             "decision": "deny",
             "reason": reason,
@@ -75,7 +77,8 @@ async def _deny(services: Services, caller: Caller, product_id: str, columns: Li
 
 async def authorize(services: Services, caller: Caller, product_id: str, action: str,
                     columns: List[str], purpose: str,
-                    lineage_verified: Optional[bool] = None) -> tuple:
+                    lineage_verified: Optional[bool] = None,
+                    audit_extra: Optional[dict] = None) -> tuple:
     """Return (product, grant or None). Raises Denied for a refusal and OPAError/other errors for a broken dependency.
 
     lineage_verified is the snapshot's provenance result for a row read. It is left out for SPARQL, which has no
@@ -95,7 +98,7 @@ async def authorize(services: Services, caller: Caller, product_id: str, action:
                       else "provenance required: this path has no verified snapshot")
         else:
             reason = "policy denies this read"
-        raise await _deny(services, caller, product_id, columns, purpose, reason, 403)
+        raise await _deny(services, caller, product_id, columns, purpose, reason, 403, audit_extra)
 
     grant: Optional[Grant] = None
     if decision.requires_approval:
@@ -109,7 +112,7 @@ async def authorize(services: Services, caller: Caller, product_id: str, action:
         )
         if grant is None:
             raise await _deny(services, caller, product_id, columns, purpose,
-                              "approval required: no valid grant", 403)
+                              "approval required: no valid grant", 403, audit_extra)
     return product, grant
 
 
@@ -212,15 +215,19 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
     except (ReadOnlyViolation, QueryParseError) as exc:
         raise Denied(400, str(exc)) from exc
 
+    # Every predicate the query tests is checked, not only the projected ones (R6): a constant object or a
+    # FILTER on a predicate that is not projected reveals data just as a projection does.
     known = predicate_classes(product)
-    needed = sorted({p for predicates in origins.values() for p in predicates})
+    needed = sorted(pattern_predicates(algebra))
     unknown = [p for p in needed if p not in known]
     if unknown:
         raise Denied(400, f"predicates outside this product's contract: {', '.join(unknown)}")
 
     # Grants are checked against the predicates the query reads, so a grant for one predicate
     # does not open another, and an alias cannot change what is read.
-    product, grant = await authorize(services, caller, product_id, "read", needed, purpose)
+    query_hash = {"query_sha256": hashlib.sha256(query.encode()).hexdigest(), "channel": "sparql"}
+    product, grant = await authorize(services, caller, product_id, "read", needed, purpose,
+                                     audit_extra=query_hash)
 
     results = await forward_read(endpoint, query, transport=services.sparql_transport)
     variables = [v for v in origins if v in results.get("head", {}).get("vars", [])]
@@ -244,7 +251,7 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
         write_audit=services.audit,
         extra_audit={
             "decision": "allow",
-            "channel": "sparql",
+            **query_hash,
             "subject": caller.principal.subject,
             "roles": sorted(caller.principal.roles),
             "workload_spiffe_id": caller.spiffe_id,
