@@ -2086,6 +2086,9 @@ config, and the compose excerpt). Nothing in the platform imports it. The same s
   predicates and property paths are refused, since they could reach any predicate. SPARQL audit records, allowed and
   refused, carry the SHA-256 of the query text, so an oracle attack leaves a trail. Tests: <code>tests/unit/test_sparql_guard.py</code>
   and <code>tests/trust/test_sparql.py</code>.</li>
+<li><strong>R7, <code>FILTER EXISTS</code> and <code>FILTER NOT EXISTS</code>.</strong> A pattern inside these sits in a filter expression, outside the main
+  algebra, so the predicate check did not see it. The guard now refuses both forms on the read path, the same way it
+  refuses <code>SERVICE</code>. Tests: <code>tests/unit/test_sparql_guard.py</code>, <code>tests/trust/test_sparql.py</code>.</li>
 <li><strong>R5, unverified lineage still serves data (closed).</strong> A product contract can now set <code>require_provenance: true</code>.
   The guardrail then refuses reads whose snapshot does not verify, with an audited reason. <code>account-master</code> is set this
   way. <code>risk-scores</code> keeps the default and only reports <code>lineage_verified</code>. A SPARQL read has no single snapshot, so it

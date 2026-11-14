@@ -34,6 +34,8 @@ REFUSED_NODES = {
     "Graph",             # GRAPH <g> { ... }
     "ServiceGraphPattern",  # SERVICE <endpoint> { ... }
     "DatasetClause",     # FROM and FROM NAMED
+    "Builtin_EXISTS",    # FILTER EXISTS { ... }: a pattern inside a filter expression (review R7)
+    "Builtin_NOTEXISTS",  # FILTER NOT EXISTS { ... }
 }
 
 
