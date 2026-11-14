@@ -33,6 +33,7 @@ class Settings:
     domains_dir: Path
     fixtures_dir: Path
     lineage_dir: Path
+    lineage_trust_dir: Path
     policy_root: Path
     idp_jwks_url: str
     idp_issuer: str
@@ -46,6 +47,7 @@ class Settings:
             domains_dir=Path(os.getenv("DOMAINS_DIR", REPO_ROOT / "domains")),
             fixtures_dir=Path(os.getenv("FIXTURES_DIR", REPO_ROOT / "platform/boundary/fixtures")),
             lineage_dir=Path(os.getenv("LINEAGE_DIR", REPO_ROOT / "platform/lineage/attestations")),
+            lineage_trust_dir=Path(os.getenv("LINEAGE_TRUST_DIR", REPO_ROOT / "platform/lineage/trust")),
             policy_root=Path(os.getenv("POLICY_ROOT", REPO_ROOT)),
             idp_jwks_url=os.getenv("IDP_JWKS_URL", "http://dev-idp:8090/.well-known/jwks.json"),
             idp_issuer=os.getenv("IDP_ISSUER", "http://dev-idp:8090"),
@@ -78,7 +80,7 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
         grants=grants,
         decide=decide_fn,
         audit=audit,
-        lineage_check=make_lineage_check(settings.lineage_dir),
+        lineage_check=make_lineage_check(settings.lineage_dir, settings.lineage_trust_dir),
         revisions=policy_revisions(
             settings.policy_root,
             {pid: settings.policy_root / "domains" / p["domain"] / "policy" / f"{p['name']}.rego"

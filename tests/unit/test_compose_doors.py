@@ -73,3 +73,41 @@ def test_gateway_forwards_only_to_the_services_and_overwrites_the_cert_header():
 
     assert "ssl_verify_client on" in conf
     assert conf.count("proxy_set_header X-Client-Cert $ssl_client_escaped_cert") == 2
+
+
+# R2 and R4: the services accept only the gateway's certificate, and no service holds a CA private key.
+def _command(service):
+    cmd = compose()["services"][service]["command"]
+    return cmd if isinstance(cmd, list) else cmd.split()
+
+
+def test_boundary_and_discovery_require_a_client_certificate_from_the_internal_ca():
+    for service in ("boundary", "discovery"):
+        cmd = _command(service)
+        assert "--ssl-cert-reqs" in cmd and cmd[cmd.index("--ssl-cert-reqs") + 1] == "2", service
+        assert "--ssl-ca-certs" in cmd and cmd[cmd.index("--ssl-ca-certs") + 1] == "/certs/ca.pem", service
+        assert "--ssl-certfile" in cmd, service
+
+
+def test_no_service_mounts_a_ca_private_key():
+    for name, service in compose()["services"].items():
+        for volume in service.get("volumes", []):
+            source = str(volume).split(":")[0]
+            assert source not in ("./tools/dev-ca/out", "./tools/dev-ca/out/ca", "./tools/dev-ca/out/internal"), name
+            assert not str(volume).endswith("ca.key"), name
+
+
+def test_fuseki_is_reachable_only_from_the_boundary_network():
+    services = compose()["services"]
+    assert services["risk-compliance-fuseki"]["networks"] == ["fuseki-risk"]
+    assert "fuseki-risk" in services["boundary"]["networks"]
+    assert "fuseki-risk" not in services["discovery"]["networks"]
+    assert compose()["networks"]["fuseki-risk"]["internal"] is True
+
+
+def test_gateway_verifies_the_services_and_presents_its_own_certificate():
+    conf = (REPO / "platform/boundary/gateway/nginx.conf").read_text()
+
+    assert "proxy_ssl_verify on" in conf
+    assert re.search(r"proxy_ssl_certificate\s+/certs/client\.pem;", conf)
+    assert re.search(r"proxy_ssl_trusted_certificate\s+/certs/internal-ca\.pem;", conf)

@@ -211,7 +211,7 @@ def test_lineage_verifies_for_the_published_snapshot(stack):
 def test_lineage_fails_for_a_tampered_snapshot():
     snapshot = (REPO / "platform/boundary/fixtures" / f"{RISK}.json").read_bytes()
     tampered = snapshot.replace(b"0.82", b"0.19")
-    check = make_lineage_check(REPO / "platform/lineage/attestations")
+    check = make_lineage_check(REPO / "platform/lineage/attestations", REPO / "platform/lineage/trust")
 
     assert check(RISK, snapshot) is True
     assert check(RISK, tampered) is False
@@ -219,6 +219,6 @@ def test_lineage_fails_for_a_tampered_snapshot():
 
 def test_lineage_fails_closed_when_no_attestation_exists(tmp_path):
     snapshot = (REPO / "platform/boundary/fixtures" / f"{RISK}.json").read_bytes()
-    check = make_lineage_check(tmp_path)
+    check = make_lineage_check(tmp_path, REPO / "platform/lineage/trust")
 
     assert check(RISK, snapshot) is False

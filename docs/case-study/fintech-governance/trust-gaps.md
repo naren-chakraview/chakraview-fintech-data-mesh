@@ -30,6 +30,9 @@ client ── bearer token + mTLS client cert ──▶ gateway (nginx: verifies
                            → rows + lineage_verified            (any failure: no rows)
 ```
 
+The gateway reaches the boundary and discovery over mutual TLS. The services accept only a certificate from the
+internal CA, which signs nothing else, so a workload certificate cannot reach them directly.
+
 Every failure path returns an error and no rows: no token, no certificate, an OPA error, a grant-store error, an
 unknown column, or an audit write that fails.
 
@@ -81,6 +84,36 @@ config, and the compose excerpt). Nothing in the platform imports it. The same s
 git checkout trust-before
 ```
 
+## Review follow-up
+
+An independent review (`trust-fix-review.md`) found four issues. Each is fixed here, with a regression test.
+
+- **R1, SPARQL aliases leaked PII.** Classification used the variable's name, so `BIND(?email AS ?amount)` returned
+  an email under a public column's grant. Now a variable is classified by the predicate its value comes from. The
+  parser refuses the forms that can create or move a value: `BIND` and projection expressions, aggregates, subqueries,
+  `VALUES`, `GRAPH`, `SERVICE`, `FROM` and `FROM NAMED`, and `ASK`, `CONSTRUCT` and `DESCRIBE`. Grants are checked on
+  predicate names. `SELECT *` is refused. Tests: `tests/unit/test_sparql_guard.py`, `tests/trust/test_sparql.py`.
+- **R2, `SERVICE` reached another domain.** The boundary refuses `SERVICE`. The risk Fuseki now sits on its own
+  network (`fuseki-risk`), reachable only from the boundary, so even a forwarded `SERVICE` cannot reach another
+  domain's Fuseki. Tests: `tests/unit/test_compose_doors.py`.
+- **R3, lineage proved only that someone held the shared key.** Each producer now has its own key. A trust
+  configuration (`platform/lineage/trust/`, mounted read-only and separate from the attestations) names the expected
+  producer and its public key for each product. A statement verifies only under that key and only if it names that
+  producer. The demo shows an attacker who re-signs a tampered snapshot failing verification.
+- **R4, any internal peer could present a certificate.** The services now require a client certificate from the
+  internal CA, and the gateway holds the only one. The gateway verifies each service's certificate. Live check: a
+  workload certificate and no certificate both get no HTTP response from the boundary.
+
+Open, and not done in this change:
+
+- **R5, unverified lineage still serves data.** A read with `lineage_verified: false` returns 200. A product contract
+  flag such as `require_provenance: true`, enforced by the guardrail, would make this a per-product choice. Not built.
+- **Per-product named graphs.** A query reads the domain's default graph. Each domain currently has one product, so
+  this is latent. Scoping each product to its named graph is the next step.
+- **Fuseki's own `SERVICE` switch.** The boundary refuses `SERVICE`, and the network isolates the risk Fuseki. The Jena
+  setting that would also disable outbound `SERVICE` inside Fuseki is not configured, because I did not verify it on
+  Fuseki 5.1.
+
 ## Known residuals
 
 These are deliberate, and each one is a production decision that this repo does not make for you.
@@ -88,8 +121,11 @@ These are deliberate, and each one is a production decision that this repo does 
 - **Identity provider.** The dev IdP (`tools/dev-idp/`) mints RS256 tokens for named test users. Production uses the
   company IdP over OIDC. Keys and users in this repo are for development only.
 - **Workload identity.** The dev CA (`tools/dev-ca/`) issues client certificates with SPIFFE URI SANs. Production uses
-  SPIRE. The gateway is nginx here; production would use Envoy with the same check.
-- **Lineage keys.** Signing keys are generated locally and never committed. Production uses KMS or Sigstore.
+  SPIRE. The gateway is nginx here; production would use Envoy with the same check. The internal CA that secures the
+  gateway-to-service hop is also a dev CA.
+- **Lineage keys.** Each producer has its own dev key, generated locally and never committed. The trust configuration
+  is a dev file written by the setup script. Production uses KMS or Sigstore keyless signing, where the signature is
+  bound to the workload identity.
 - **Product reads.** The boundary reads fixture snapshots (`platform/boundary/fixtures/`). The pyiceberg adapter for
   real Iceberg tables is not wired. The lineage check covers the bytes the boundary actually reads.
 - **Fuseki authentication.** The stock Fuseki 5.1 image protects `/update` and `/data` with one shared admin password,

@@ -121,7 +121,7 @@ def after(scratch: Path, volume: str) -> None:
     with open_stack(fuseki_endpoints={"risk-compliance": f"{endpoint}/sparql"}) as stack:
         token = stack.token(SUBJECT, roles=["risk_analyst"])
         stack.grants.create(subject=SUBJECT, workload_spiffe_id=WORKLOADS["notebook"], product_id=PRODUCT,
-                            columns=["email", "name"], purpose=PURPOSE,
+                            columns=["customerEmail", "customerName"], purpose=PURPOSE,
                             expires_at=stack.now + timedelta(hours=1))
         client = stack.boundary()
         headers = stack.headers(token)

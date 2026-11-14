@@ -1,9 +1,15 @@
-"""Create the dev workload CA and issue client certificates for the named test workloads.
+"""Create the dev certificate authorities and the certificates each service mounts.
 
-Writes tools/dev-ca/out/ (gitignored): ca.pem, ca.key, gateway.pem / gateway.key (TLS server
-certificate), and <name>.pem / <name>.key for each workload with its SPIFFE ID in the URI SAN. Development only. Production uses SPIRE.
+Two CAs, so that trust is scoped:
+- dev CA: issues workload certificates (SPIFFE URI SANs) and the gateway's edge TLS certificate. Clients use it.
+- internal CA: issues the services' TLS certificates and the gateway's client certificate. Only the gateway holds
+  a certificate from it, so a workload certificate cannot reach the boundary or discovery directly.
+
+Writes tools/dev-ca/out/ (gitignored). The CA private keys stay in out/ca/ and out/internal/, which no service mounts.
+Each service mounts only its own directory under out/services/. Development only. Production uses SPIRE.
 """
 
+import shutil
 import sys
 from pathlib import Path
 
@@ -21,22 +27,57 @@ WORKLOADS = {
     "nightly-batch": "spiffe://chakracommerce.com/ns/batch/sa/nightly",
     "risk-producer": "spiffe://chakracommerce.com/ns/risk/sa/producer",
 }
+GATEWAY_SPIFFE = "spiffe://chakracommerce.com/ns/edge/sa/gateway"
+
+
+def _pem_key(key) -> bytes:
+    return key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+                             serialization.NoEncryption())
+
+
+def _pem_cert(cert) -> bytes:
+    return cert.public_bytes(serialization.Encoding.PEM)
+
+
+def _write(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
 
 
 def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
-    ca_key, ca_cert = make_ca()
-    (OUT / "ca.pem").write_bytes(ca_cert.public_bytes(serialization.Encoding.PEM))
-    (OUT / "ca.key").write_bytes(ca_key.private_bytes(
-        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()))
-    gateway_key, gateway_cert = issue_server_cert(ca_key, ca_cert, ["localhost", "gateway"])
-    (OUT / "gateway.key").write_bytes(gateway_key)
-    (OUT / "gateway.pem").write_bytes(gateway_cert)
+    shutil.rmtree(OUT, ignore_errors=True)
+    dev_key, dev_cert = make_ca("chakra dev workload CA")
+    internal_key, internal_cert = make_ca("chakra dev internal service CA")
+
+    _write(OUT / "ca" / "ca.key", _pem_key(dev_key))
+    _write(OUT / "ca" / "ca.pem", _pem_cert(dev_cert))
+    _write(OUT / "internal" / "ca.key", _pem_key(internal_key))
+    _write(OUT / "internal" / "ca.pem", _pem_cert(internal_cert))
+
     for name, spiffe_id in WORKLOADS.items():
-        key_pem, cert_pem = issue_workload_cert(ca_key, ca_cert, spiffe_id)
-        (OUT / f"{name}.key").write_bytes(key_pem)
-        (OUT / f"{name}.pem").write_bytes(cert_pem)
-        print(f"issued {name}: {spiffe_id}")
+        key_pem, cert_pem = issue_workload_cert(dev_key, dev_cert, spiffe_id)
+        _write(OUT / f"{name}.key", key_pem)
+        _write(OUT / f"{name}.pem", cert_pem)
+        print(f"issued workload {name}: {spiffe_id}")
+
+    # Gateway: the edge certificate clients trust (dev CA), and the client certificate it presents to services.
+    edge_key, edge_cert = issue_server_cert(dev_key, dev_cert, ["localhost", "gateway"])
+    client_key, client_cert = issue_workload_cert(internal_key, internal_cert, GATEWAY_SPIFFE)
+    gateway = OUT / "services" / "gateway"
+    _write(gateway / "edge.key", edge_key)
+    _write(gateway / "edge.pem", edge_cert)
+    _write(gateway / "client.key", client_key)
+    _write(gateway / "client.pem", client_cert)
+    _write(gateway / "ca.pem", _pem_cert(dev_cert))
+    _write(gateway / "internal-ca.pem", _pem_cert(internal_cert))
+
+    for service in ("boundary", "discovery"):
+        key, cert = issue_server_cert(internal_key, internal_cert, [service])
+        target = OUT / "services" / service
+        _write(target / "server.key", key)
+        _write(target / "server.pem", cert)
+        _write(target / "ca.pem", _pem_cert(internal_cert))
+        print(f"issued {service} server certificate (internal CA)")
 
 
 if __name__ == "__main__":

@@ -8,12 +8,13 @@ from governance.enforce import mask_rows
 from governance.enforce import opa_decide_strategy
 from shared.compliance.masking import ColumnMaskingPolicy
 from shared.governance.grants import Grant, GrantStore
-from shared.governance.products import column_classifications, product_policy_input
+from shared.governance.products import CLASSIFICATION_ORDER, column_classifications, product_policy_input
 from shared.identity import Caller
 
 from .policy import Decision
 from .reader import FixtureReader
-from .sparql import ReadOnlyViolation, QueryParseError, forward_read, parse_read_only, pii_variables
+from .sparql import (PII_PREDICATE_NAMES, QueryParseError, ReadOnlyViolation, forward_read,
+                     parse_read_only, projected_predicates)
 
 
 class Denied(Exception):
@@ -163,6 +164,26 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
             "lineage_verified": lineage_verified, "grant_id": grant.id if grant else None}
 
 
+def predicate_classes(product: dict) -> Dict[str, str]:
+    """Predicate local name -> classification, for the predicates this product's SPARQL may read.
+
+    A product column maps to its camelCase predicate (fraud_score -> fraudScore). The PII predicates
+    are always pii, whichever product they appear in.
+    """
+    classes = {_camel(column): cls for column, cls in column_classifications(product).items()}
+    classes.update({name: "pii" for name in PII_PREDICATE_NAMES})
+    return classes
+
+
+def _camel(column: str) -> str:
+    head, *rest = column.split("_")
+    return head + "".join(part.capitalize() for part in rest)
+
+
+def _strictest(classes: List[str]) -> str:
+    return max(classes, key=CLASSIFICATION_ORDER.index)
+
+
 async def read_sparql(services: Services, caller: Caller, product_id: str,
                       query: str, purpose: str) -> dict:
     product = services.products.get(product_id)
@@ -174,31 +195,29 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
 
     try:
         algebra = parse_read_only(query)
-    except ReadOnlyViolation as exc:
-        raise Denied(400, str(exc)) from exc
-    except QueryParseError as exc:
+        origins = projected_predicates(algebra)
+    except (ReadOnlyViolation, QueryParseError) as exc:
         raise Denied(400, str(exc)) from exc
 
-    # Grants are checked against the variables the query projects, so a grant for one
-    # column does not open another through SPARQL.
-    projected = [str(v) for v in (algebra.get("PV") or [])]
-    product, grant = await authorize(services, caller, product_id, "read", projected, purpose)
+    known = predicate_classes(product)
+    needed = sorted({p for predicates in origins.values() for p in predicates})
+    unknown = [p for p in needed if p not in known]
+    if unknown:
+        raise Denied(400, f"predicates outside this product's contract: {', '.join(unknown)}")
+
+    # Grants are checked against the predicates the query reads, so a grant for one predicate
+    # does not open another, and an alias cannot change what is read.
+    product, grant = await authorize(services, caller, product_id, "read", needed, purpose)
 
     results = await forward_read(endpoint, query, transport=services.sparql_transport)
-    variables = results.get("head", {}).get("vars", [])
-    pii = pii_variables(algebra)
-    classes = dict(column_classifications(product))
-    for variable in pii:
-        classes[variable] = "pii"
-
-    rows = [
-        {v: binding[v]["value"] for v in variables if v in binding}
-        for binding in results.get("results", {}).get("bindings", [])
-    ]
+    variables = [v for v in origins if v in results.get("head", {}).get("vars", [])]
     policy = ColumnMaskingPolicy()
     for variable in variables:
-        if variable in classes:
-            policy.add_policy(product_id, variable, classes[variable])
+        policy.add_policy(product_id, variable,
+                          _strictest([known[p] for p in origins[variable]]))
+
+    raw = results.get("results", {}).get("bindings", [])
+    rows = [{v: binding[v]["value"] for v in variables if v in binding} for binding in raw]
 
     base = _base_input(caller, product_policy_input(product), "read")
     masked_rows = await mask_rows(
@@ -218,6 +237,7 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
             "workload_spiffe_id": caller.spiffe_id,
             "product": product_id,
             "purpose": purpose,
+            "predicates": needed,
             "grant_id": grant.id if grant else None,
             "lineage_verified": False,
             "policy_revisions": services.revisions,
@@ -226,9 +246,10 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
     )
 
     bindings = []
-    for source, masked in zip(results.get("results", {}).get("bindings", []), masked_rows):
+    for source, masked in zip(raw, masked_rows):
         bindings.append({
             v: {"type": source[v]["type"], "value": masked.get(v)}
             for v in variables if v in source
         })
-    return {"head": {"vars": variables}, "results": {"bindings": bindings}, "grant_id": grant.id if grant else None}
+    return {"head": {"vars": variables}, "results": {"bindings": bindings},
+            "grant_id": grant.id if grant else None}

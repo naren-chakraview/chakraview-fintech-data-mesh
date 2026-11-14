@@ -92,7 +92,8 @@ class TrustStack:
     """Boundary and discovery in-process, against one OPA URL. Build with `open_stack`."""
 
     def __init__(self, opa_url: str, *, grants=None, fuseki_endpoints: Optional[Dict[str, str]] = None,
-                 lineage_dir: Optional[Path] = None, sparql_transport=None):
+                 lineage_dir: Optional[Path] = None, lineage_trust_dir: Optional[Path] = None,
+                 sparql_transport=None):
         from boundary.main import Settings, create_app
         import backend.main as discovery
 
@@ -130,6 +131,7 @@ class TrustStack:
             domains_dir=REPO / "domains",
             fixtures_dir=REPO / "platform/boundary/fixtures",
             lineage_dir=Path(lineage_dir) if lineage_dir else REPO / "platform/lineage/attestations",
+            lineage_trust_dir=Path(lineage_trust_dir) if lineage_trust_dir else REPO / "platform/lineage/trust",
             policy_root=REPO,
             idp_jwks_url=f"{IDP_ISSUER}/.well-known/jwks.json",
             idp_issuer=IDP_ISSUER,

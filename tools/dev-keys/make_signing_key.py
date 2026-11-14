@@ -1,23 +1,15 @@
-"""Create the dev Ed25519 producer key for lineage attestations (gitignored). Production uses KMS or Sigstore."""
+"""Create the dev Ed25519 producer keys (one per producer workload), gitignored.
+
+Production uses KMS or Sigstore. `publish_attestations.py` does the same and also writes the trust config.
+"""
 
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "platform"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from lineage.attest import generate_signing_key  # noqa: E402
-
-OUT = REPO_ROOT / "platform/lineage/keys"
-
-
-def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
-    private_pem, public_pem = generate_signing_key()
-    (OUT / "producer.key").write_bytes(private_pem)
-    (OUT / "producer.pub").write_bytes(public_pem)
-    print(f"wrote {OUT / 'producer.key'} and {OUT / 'producer.pub'}")
+from publish_attestations import ensure_producer_keys  # noqa: E402
 
 
 if __name__ == "__main__":
-    main()
+    ensure_producer_keys()

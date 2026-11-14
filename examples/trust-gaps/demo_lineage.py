@@ -5,6 +5,7 @@ After:  the producer signs an in-toto statement (DSSE, Ed25519) over the snapsho
         reports lineage_verified with every read. A tampered snapshot does not verify.
 """
 
+import json
 import subprocess
 import sys
 import tempfile
@@ -35,19 +36,23 @@ def before() -> None:
 def after() -> None:
     with tempfile.TemporaryDirectory(prefix="trust-lineage-") as tmp:
         tmp = Path(tmp)
-        lineage_dir = tmp / "lineage"
+        lineage_dir = tmp / "attestations"
+        trust_dir = tmp / "trust"
+        lineage_dir.mkdir()
+        trust_dir.mkdir()
         private_pem, public_pem = generate_signing_key()
-        (lineage_dir).mkdir()
-        (lineage_dir / "producer.pub").write_bytes(public_pem)
+        (trust_dir / "risk-producer.pub").write_bytes(public_pem)
+        (trust_dir / "producers.json").write_text(json.dumps({"products": {PRODUCT: {
+            "producer": WORKLOADS["risk-producer"], "public_key": "risk-producer.pub"}}}))
         snapshot = (REPO / "platform/boundary/fixtures" / f"{PRODUCT}.json").read_bytes()
         publish_attestation(
-            PRODUCT, snapshot, private_key_pem=private_pem, keyid="producer-demo",
+            PRODUCT, snapshot, private_key_pem=private_pem, keyid="risk-producer",
             producer_spiffe_id=WORKLOADS["risk-producer"], code_commit="demo",
             input_snapshots=[], out_dir=lineage_dir,
         )
         print(f"producer {WORKLOADS['risk-producer']} signed the snapshot of {PRODUCT}")
 
-        with open_stack(lineage_dir=lineage_dir) as stack:
+        with open_stack(lineage_dir=lineage_dir, lineage_trust_dir=trust_dir) as stack:
             grant = dict(subject="risk.analyst@chakra.fintech", workload_spiffe_id=WORKLOADS["notebook"],
                          product_id=PRODUCT, columns=["fraud_score"], purpose=PURPOSE,
                          expires_at=stack.now + timedelta(hours=1))
@@ -64,6 +69,17 @@ def after() -> None:
             stack.boundary_app.state.services.reader = FixtureReader(tampered_dir)
             r = stack.boundary().get(url, headers=headers)
             print(f"read after one byte of the snapshot changed -> {r.status_code} lineage_verified={r.json()['lineage_verified']}")
+
+            # An attacker who can write the attestation directory re-signs the tampered snapshot with their own key
+            # and claims the expected producer. The trust configuration still names the producer's real key.
+            stack.boundary_app.state.services.reader = FixtureReader(tampered_dir)
+            attacker_private, _ = generate_signing_key()
+            publish_attestation(PRODUCT, tampered_dir.joinpath(f"{PRODUCT}.json").read_bytes(),
+                                private_key_pem=attacker_private, keyid="risk-producer",
+                                producer_spiffe_id=WORKLOADS["risk-producer"], code_commit="forged",
+                                input_snapshots=[], out_dir=lineage_dir)
+            r = stack.boundary().get(url, headers=headers)
+            print(f"forged attestation for the tampered bytes -> {r.status_code} lineage_verified={r.json()['lineage_verified']}")
 
 
 if __name__ == "__main__":
