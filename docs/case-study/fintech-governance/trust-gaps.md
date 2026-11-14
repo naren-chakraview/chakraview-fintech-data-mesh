@@ -112,6 +112,9 @@ Status and open items (R5 is closed; the others remain):
   predicates and property paths are refused, since they could reach any predicate. SPARQL audit records, allowed and
   refused, carry the SHA-256 of the query text, so an oracle attack leaves a trail. Tests: `tests/unit/test_sparql_guard.py`
   and `tests/trust/test_sparql.py`.
+- **R7, `FILTER EXISTS` and `FILTER NOT EXISTS`.** A pattern inside these sits in a filter expression, outside the main
+  algebra, so the predicate check did not see it. The guard now refuses both forms on the read path, the same way it
+  refuses `SERVICE`. Tests: `tests/unit/test_sparql_guard.py`, `tests/trust/test_sparql.py`.
 - **R5, unverified lineage still serves data (closed).** A product contract can now set `require_provenance: true`.
   The guardrail then refuses reads whose snapshot does not verify, with an audited reason. `account-master` is set this
   way. `risk-scores` keeps the default and only reports `lineage_verified`. A SPARQL read has no single snapshot, so it

@@ -61,6 +61,9 @@ def test_derivation_routes_are_refused(query):
 # R2: no reaching another service, another graph, or a caller-chosen dataset.
 @pytest.mark.parametrize("query", [
     PREFIX + "SELECT ?x WHERE { SERVICE <http://accounts-fuseki:3030/accounts/sparql> { ?c f:customerName ?x } }",
+    # R7: a pattern inside FILTER EXISTS / NOT EXISTS sits in an expression, not the main algebra.
+    PREFIX + 'SELECT ?amount WHERE { ?c f:amount ?amount FILTER EXISTS { ?c f:customerEmail "john@acme.com" } }',
+    PREFIX + "SELECT ?amount WHERE { ?c f:amount ?amount FILTER NOT EXISTS { ?c f:customerEmail ?e } }",
     PREFIX + "SELECT ?e WHERE { GRAPH <urn:accounts> { ?c f:customerEmail ?e } }",
     PREFIX + "SELECT ?e FROM <urn:accounts> WHERE { ?c f:customerEmail ?e }",
     PREFIX + "SELECT ?e FROM NAMED <urn:accounts> WHERE { GRAPH ?g { ?c f:customerEmail ?e } }",

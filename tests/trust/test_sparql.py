@@ -199,3 +199,24 @@ def test_sparql_audit_records_the_query_hash_for_allowed_and_refused_reads(sparq
 
     assert refused["decision"] == "deny"
     assert refused["query_sha256"] == expected
+
+
+# R7 regression: FILTER EXISTS and NOT EXISTS carry a pattern that the answer depends on, so they are refused.
+EXISTS = PREFIX + 'SELECT ?score WHERE { ?c f:fraudScore ?score FILTER EXISTS { ?c f:customerEmail "john@acme.com" } }'
+NOT_EXISTS = PREFIX + 'SELECT ?score WHERE { ?c f:fraudScore ?score FILTER NOT EXISTS { ?c f:customerEmail ?e } }'
+
+
+def test_filter_exists_is_refused_before_fuseki_even_with_the_pii_grant(sparql_stack):
+    stack, seen = sparql_stack
+    grant(stack, ["fraudScore", "customerEmail"])
+
+    assert post(stack, EXISTS).status_code == 400
+    assert seen == []
+
+
+def test_filter_not_exists_is_refused_before_fuseki(sparql_stack):
+    stack, seen = sparql_stack
+    grant(stack, ["fraudScore"])
+
+    assert post(stack, NOT_EXISTS).status_code == 400
+    assert seen == []
