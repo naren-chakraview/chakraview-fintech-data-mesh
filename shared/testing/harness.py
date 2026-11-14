@@ -131,7 +131,7 @@ class TrustStack:
             domains_dir=REPO / "domains",
             fixtures_dir=REPO / "platform/boundary/fixtures",
             lineage_dir=Path(lineage_dir) if lineage_dir else REPO / "platform/lineage/attestations",
-            lineage_trust_dir=Path(lineage_trust_dir) if lineage_trust_dir else REPO / "platform/lineage/trust",
+            lineage_trust_dir=Path(lineage_trust_dir) if lineage_trust_dir else REPO / "platform/lineage/trust-config",
             policy_root=REPO,
             idp_jwks_url=f"{IDP_ISSUER}/.well-known/jwks.json",
             idp_issuer=IDP_ISSUER,

@@ -47,7 +47,7 @@ class Settings:
             domains_dir=Path(os.getenv("DOMAINS_DIR", REPO_ROOT / "domains")),
             fixtures_dir=Path(os.getenv("FIXTURES_DIR", REPO_ROOT / "platform/boundary/fixtures")),
             lineage_dir=Path(os.getenv("LINEAGE_DIR", REPO_ROOT / "platform/lineage/attestations")),
-            lineage_trust_dir=Path(os.getenv("LINEAGE_TRUST_DIR", REPO_ROOT / "platform/lineage/trust")),
+            lineage_trust_dir=Path(os.getenv("LINEAGE_TRUST_DIR", REPO_ROOT / "platform/lineage/trust-config")),
             policy_root=Path(os.getenv("POLICY_ROOT", REPO_ROOT)),
             idp_jwks_url=os.getenv("IDP_JWKS_URL", "http://dev-idp:8090/.well-known/jwks.json"),
             idp_issuer=os.getenv("IDP_ISSUER", "http://dev-idp:8090"),

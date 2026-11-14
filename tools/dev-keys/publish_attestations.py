@@ -1,7 +1,7 @@
 """Development producer step.
 
 1. Create one Ed25519 key per producer workload (platform/lineage/keys/, gitignored), if missing.
-2. Write the trust configuration (platform/lineage/trust/): product -> expected producer and its public key.
+2. Write the trust configuration (platform/lineage/trust-config/): product -> expected producer and its public key.
 3. Sign each fixture snapshot's statement with its own producer's key into platform/lineage/attestations/.
 
 Production: the trust configuration is reviewed platform config, and signing is KMS or Sigstore keyless.
@@ -23,7 +23,7 @@ from lineage.producers import PRODUCERS  # noqa: E402
 FIXTURES = REPO_ROOT / "platform/boundary/fixtures"
 KEYS = REPO_ROOT / "platform/lineage/keys"
 ATTESTATIONS = REPO_ROOT / "platform/lineage/attestations"
-TRUST = REPO_ROOT / "platform/lineage/trust"
+TRUST = REPO_ROOT / "platform/lineage/trust-config"
 
 
 def ensure_producer_keys() -> None:

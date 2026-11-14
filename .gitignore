@@ -26,4 +26,4 @@ platform/lineage/keys/
 platform/lineage/attestations/
 .env
 .venv*/
-platform/lineage/trust/
+platform/lineage/trust-config/
