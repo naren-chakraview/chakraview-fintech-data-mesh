@@ -8,7 +8,7 @@ import rego.v1
 default allow := false
 
 allow if {
-	input.action in {"read", "request_access"}
+	input.action in {"read", "aggregate", "request_access"}
 	input.principal.roles[_] in {"analyst", "risk_analyst", "fraud_analyst"}
 }
 
@@ -29,3 +29,6 @@ column_strategy := {
 allow_agents := ["spiffe://chakracommerce.com/ns/agents/sa/risk-review-agent"]
 
 agent_columns := ["customer_iri", "risk_band", "scored_at"]
+
+# Columns an agent may group counts by. The band only: counts of it reveal no customer's row.
+agent_aggregate_columns := ["risk_band"]

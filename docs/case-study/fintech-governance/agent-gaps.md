@@ -52,8 +52,19 @@ written is not recorded (the boundary writes the audit, then commits).
 - **Only the sidecars reach the boundary's loopback.** Each sidecar shares its workload's network namespace, so the
   loopback is that workload's own. The agent's network cannot reach the boundary's loopback port.
 - **The agent's permissions** come from the domain's policy: `allow_agents` names the agent by SPIFFE ID, and
-  `agent_columns` lists what it may ask for. Both default to nothing.
+  `agent_columns` lists what it may read as rows. `agent_aggregate_columns` lists what it may count by. An aggregate
+  is a count per group, so an agent can be allowed counts it may not read as rows. Both default to nothing.
+- **Aggregates suppress small groups.** A count is published only for groups of at least `aggregate_min_group` rows (3
+  on the fixture, which is small; production sets a larger number). Suppressed groups are reported as a number, never
+  by value. Grouping is allowed only by a public column, because a group key reveals its value.
 - **The product's contract** (`require_provenance`, classification, approval) comes from the platform.
+
+## The binding, live
+
+The sidecar binds each delegated token to the certificate of the workload it was issued to. `make agent-check` runs
+against the compose stack: it presents the agent's token with the notebook's dev-CA certificate, and the boundary's
+sidecar refuses it with `certificate_binding_mismatch`. The agent's own certificate is served. The demos cannot show
+this, because the boundary never sees the peer certificate, only the sidecar does.
 
 ## Run the demos
 
@@ -110,8 +121,12 @@ These are real limits of this change. Each one is either a production decision o
 - **The analyst's consent is a stand-in.** The agent is given the analyst's IdP token as its input
   (`agent_runner.py` fetches it from the dev IdP). A real consent flow would give the agent a token the analyst
   granted, with its own scope and lifetime.
+- **Aggregate suppression is a count of the suppressed groups.** A determined reader can learn that a group exists below
+  the minimum, from the number. Production needs a policy on how many suppressed groups may be reported.
 - **Grants in compose come from a dev script.** `tools/dev-gateway/grant_agent.py` creates the read and propose grants
   the owner's approval would create. It is run by hand (`make agent-grants`). It is not an approval flow.
+- **`make agent-check` restarts the agent afterwards,** which runs the scripted agent once more. Its proposals are
+  pending, not accepted, so the product is unchanged.
 - **Edge mint and exchange trust the local network.** The sidecar's admin listener takes an IdP credential with no
   bootstrap token of its own, which is correct only because the admin is reachable only from the agent's namespace.
   The bootstrap tokens in the generated registry are a stand-in for SPIRE node attestation, and the static signing keys

@@ -1,0 +1,10 @@
+# Used only by `make agent-check`: lets the check run inside the agent's network namespace. The agent sleeps instead of
+# running the scripted agent, and it also gets the notebook's dev-CA certificate, to present the wrong binding.
+services:
+  agent:
+    command: ["sleep", "300"]
+    restart: "no"
+    volumes:
+      - ./tools/dev-gateway/out/agent:/certs:ro
+      - ./tools/dev-ca/out/notebook.pem:/certs-notebook/notebook.pem:ro
+      - ./tools/dev-ca/out/notebook.key:/certs-notebook/notebook.key:ro

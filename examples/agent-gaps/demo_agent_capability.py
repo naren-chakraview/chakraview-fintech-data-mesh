@@ -51,6 +51,16 @@ def main() -> None:
         show("agent, its own grant", allowed.status_code)
         assert allowed.status_code == 200
 
+        counts = after.boundary().get(f"/products/{RISK}/aggregates?group_by=risk_band&purpose=risk-review",
+                                      headers=after.delegated_headers(ANALYST, ANALYST_ROLES, [AGENT]))
+        show("agent, counts by band", counts.status_code)
+        assert counts.status_code == 200
+        print(f"  groups the agent may see: {counts.json()['groups']}; suppressed: {counts.json()['suppressed_groups']}")
+        by_fraud = after.boundary().get(f"/products/{RISK}/aggregates?group_by=fraud_score&purpose=risk-review",
+                                        headers=after.delegated_headers(ANALYST, ANALYST_ROLES, [AGENT]))
+        show("agent, counts by fraud score", by_fraud.status_code)
+        assert by_fraud.status_code == 403
+
         ok("the analyst reads kyc_verdict directly; the agent acting for them does not")
         ok("a grant for the notebook is not a grant for the agent")
         ok("the agent sees only the columns its domain lists for agents")
