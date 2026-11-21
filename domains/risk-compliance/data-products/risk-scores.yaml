@@ -33,6 +33,14 @@ sla:
     value: 100
     unit: percent
 
+# Write contract (addendum W1, W2). Derived: a listed producer writes its sensitive output directly, and an agent
+# proposes. Upsert by account_ref: a rescore replaces the row.
+write_kind: derived
+write_key: account_ref
+write_mode: upsert
+producers:
+  - spiffe://chakracommerce.com/ns/risk/sa/producer
+
 access_policy:
   default: deny
   approval_required: true
@@ -41,6 +49,10 @@ access_policy:
   # uses a larger number set by the domain.
   aggregate_min_group: 3
   columns:
+    - name: account_ref
+      classification: sensitive
+    - name: kyc_verdict
+      classification: sensitive
     - name: fraud_score
       classification: sensitive
     # Pseudonymous identifiers and the band a producer assigned. Public, so the masking floor does not hide them.

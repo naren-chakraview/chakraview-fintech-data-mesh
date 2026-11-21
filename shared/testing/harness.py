@@ -21,6 +21,8 @@ import httpx
 from fastapi.testclient import TestClient
 
 REPO = Path(__file__).resolve().parents[2]
+# Test-only value: customer IRIs are minted with it (shared/semantic/identity.py). Real runs set their own.
+os.environ.setdefault("FINTECH_IRI_KEY", "demo-only-key-not-for-production")
 for entry in (REPO, REPO / "platform", REPO / "platform" / "discovery"):
     if str(entry) not in sys.path:
         sys.path.insert(0, str(entry))
@@ -146,6 +148,7 @@ class TrustStack:
 
         os.environ["OPA_DECISION_URL"] = f"{opa_url}/v1/data/data_mesh/access"
         os.environ["OPA_MASKING_URL"] = f"{opa_url}/v1/data/data_mesh/access/masking_strategy"
+        os.environ["OPA_WRITE_URL"] = f"{opa_url}/v1/data/data_mesh/access/write_outcome"
 
         # `now` is the stack's clock. Tests move it to exercise expiry and approval windows.
         self.now = datetime.now(timezone.utc)
@@ -219,16 +222,19 @@ class TrustStack:
         self.discovery = discovery
 
     def token(self, subject: str, roles: Iterable[str] = (), owns: Iterable[str] = (),
-              ttl_seconds: int = 3600, issued_at: Optional[datetime] = None) -> str:
+              ttl_seconds: int = 3600, issued_at: Optional[datetime] = None,
+              attributes: Optional[dict] = None) -> str:
+        """An IdP token. `attributes` are extra claims the credential carries (e.g. kyc_id)."""
         return mint_token(self.private_pem, self.kid, issuer=IDP_ISSUER, audience=AUDIENCE,
                           subject=subject, roles=roles, owns=owns, ttl_seconds=ttl_seconds,
-                          now=issued_at)
+                          now=issued_at, extra_claims=attributes)
 
     def headers(self, token: str, workload: str = WORKLOADS["notebook"]) -> dict:
         return {"Authorization": f"Bearer {token}", "X-Client-Cert": self._certs[workload]}
 
     def delegated_headers(self, user: str, roles: Iterable[str], chain: Iterable[str],
-                          ttl_seconds: int = 60, issued_at: Optional[datetime] = None) -> dict:
+                          ttl_seconds: int = 60, issued_at: Optional[datetime] = None,
+                          attributes: Optional[dict] = None) -> dict:
         """What the boundary's sidecar forwards on the loopback listener for a call the agent's sidecar issued.
 
         `chain` is originator first, current actor last. A fresh token each time: the replay check is single use.
@@ -238,6 +244,7 @@ class TrustStack:
         token = mint_delegated_token(
             self._gateway_key, self.gateway_kid, issuer=GATEWAY_ISSUER, audience=BOUNDARY_SPIFFE_ID,
             user=user, roles=roles, chain=chain, ttl_seconds=ttl_seconds, now=issued_at or self.now,
+            attributes=attributes,
         )
         return {
             "X-ZT-Verified-Token": token,

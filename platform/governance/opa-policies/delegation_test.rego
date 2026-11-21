@@ -190,3 +190,87 @@ test_agent_not_named_may_not_aggregate if {
 	not access.allow with input as object.union(aggregate(risk_scores, ["risk_band"]),
 		{"delegation": {"actor": OTHER_AGENT, "chain": [OTHER_AGENT]}, "workload": {"spiffe_id": OTHER_AGENT}})
 }
+
+# --- Write tiers (addendum W2): who decided the data decides whether a human gate applies ---
+
+write(kind, classification, caller, producer, subject_or_grant) := {
+	"action": "write",
+	"principal": analyst,
+	"workload": {"spiffe_id": AGENT},
+	"product": review_notes,
+	"write": {"kind": kind, "classification": classification, "caller": caller, "producer": producer,
+		"subject_or_grant": subject_or_grant},
+}
+
+test_captured_by_a_service_is_direct if {
+	data.data_mesh.access.write_outcome == "direct" with input as write("captured", "pii", "service", false, false)
+}
+
+test_captured_by_an_agent_for_its_subject_is_direct if {
+	data.data_mesh.access.write_outcome == "direct" with input as write("captured", "pii", "agent", false, true)
+}
+
+test_captured_by_an_agent_for_someone_else_is_forbidden if {
+	data.data_mesh.access.write_outcome == "forbidden" with input as write("captured", "pii", "agent", false, false)
+}
+
+test_derived_public_or_internal_is_direct_for_an_agent if {
+	data.data_mesh.access.write_outcome == "direct" with input as write("derived", "internal", "agent", false, false)
+	data.data_mesh.access.write_outcome == "direct" with input as write("derived", "public", "agent", false, false)
+}
+
+test_derived_confidential_by_an_agent_needs_an_owner if {
+	data.data_mesh.access.write_outcome == "requires_owner_review" with input as write("derived", "confidential", "agent", false, false)
+	data.data_mesh.access.write_outcome == "requires_owner_review" with input as write("derived", "sensitive", "agent", false, false)
+}
+
+test_derived_confidential_by_a_listed_producer_is_direct if {
+	data.data_mesh.access.write_outcome == "direct" with input as write("derived", "sensitive", "service", true, false)
+}
+
+test_derived_confidential_by_an_unlisted_service_is_forbidden if {
+	data.data_mesh.access.write_outcome == "forbidden" with input as write("derived", "confidential", "service", false, false)
+}
+
+test_derived_pii_by_an_agent_is_refused if {
+	data.data_mesh.access.write_outcome == "refused_pii" with input as write("derived", "pii", "agent", false, false)
+}
+
+test_derived_pii_by_a_listed_producer_is_direct if {
+	data.data_mesh.access.write_outcome == "direct" with input as write("derived", "pii", "service", true, false)
+}
+
+test_a_domain_may_only_be_stricter_than_the_platform if {
+	# The platform says requires_owner_review for a confidential derived write by an agent. A domain that says
+	# direct cannot loosen it.
+	data.data_mesh.access.write_outcome == "requires_owner_review"
+		with input as write("derived", "confidential", "agent", false, false)
+		with data.data_mesh.domain["risk-compliance"]["risk-review-notes"].write_outcome as "direct"
+}
+
+test_a_domain_can_tighten_the_platform if {
+	data.data_mesh.access.write_outcome == "forbidden"
+		with input as write("derived", "internal", "agent", false, false)
+		with data.data_mesh.domain["risk-compliance"]["risk-review-notes"].write_outcome as "forbidden"
+}
+
+test_a_write_needs_a_domain_that_allows_it if {
+	not data.data_mesh.access.allow with input as write("derived", "internal", "agent", false, false)
+}
+
+intake := {"id": "accounts.customer-intake", "domain": "accounts", "name": "customer-intake",
+	"classification": "pii", "approval_required": true}
+
+test_kyc_purpose_uses_the_kyc_masking_for_a_listed_column if {
+	access.masking_strategy == "partial_mask" with input as {"column": "ssn", "product": intake,
+		"column_classification": "pii", "purpose": "kyc"}
+		with data.data_mesh.domain["accounts"]["customer-intake"].kyc_column_strategy as {"ssn": "partial_mask"}
+		with data.data_mesh.domain["accounts"]["customer-intake"].column_strategy as {"ssn": "full_mask"}
+}
+
+test_the_default_purpose_keeps_the_full_mask if {
+	access.masking_strategy == "full_mask" with input as {"column": "ssn", "product": intake,
+		"column_classification": "pii", "purpose": "review"}
+		with data.data_mesh.domain["accounts"]["customer-intake"].kyc_column_strategy as {"ssn": "partial_mask"}
+		with data.data_mesh.domain["accounts"]["customer-intake"].column_strategy as {"ssn": "full_mask"}
+}

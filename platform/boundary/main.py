@@ -18,10 +18,13 @@ from governance.enforce import elasticsearch_write_audit
 from shared.governance.grants import GrantStore, MemoryGrantStore, PostgresGrantStore, utc_now
 from shared.governance.products import load_products
 from shared.identity import AuthError, Caller, CallerVerifier, JWKSCache
-from shared.identity import IdentityError, Principal, spiffe_id_from_pem
+from shared.identity import Principal
 from delegation import DelegationError, GatewayTrust, JtiCache, load_gateway_trusts, verify_forwarded
 from proposals.payload import PayloadError
 from proposals.writer import GovernedWriter, ProposalConflict, ProposalNotFound
+
+from . import direct_writes
+from . import writes as write_contracts
 
 from . import proposals as governed
 from .ledger import ReadLedger
@@ -94,6 +97,11 @@ class DecisionBody(BaseModel):
     reason: str = ""
 
 
+class WriteBody(BaseModel):
+    rows: List[dict]
+    derived_from: List[str] = []
+
+
 def build_writer(settings: Settings, clock, *, product_id: str = PRODUCT_WITH_PROPOSALS) -> Optional[GovernedWriter]:
     """The governed writer for the review-notes product, or None when its signing key is not provisioned."""
     if not settings.writer_key_path.exists():
@@ -110,11 +118,40 @@ def build_writer(settings: Settings, clock, *, product_id: str = PRODUCT_WITH_PR
     )
 
 
+def build_direct_writers(settings: Settings, clock, products: dict) -> dict:
+    """A governed writer for each product that takes direct writes (addendum W1). Each one's current snapshot is kept
+    in the state directory, never in the tracked fixtures, and starts from the product's fixture (empty for the new
+    products). The review-notes writer is built by build_writer, since its snapshot is the tracked fixture."""
+    if not settings.writer_key_path.exists():
+        return {}
+    writers = {}
+    for product_id, product in products.items():
+        if "write_kind" not in product or product_id == PRODUCT_WITH_PROPOSALS:
+            continue
+        fixture = settings.fixtures_dir / f"{product_id}.json"
+        if not fixture.exists():
+            continue
+        columns = json.loads(fixture.read_text())["columns"]
+        writers[product_id] = GovernedWriter(
+            product_id=product_id,
+            snapshot_dir=settings.proposal_state_dir / "products",
+            attestation_dir=settings.lineage_dir,
+            history_dir=settings.proposal_state_dir / "history",
+            private_key_pem=settings.writer_key_path.read_bytes(),
+            keyid=WRITER_KEYID,
+            producer_spiffe_id=WRITER_SPIFFE_ID,
+            clock=clock,
+            columns=columns,
+            seed_dir=settings.fixtures_dir,
+        )
+    return writers
+
+
 def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
                decide_fn=decide, audit=elasticsearch_write_audit,
                clock=utc_now, sparql_transport=None, jwks_fetch=None,
                gateway_trusts: Optional[List[GatewayTrust]] = None, writer: Optional[GovernedWriter] = None,
-               limits: Optional[governed.Limits] = None) -> FastAPI:
+               writers: Optional[dict] = None, limits: Optional[governed.Limits] = None) -> FastAPI:
     products = load_products(settings.domains_dir)
     if gateway_trusts is None:
         gateways_file = settings.delegation_trust_dir / "gateways.json"
@@ -122,6 +159,11 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
     jti_cache = JtiCache()
     if writer is None:
         writer = build_writer(settings, clock)
+    writers = dict(writers or {})
+    if writer is not None:
+        writers[writer.product_id] = writer
+    for product_id, direct in build_direct_writers(settings, clock, products).items():
+        writers.setdefault(product_id, direct)
     limits = limits or governed.Limits()
     ledger = ReadLedger()
     if grants is None:
@@ -137,7 +179,7 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
 
     services = Services(
         products=products,
-        reader=FixtureReader(settings.fixtures_dir),
+        reader=FixtureReader(settings.fixtures_dir, settings.proposal_state_dir / "products"),
         grants=grants,
         decide=decide_fn,
         audit=audited,
@@ -215,6 +257,10 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ProposalNotFound as exc:
             raise HTTPException(status_code=404, detail="proposal not found") from exc
+        except write_contracts.WriteContractError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except write_contracts.WriteConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         except Exception as exc:  # any failure leaves the product unchanged and says so
             raise handle(exc) from exc
 
@@ -222,6 +268,12 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
         if writer is None or product_id != writer.product_id:
             raise HTTPException(status_code=404, detail="this product takes no proposals")
         return writer
+
+    def _any_writer_for(product_id: str) -> GovernedWriter:
+        target = writers.get(product_id)
+        if target is None:
+            raise HTTPException(status_code=404, detail="this product takes no writes")
+        return target
 
     @app.get("/health")
     async def health():
@@ -259,8 +311,14 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
 
     @app.post("/products/{product_id}/rollback")
     async def rollback_product(product_id: str, body: DecisionBody, caller: Caller = Depends(get_caller)):
-        target = _writer_for(product_id)
+        target = _any_writer_for(product_id)
         return await _governed(governed.rollback(services, target, caller, product_id, body.reason))
+
+    @app.post("/products/{product_id}/writes", status_code=201)
+    async def post_write(product_id: str, body: WriteBody, caller: Caller = Depends(get_caller)):
+        target = _any_writer_for(product_id)
+        return await _governed(direct_writes.direct_write(services, target, limits, caller, product_id,
+                                                          body.rows, body.derived_from))
 
     @app.get("/products/{product_id}/rows")
     async def get_rows(

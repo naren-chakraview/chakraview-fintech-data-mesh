@@ -66,6 +66,44 @@ against the compose stack: it presents the agent's token with the notebook's dev
 sidecar refuses it with `certificate_binding_mismatch`. The agent's own certificate is served. The demos cannot show
 this, because the boundary never sees the peer certificate, only the sidecar does.
 
+## Write tiers
+
+Who decided the data decides whether a human gate applies (addendum W1 to W4). A product declares whether what it holds
+is **captured** (facts a person or system of record supplied) or **derived** (what a writer computed or judged). The
+gate for a write follows the kind of write, the classification of what is written, and who wrote it:
+
+| Write | Service (deterministic) | Agent (delegated) |
+|---|---|---|
+| captured, any classification incl. `pii` | direct | direct, only when the delegating person is the data subject (their minted `customer_iri`), or holds an intake grant |
+| derived, `public` / `internal` | direct | direct |
+| derived, `confidential` / `sensitive` | direct, only if the workload is a listed producer | **proposal**: an owner accepts (`409 requires_owner_review` for a direct attempt) |
+| derived, `pii` | direct, only if a listed producer | **refused**: agents do not create personal data (`422 agent_cannot_create_pii`) |
+
+Every direct write passes the same automated gates as a proposal, fail closed and in the same order: verified identity
+(and delegation for agents), a write grant separate from read and propose, person ∩ agent ∩ product policy, the contract's
+columns and key, the shapes (SHACL), rate and size limits, and for an agent's derived write, the snapshots it read.
+A domain can make the outcome stricter, never looser. An unclassified column counts as personal when it is written.
+
+**The reasoning.** A customer entering an SSN produces the most sensitive data the bank holds, and no human should sit in
+that path: the customer decided the values, and the software only carries them. What deserves a human is what the writer
+decided. A microservice's derived output was reviewed once, at code review, because its logic is fixed when deployed.
+An agent decides per request, so for confidential output the review moves to the write.
+
+**Captured personal data.** `accounts.customer-intake` takes an onboarding agent's write for the customer's own record,
+with no human gate. The record's `customer_iri` must be the one minted from the customer's identity (their email and
+the `kyc_id` the IdP credential carries, verified through zero-trust-rs's `user_attributes`). A customer writes only their
+own record. On read, `ssn` and `address` are masked for everyone except a KYC grant, which sees the last digits. Field-level
+encryption is not built here: personal data relies on mTLS in motion, storage encryption at rest in deployment, and masking
+on read. Field-level encryption is a deployment choice outside this repo.
+
+**Derived data, three outcomes.** `risk-compliance.score-freshness-summary` (internal) is written directly by the risk
+agent. The review note (confidential) is a proposal an owner accepts. A personal column in the summary is refused for the
+agent. The risk-scores service writes its sensitive output directly, as a listed producer.
+
+**A residual the gate cannot close.** Column classification cannot see personal data inside free text. A review note whose
+text names a customer is confidential by its column, and goes to an owner for that reason, not because the gate detects the
+name.
+
 ## Run the demos
 
 ```bash
@@ -81,6 +119,7 @@ make agent-demo     # five demos, before and after
 | `examples/agent-gaps/demo_agent_capability.py` | D2: before, the agent reads `kyc_verdict`; after, the analyst can and the agent acting for them cannot, and a notebook grant does not extend to the agent |
 | `examples/agent-gaps/demo_agent_proposes.py` | D3, D4: before, the only write code targets a removed endpoint; after, the scripted agent proposes, bad proposals are refused, the agent cannot accept, and the owner's acceptance is signed |
 | `examples/agent-gaps/demo_undo.py` | Undo: before, a bad change is removed by hand and not recorded; after, the owner rolls back and the rollback is signed and audited |
+| `examples/agent-gaps/demo_write_tiers.py` | Write tiers: one line per write (caller, kind, classification, outcome, accepted by), then the owner rolls one back |
 
 The demos run on the real clock, use temporary copies of the product state (they never change the repository), and
 assert every claim they print. The scripted agent is `examples/agent-gaps/agent.py`.
@@ -114,7 +153,8 @@ These are real limits of this change. Each one is either a production decision o
   decides. The governance does not depend on that, and the tests do not claim it does.
 - **The demos and tests use a stand-in sidecar.** `platform/delegation/verify.py` mints tokens with the claim shapes
   zt-gateway issues, and the harness routes them to the loopback listener. The compose stack runs the real zt-gateway
-  as both sidecars, pinned to tag `v0.4.2` of zero-trust-rs (the roles claim).
+  as both sidecars, pinned to tag `v0.4.3` of zero-trust-rs (the Z5 fix). The customer-intake check needs the
+  `user_attributes` claim of zero-trust-rs v0.4.4; the pin moves to it once that PR merges and is tagged.
   The compose stack exercises the real path end to end: the agent's read, and its proposals, go through both sidecars.
 - **The sidecar topology is the trust model for the loopback hop.** The boundary trusts `X-ZT-Verified-*` only because
   nothing but its own sidecar can reach that port. Zero-trust-rs's upstream TLS (Z3) is not used for it.

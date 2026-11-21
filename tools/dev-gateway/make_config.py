@@ -84,7 +84,9 @@ def sidecar_config(name: str, cfg: dict, *, admin_port: int, proxy: str, upstrea
         "trusted_issuers": trusted,
         "user_issuers": [IDP_ISSUER],
         "user_idps": [{"issuer": IDP_ISSUER, "jwks_path": "/config/idp-jwks.json",
-                       "audience": AUDIENCE, "principal_claim": "sub"}],
+                       "audience": AUDIENCE, "principal_claim": "sub",
+                       # carried into the token as user_attributes (zero-trust-rs v0.4.4)
+                       "attribute_claims": ["kyc_id"]}],
         "strict": True,
     }
     config.update(extra)

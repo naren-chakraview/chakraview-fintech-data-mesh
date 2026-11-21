@@ -5,7 +5,7 @@ A snapshot is the exact bytes of the fixture file. Lineage verifies those bytes.
 
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 
 class UnknownColumn(ValueError):
@@ -13,10 +13,17 @@ class UnknownColumn(ValueError):
 
 
 class FixtureReader:
-    def __init__(self, fixtures_dir: Path):
+    """Reads the current snapshot of each product. A product written by the boundary (a direct write, or an accepted
+    proposal) is read from the state directory, which holds the boundary's own snapshots and is never committed.
+    Everything else is read from the fixtures."""
+
+    def __init__(self, fixtures_dir: Path, state_dir: Optional[Path] = None):
         self.fixtures_dir = Path(fixtures_dir)
+        self.state_dir = Path(state_dir) if state_dir else None
 
     def _path(self, product_id: str) -> Path:
+        if self.state_dir is not None and (self.state_dir / f"{product_id}.json").exists():
+            return self.state_dir / f"{product_id}.json"
         path = self.fixtures_dir / f"{product_id}.json"
         if not path.exists():
             raise LookupError(f"no snapshot for {product_id}")

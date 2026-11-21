@@ -6,7 +6,7 @@ from typing import Dict
 import yaml
 
 # Lowest to highest sensitivity; a product is classified by its most sensitive column.
-CLASSIFICATION_ORDER = ["public", "sensitive", "confidential", "pii", "restricted"]
+CLASSIFICATION_ORDER = ["public", "internal", "sensitive", "confidential", "pii", "restricted"]
 
 
 def product_classification(product: dict) -> str:

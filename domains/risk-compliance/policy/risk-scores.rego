@@ -15,12 +15,21 @@ allow if {
 # The product's approval_required flag from its YAML. The boundary still needs a grant.
 requires_approval if input.product.approval_required == true
 
+# Writes: the listed producer (a risk service) writes the sensitive derived output. Agents never write it directly;
+# the platform sends an agent's write to a proposal (the rule in the guardrails).
+allow_write if {
+	input.action == "write"
+	input.principal.roles[_] == "risk_producer"
+}
+
 # Columns this domain shows. Anything not listed is masked (full_hash).
 column_strategy := {
 	"fraud_score": "partial_mask",
 	"customer_iri": "no_mask",
 	"risk_band": "no_mask",
 	"scored_at": "no_mask",
+	"account_ref": "partial_mask",
+	"kyc_verdict": "partial_mask",
 }
 
 # The agents that may act for a person on this product. Only the risk-review agent, and only for the

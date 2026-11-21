@@ -6,7 +6,8 @@
 #   input.principal.roles          verified role claims (for a delegated call: the person's roles)
 #   input.principal.owns           verified domain ownership claims (owner actions only)
 #   input.workload.spiffe_id       verified SPIFFE ID of the workload (for a delegated call: the agent)
-#   input.action                   "read" | "aggregate" | "request_access" | "propose" | "accept" | "reject" | "rollback"
+#   input.action                   "read" | "aggregate" | "request_access" | "write" | "propose" | "accept" | "reject" | "rollback"
+#   input.write                    for a write: {kind, classification, caller, producer, subject_or_grant}
 #   input.delegation               present only for a delegated call: {actor, chain}, verified from a gateway token
 #   input.product.classification   highest column classification of the product
 #   input.column_classification    classification of one column (masking only)
@@ -99,4 +100,70 @@ masking_floor := "partial_mask" if {
 	not delegated_personal
 }
 
-masking_floor := "no_mask" if input.column_classification == "public"
+masking_floor := "no_mask" if input.column_classification in {"public", "internal"}
+
+# --- Write tiers (addendum W2). Who decided the data decides whether a human gate applies. ---
+#
+# A captured write records facts a person or system of record supplied, so no human gate applies: the customer
+# decided the values. A derived write records what a writer computed or judged from data it read. A service's
+# derived output was reviewed once, at code review. An agent decides per request, so for confidential output the
+# review moves to the write: an owner accepts it. An agent never creates personal data.
+#
+# The outcome is the platform's; a domain may only make it stricter (abac.rego).
+
+default platform_write_allow := false
+
+platform_write_allow if {
+	input.action == "write"
+	input.principal.subject != ""
+	startswith(input.workload.spiffe_id, "spiffe://")
+	delegation_ok
+}
+
+default write_platform := "forbidden"
+
+# Captured: a service records what it was given; an agent only for its own data subject (or an intake grant).
+write_platform := "direct" if {
+	input.write.kind == "captured"
+	input.write.caller == "service"
+}
+
+write_platform := "direct" if {
+	input.write.kind == "captured"
+	input.write.caller == "agent"
+	input.write.subject_or_grant == true
+}
+
+# Derived, public or internal: anyone may write it directly.
+write_platform := "direct" if {
+	input.write.kind == "derived"
+	input.write.classification in {"public", "internal"}
+}
+
+# Derived, confidential or sensitive: a listed producer writes directly; an agent proposes and an owner accepts.
+write_platform := "direct" if {
+	input.write.kind == "derived"
+	input.write.classification in {"confidential", "sensitive"}
+	input.write.caller == "service"
+	input.write.producer == true
+}
+
+write_platform := "requires_owner_review" if {
+	input.write.kind == "derived"
+	input.write.classification in {"confidential", "sensitive"}
+	input.write.caller == "agent"
+}
+
+# Derived, personal or restricted: a listed producer only. An agent is refused: agents do not create personal data.
+write_platform := "direct" if {
+	input.write.kind == "derived"
+	input.write.classification in {"pii", "restricted"}
+	input.write.caller == "service"
+	input.write.producer == true
+}
+
+write_platform := "refused_pii" if {
+	input.write.kind == "derived"
+	input.write.classification in {"pii", "restricted"}
+	input.write.caller == "agent"
+}

@@ -77,3 +77,32 @@ def policy_revisions(policy_root: Path, product_policy_files: dict) -> dict:
             for product_id, path in product_policy_files.items()
         },
     }
+
+
+WRITE_OUTCOMES = ("direct", "requires_owner_review", "forbidden", "refused_pii")
+DEFAULT_OPA_WRITE_URL = "http://opa:8181/v1/data/data_mesh/access/write_outcome"
+
+
+async def decide_write_outcome(
+    policy_input: dict,
+    *,
+    url: Optional[str] = None,
+    transport: Optional[httpx.AsyncBaseTransport] = None,
+) -> str:
+    """The outcome of a write (addendum W2): direct, requires_owner_review, forbidden or refused_pii. Anything else from
+    OPA is an error, never a default, so an unreadable policy refuses the write."""
+    url = url or os.getenv("OPA_WRITE_URL", DEFAULT_OPA_WRITE_URL)
+    try:
+        async with httpx.AsyncClient(timeout=2.0, transport=transport) as client:
+            response = await client.post(url, json={"input": policy_input})
+    except httpx.HTTPError as exc:
+        raise OPAError(f"OPA unreachable: {exc}") from exc
+    if response.status_code != 200:
+        raise OPAError(f"OPA returned HTTP {response.status_code}")
+    try:
+        result = response.json()["result"]
+    except (ValueError, KeyError, TypeError) as exc:
+        raise OPAError("OPA response has no result") from exc
+    if result not in WRITE_OUTCOMES:
+        raise OPAError("OPA write outcome is malformed")
+    return result

@@ -193,6 +193,8 @@ services:
       LINEAGE_DIR: /app/platform/lineage/attestations
       LINEAGE_TRUST_DIR: /app/platform/lineage/trust-config
       DELEGATION_TRUST_DIR: /config/boundary
+      # Customer IRIs are minted from the customer's identity and this key (addendum W3). Dev default; production sets it.
+      FINTECH_IRI_KEY: ${FINTECH_IRI_KEY:-demo-only-key-not-for-production}
       PROPOSAL_SIGNING_KEY: /run/secrets/governed-writer.key
     # Both listeners in one process: mTLS on 8443 (nginx), and loopback on 8080 (the boundary's own sidecar).
     command: ["python", "-m", "boundary.serve"]

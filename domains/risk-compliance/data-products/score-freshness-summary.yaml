@@ -1,0 +1,36 @@
+name: score-freshness-summary
+version: "1.0"
+owner: risk-compliance-domain
+owner_email: risk@chakra.fintech
+domain: risk-compliance
+
+description: |
+  Count of stale risk scores per day and risk band. Derived from the risk scores: an agent writes it directly, because
+  its columns are internal. customer_label is personal data: no agent may write it (write tiers, addendum W2).
+
+write_kind: derived
+write_key: summary_id
+write_mode: upsert
+producers: []
+
+access_policy:
+  default: deny
+  approval_required: false
+  require_provenance: false
+  columns:
+    - name: summary_id
+      classification: public
+    - name: day
+      classification: public
+    - name: risk_band
+      classification: public
+    - name: stale_count
+      classification: internal
+    - name: customer_label
+      classification: pii
+
+tags: [derived, internal]
+retention_policy:
+  value: 5
+  unit: years
+  rationale: "operational reporting"

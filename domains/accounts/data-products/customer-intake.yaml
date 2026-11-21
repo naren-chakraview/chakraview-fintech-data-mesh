@@ -1,0 +1,37 @@
+name: customer-intake
+version: "1.0"
+owner: accounts-domain
+owner_email: accounts@chakra.fintech
+domain: accounts
+
+description: |
+  Customer intake: the facts a customer supplied when they opened a relationship. Captured, not derived: no human
+  gate applies to a customer writing their own intake. Personal data is masked on read for everyone except a KYC
+  grant, and relies on mTLS in motion and storage encryption at rest in deployment (field-level encryption is a
+  deployment choice outside this repo).
+
+write_kind: captured
+write_key: customer_iri
+write_mode: append
+producers: []
+
+access_policy:
+  default: deny
+  approval_required: true
+  approval_sla_hours: 4
+  require_provenance: false
+  columns:
+    - name: customer_iri
+      classification: public
+    - name: legal_name
+      classification: pii
+    - name: ssn
+      classification: pii
+    - name: address
+      classification: pii
+
+tags: [personal-data, captured]
+retention_policy:
+  value: 7
+  unit: years
+  rationale: "KYC record-keeping"
