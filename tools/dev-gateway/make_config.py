@@ -141,7 +141,7 @@ def main() -> None:
     copy_ca(agent_dir, "agent-zt")
     write(agent_dir / "gateway.yaml", sidecar_config(
         "agent-zt", SIDECARS["agent-zt"], admin_port=6443, proxy="127.0.0.1:8445",
-        upstream="http://127.0.0.1:9", client_auth="optional",
+        upstream="http://127.0.0.1:9", client_auth="required",
         trusted=[gateway_iss("agent-zt-1")], extra={"gateway_id": AGENT}))
 
     # boundary-zt: verifies the agent's tokens (its own key and the agent's public key), serves the agent over mTLS,
