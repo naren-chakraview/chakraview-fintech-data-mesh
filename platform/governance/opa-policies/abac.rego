@@ -3,6 +3,11 @@
 # The domain policy lives at domains/<domain>/policy/<product>.rego, in the package
 # data_mesh.domain["<domain>"]["<product>"]. A product with no domain policy has no
 # domain_policy, so every decision is false and every column is masked (fail closed).
+#
+# A delegated call (an agent acting for a person) is allowed only where all three hold:
+#   the person's own access (the grant, checked by the boundary, and the domain's roles),
+#   the agent's capability (the domain names the agent, and the columns it asks for), and
+#   the product's policy (the platform guardrails). The intersection is what the agent gets.
 package data_mesh.access
 
 import rego.v1
@@ -11,16 +16,59 @@ domain_policy := data.data_mesh.domain[input.product.domain][input.product.name]
 
 default allow := false
 
+# Reads, by a person or by an agent acting for one.
 allow if {
 	data.data_mesh.guardrails.platform_allow
 	domain_policy.allow
+	agent_permitted
+}
+
+# Proposals: only an agent proposes, and only where the domain opts that agent in.
+allow if {
+	data.data_mesh.guardrails.platform_propose_allow
+	domain_policy.allow_propose
+	agent_opted_in
+}
+
+# Owner actions: the owner's own token, no delegation, and the domain grants owner actions.
+allow if {
+	data.data_mesh.guardrails.platform_owner_allow
+	domain_policy.allow_owner_actions
+}
+
+agent_permitted if not input.delegation
+
+agent_permitted if {
+	input.delegation
+	agent_opted_in
+	agent_columns_ok
+}
+
+# An agent is refused unless the domain names it by SPIFFE ID, on every product. For a product with personal,
+# confidential or restricted data this is the default the platform relies on, and the domain cannot widen it.
+agent_opted_in if input.delegation.actor in object.get(domain_policy, "allow_agents", [])
+
+# An agent may ask only for the columns the domain lists for agents. Anything else is refused, not silently
+# dropped, so the caller can see what it was not allowed to read.
+agent_columns_ok if {
+	every column in object.get(input, "columns", []) {
+		column in object.get(domain_policy, "agent_columns", [])
+	}
 }
 
 default requires_approval := false
 
-requires_approval if data.data_mesh.guardrails.platform_requires_approval
+requires_approval if {
+	not owner_action
+	data.data_mesh.guardrails.platform_requires_approval
+}
 
-requires_approval if domain_policy.requires_approval
+requires_approval if {
+	not owner_action
+	domain_policy.requires_approval
+}
+
+owner_action if input.action in {"accept", "reject", "rollback"}
 
 # Masking strategies ordered from least to most strict. The stricter of the platform
 # floor and the domain's strategy wins, so a domain cannot loosen the floor.

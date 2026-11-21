@@ -1,0 +1,8 @@
+{
+  "columns": ["account_id", "customer_name", "balance"],
+  "rows": [
+    {"account_id": "ACC-1001", "customer_name": "John Doe", "balance": "250.00"},
+    {"account_id": "ACC-1002", "customer_name": "Jane Roe", "balance": "75.10"},
+    {"account_id": "ACC-1003", "customer_name": "Bob Stone", "balance": "0.00"}
+  ]
+}

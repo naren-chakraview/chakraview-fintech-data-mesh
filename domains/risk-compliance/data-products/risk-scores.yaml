@@ -40,6 +40,14 @@ access_policy:
   columns:
     - name: fraud_score
       classification: sensitive
+    # Pseudonymous identifiers and the band a producer assigned. Public, so the masking floor does not hide them.
+    # They are the only columns an agent acting for a person may read (see risk-scores.rego).
+    - name: customer_iri
+      classification: public
+    - name: risk_band
+      classification: public
+    - name: scored_at
+      classification: public
 
 tags: [compliance-critical, real-time, regulatory]
 retention_policy:

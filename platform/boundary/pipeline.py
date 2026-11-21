@@ -12,6 +12,7 @@ from shared.governance.grants import Grant, GrantStore
 from shared.governance.products import CLASSIFICATION_ORDER, column_classifications, product_policy_input
 from shared.identity import Caller
 
+from .ledger import ReadLedger
 from .policy import Decision
 from .reader import FixtureReader
 from .sparql import (PII_PREDICATE_NAMES, QueryParseError, ReadOnlyViolation, forward_read,
@@ -39,18 +40,36 @@ class Services:
     clock: Callable[[], datetime]
     sparql_endpoints: Dict[str, str] = field(default_factory=dict)
     sparql_transport: object = None
+    ledger: ReadLedger = field(default_factory=ReadLedger)
 
 
-def _base_input(caller: Caller, product: dict, action: str) -> dict:
-    return {
+def _base_input(caller: Caller, product: dict, action: str, columns: Optional[List[str]] = None) -> dict:
+    """The policy input. For a delegated call, `workload` is the agent and `principal` is the person it acts for.
+
+    The delegation block and the requested columns are present only for delegated calls, so a person's own
+    requests keep exactly the input they had before delegation existed.
+    """
+    policy_input = {
         "action": action,
         "principal": {
             "subject": caller.principal.subject,
             "roles": sorted(caller.principal.roles),
+            "owns": sorted(caller.principal.claims.get("owns", [])),
         },
         "workload": {"spiffe_id": caller.spiffe_id},
         "product": product,
     }
+    if caller.delegation is not None:
+        policy_input["delegation"] = {"actor": caller.delegation.actor, "chain": list(caller.delegation.chain)}
+        policy_input["columns"] = list(columns or [])
+    return policy_input
+
+
+def delegation_audit(caller: Caller) -> dict:
+    """The audit fields that name the delegation. Empty for a person's own request."""
+    if caller.delegation is None:
+        return {}
+    return {"on_behalf_of": caller.principal.subject, "actor_chain": list(caller.delegation.chain)}
 
 
 async def _deny(services: Services, caller: Caller, product_id: str, columns: List[str],
@@ -69,6 +88,7 @@ async def _deny(services: Services, caller: Caller, product_id: str, columns: Li
             "columns": columns,
             "purpose": purpose,
             "policy_revisions": services.revisions,
+            **delegation_audit(caller),
         })
     except Exception:
         pass
@@ -88,7 +108,7 @@ async def authorize(services: Services, caller: Caller, product_id: str, action:
     if product is None:
         raise Denied(404, "product not found")
 
-    policy_input = _base_input(caller, product_policy_input(product), action)
+    policy_input = _base_input(caller, product_policy_input(product), action, columns)
     if lineage_verified is not None:
         policy_input["lineage_verified"] = lineage_verified
     decision = await services.decide(policy_input)
@@ -147,13 +167,14 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
 
     # Provenance is checked before the decision, so the guardrail can require it.
     snapshot = services.reader.snapshot(product_id)
+    snapshot_sha256 = hashlib.sha256(snapshot).hexdigest()
     lineage_verified = services.lineage_check(product_id, snapshot)
 
     product, grant = await authorize(services, caller, product_id, "read", columns, purpose,
                                      lineage_verified=lineage_verified)
     rows = services.reader.read(product_id, columns)
 
-    base = _base_input(caller, product_policy_input(product), "read")
+    base = _base_input(caller, product_policy_input(product), "read", columns)
     masked = await mask_rows(
         rows,
         product_id,
@@ -164,6 +185,7 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
         decide_strategy=_strategy_decider(base),
         write_audit=services.audit,
         extra_audit={
+            "action": "read",
             "decision": "allow",
             "subject": caller.principal.subject,
             "roles": sorted(caller.principal.roles),
@@ -172,12 +194,15 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
             "purpose": purpose,
             "grant_id": grant.id if grant else None,
             "lineage_verified": lineage_verified,
+            "snapshot_sha256": snapshot_sha256,
             "policy_revisions": services.revisions,
             "timestamp": services.clock().isoformat(),
+            **delegation_audit(caller),
         },
     )
     return {"product_id": product_id, "columns": columns, "rows": masked,
-            "lineage_verified": lineage_verified, "grant_id": grant.id if grant else None}
+            "lineage_verified": lineage_verified, "grant_id": grant.id if grant else None,
+            "snapshot_sha256": snapshot_sha256}
 
 
 def predicate_classes(product: dict) -> Dict[str, str]:
@@ -239,7 +264,7 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
     raw = results.get("results", {}).get("bindings", [])
     rows = [{v: binding[v]["value"] for v in variables if v in binding} for binding in raw]
 
-    base = _base_input(caller, product_policy_input(product), "read")
+    base = _base_input(caller, product_policy_input(product), "read", needed)
     masked_rows = await mask_rows(
         rows,
         product_id,
@@ -250,8 +275,10 @@ async def read_sparql(services: Services, caller: Caller, product_id: str,
         decide_strategy=_strategy_decider(base),
         write_audit=services.audit,
         extra_audit={
+            "action": "read",
             "decision": "allow",
             **query_hash,
+            **delegation_audit(caller),
             "subject": caller.principal.subject,
             "roles": sorted(caller.principal.roles),
             "workload_spiffe_id": caller.spiffe_id,

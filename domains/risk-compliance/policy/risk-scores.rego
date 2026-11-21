@@ -16,4 +16,16 @@ allow if {
 requires_approval if input.product.approval_required == true
 
 # Columns this domain shows. Anything not listed is masked (full_hash).
-column_strategy := {"fraud_score": "partial_mask"}
+column_strategy := {
+	"fraud_score": "partial_mask",
+	"customer_iri": "no_mask",
+	"risk_band": "no_mask",
+	"scored_at": "no_mask",
+}
+
+# The agents that may act for a person on this product. Only the risk-review agent, and only for the
+# columns below: the pseudonymous customer IRI, the band and the score date. fraud_score and kyc_verdict
+# stay with the person, so a grant for the person does not reach them through an agent.
+allow_agents := ["spiffe://chakracommerce.com/ns/agents/sa/risk-review-agent"]
+
+agent_columns := ["customer_iri", "risk_band", "scored_at"]

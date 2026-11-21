@@ -1,0 +1,40 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Product shape for risk-compliance/risk-review-notes. Loaded with the core shapes (core-shapes.ttl), which
+# already reject deprecated terms and malformed customer IRIs. This file adds what a review note must carry.
+# An agent's proposal must conform before it is recorded; an owner's acceptance is the only path into the product.
+
+fintech:ReviewNoteShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:ReviewNote ;
+  sh:property [
+    sh:path fintech:noteId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:pattern "^[A-Za-z0-9._-]{1,64}$" ;
+    sh:message "noteId is required: one string of letters, digits, dot, dash or underscore, up to 64 characters."
+  ] ;
+  sh:property [
+    sh:path fintech:forCustomer ; sh:minCount 1 ; sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:pattern "^https://chakracommerce.com/customer#[0-9a-f]{64}$" ;
+    sh:message "forCustomer must be a Customer IRI minted by the identity library (64 lowercase hex digits)."
+  ] ;
+  sh:property [
+    sh:path fintech:riskBand ; sh:minCount 1 ; sh:maxCount 1 ;
+    sh:in ( "high" "medium" "low" ) ;
+    sh:message "riskBand must be one of high, medium, low."
+  ] ;
+  sh:property [
+    sh:path fintech:reviewedNote ; sh:minCount 1 ; sh:maxCount 1 ;
+    sh:datatype xsd:string ; sh:maxLength 2000 ;
+    sh:message "reviewedNote is required, and at most 2000 characters."
+  ] ;
+  sh:property [
+    sh:path fintech:sourceSystem ; sh:minCount 1 ;
+    sh:message "Every review note needs fintech:sourceSystem (the proposing agent's workload)."
+  ] ;
+  sh:property [
+    sh:path fintech:sourceIngestionTime ; sh:minCount 1 ; sh:datatype xsd:dateTime ;
+    sh:message "Every review note needs fintech:sourceIngestionTime typed xsd:dateTime."
+  ] .

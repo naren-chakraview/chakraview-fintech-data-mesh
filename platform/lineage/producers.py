@@ -7,4 +7,6 @@ configuration that the boundary reads, which is written and reviewed by the plat
 PRODUCERS = {
     "risk-compliance.risk-scores": ("risk-producer", "spiffe://chakracommerce.com/ns/risk/sa/producer"),
     "accounts.account-master": ("nightly-batch", "spiffe://chakracommerce.com/ns/batch/sa/nightly"),
+    # The governed write path. Only accepted proposals reach this product, so the boundary is its producer of record.
+    "risk-compliance.risk-review-notes": ("governed-writer", "spiffe://chakracommerce.com/ns/boundary/sa/governed-writer"),
 }

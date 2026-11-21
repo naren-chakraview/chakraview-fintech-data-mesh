@@ -192,14 +192,18 @@ services:
       POLICY_ROOT: /app
       LINEAGE_DIR: /app/platform/lineage/attestations
       LINEAGE_TRUST_DIR: /app/platform/lineage/trust-config
-    command: ["uvicorn", "--factory", "boundary.main:get_app", "--app-dir", "platform",
-              "--host", "0.0.0.0", "--port", "8443",
-              "--ssl-keyfile", "/certs/server.key", "--ssl-certfile", "/certs/server.pem",
-              "--ssl-ca-certs", "/certs/ca.pem", "--ssl-cert-reqs", "2"]
+      DELEGATION_TRUST_DIR: /config/boundary
+      PROPOSAL_SIGNING_KEY: /run/secrets/governed-writer.key
+    # Both listeners in one process: mTLS on 8443 (nginx), and loopback on 8080 (the boundary's own sidecar).
+    command: ["python", "-m", "boundary.serve"]
     volumes:
-      - ./platform/lineage/attestations:/app/platform/lineage/attestations:ro
+      # Writable: the governed writer publishes each accepted snapshot's signed statement here. The trust config is
+      # read-only, so the writer cannot change which key verifies what it wrote.
+      - ./platform/lineage/attestations:/app/platform/lineage/attestations
       - ./platform/lineage/trust-config:/app/platform/lineage/trust-config:ro
+      - ./platform/lineage/keys/governed-writer.key:/run/secrets/governed-writer.key:ro
       - ./tools/dev-ca/out/services/boundary:/certs:ro
+      - ./tools/dev-gateway/out/boundary:/config/boundary:ro
     networks: [internal, fuseki-risk]
     depends_on:
       - opa
@@ -243,6 +247,56 @@ services:
     depends_on:
       - boundary
       - discovery
+
+  # Delegation sidecars (zt-gateway), pinned to a commit of the public repo. A sidecar shares the network namespace of
+  # the one workload it serves, so its loopback is that workload's alone. See
+  # docs/case-study/fintech-governance/agent-gaps.md (the sidecar topology).
+  boundary-zt:
+    build:
+      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.2
+    container_name: chakra-boundary-zt
+    network_mode: "service:boundary"
+    command: ["/config/gateway.yaml"]
+    volumes:
+      - ./tools/dev-gateway/out/boundary-zt:/config:ro
+    depends_on:
+      - boundary
+
+  # The scripted risk-review agent. It holds no credential of its own: its sidecar issues each call's token.
+  agent:
+    build:
+      context: .
+      dockerfile: platform/Dockerfile
+    container_name: chakra-agent
+    command: ["python", "/app/examples/agent-gaps/agent_runner.py"]
+    environment:
+      ANALYST_TOKEN_URL: http://dev-idp:8090/token/risk-analyst
+      IDP_ISSUER: http://dev-idp:8090
+      ADMIN_URL: https://localhost:6443
+      BOUNDARY_URL: https://boundary:8444
+      AGENT_SPIFFE_ID: spiffe://chakracommerce.com/ns/agents/sa/risk-review-agent
+      BOUNDARY_SPIFFE_ID: spiffe://chakracommerce.com/ns/boundary/sa/boundary
+      CLIENT_CERT: /certs/risk-review-agent.pem
+      CLIENT_KEY: /certs/risk-review-agent.key
+      CA_CERT: /certs/ca.pem
+    volumes:
+      - ./tools/dev-gateway/out/agent:/certs:ro
+    networks: [internal]
+    restart: "no"
+    depends_on:
+      - dev-idp
+      - boundary-zt
+
+  agent-zt:
+    build:
+      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.2
+    container_name: chakra-agent-zt
+    network_mode: "service:agent"
+    command: ["/config/gateway.yaml"]
+    volumes:
+      - ./tools/dev-gateway/out/agent-zt:/config:ro
+    depends_on:
+      - agent
 
 volumes:
   postgres_data:

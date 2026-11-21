@@ -1,0 +1,143 @@
+# Agents as governed participants: before and after
+
+Article 4 of the data mesh series makes one claim: **an autonomous agent is a participant the platform has to govern,
+not a notebook with a different name.** This page is the evidence. Before this change, an agent acting for an analyst
+was indistinguishable from the analyst, and the platform had no write path that an agent's output could safely take.
+The fix makes delegation verifiable, caps what an agent can do below what its person can do, and turns every agent
+write into a proposal that a domain owner must accept. Each gap below has a frozen "before", a live "after", a demo
+and a test.
+
+## The gaps
+
+| Gap | Before (`agents-before`, frozen) | After (live code) | How it is caught now |
+|---|---|---|---|
+| **D1** An agent has no identity of its own | The agent can only present the analyst's token and its own certificate. The boundary has no notion of delegation, so a forged claim of who the agent acts for is ignored, not refused. | A delegated call reaches the boundary only on its **loopback listener**, which only the boundary's own sidecar can reach, carrying a token the agent's sidecar issued and the boundary's sidecar verified (`X-ZT-Verified-Token`). The boundary checks the token's signature, issuer, audience, expiry and single use, and checks that the forwarded headers agree with the token. The mTLS listener never reads these headers. A claimed actor with no gateway signature is 401. | `tests/trust/test_delegation.py`, demo `demo_actor_must_be_proven.py` |
+| **D2** An agent gets the person's whole view | Policy input describes one principal and one workload. An agent using the analyst's token reads everything the analyst can read. | Effective access is the **intersection**: the person's grant (the grant names the agent's workload, so a notebook grant does not reach the agent), the agent's capability (the domain names the agent and the columns it may ask for), and the product's policy. Refusals name the column; nothing is silently dropped. A delegated read of personal data is never shown in the clear. Chains are capped at two workloads. | `platform/governance/opa-policies/delegation_test.rego`, `tests/trust/test_delegation.py`, demo `demo_agent_capability.py` |
+| **D3** No governed write path | The only write code (`RdfWriter.write_to_jena`) posts to Fuseki's `/update`, which the trust fix removed. Nothing calls it. | An agent **proposes**: `POST /products/{id}/proposals`. A proposal must be authorized with a propose grant (separate from read), parse, conform to the SHACL shapes (the shared core's, and the product's own), and fit the rate limits per agent and per person. Nothing reaches the authoritative product until an owner accepts. Only an owner's token can accept, reject or roll back, and a delegated call can never do any of these. | `tests/trust/test_proposals.py`, demo `demo_agent_proposes.py` |
+| **D4** Lineage cannot name a delegator | A signed statement records the producing workload only. | The proposal's statement is signed by the boundary's governed-writer key and names the person (`on_behalf_of`), the chain (`actor_chain`) and the inputs (`derived_from`). An accepted snapshot's statement chains to the proposal's statement and names the acceptor (`accepted_by`). The product's trust entry is the boundary, the producer of record. | `tests/trust/test_proposals.py`, demo `demo_agent_proposes.py` |
+| **D5** The audit has no chain | Person and workload, no chain, no link from a write to the reads behind it. | Every record carries the chain, the proposal id, the cited snapshots and the acceptor. A read records the digest of the snapshot it returned. `platform/boundary/audit_trace.py` answers "which agent, for whom, read what, proposed what, and who accepted it" from the records alone. | `tests/trust/test_proposals.py` (trace test), demo `demo_agent_is_the_person.py` |
+
+## How an agent's write works now
+
+```
+agent ── IdP token (consent) ──▶ agent-zt (its sidecar, same network namespace)
+                              │  edge mint: the analyst's IdP token becomes a token whose user is the analyst
+                              │  RFC 8693 exchange for the boundary, bound (cnf) to the agent's certificate
+                              ▼
+agent ── mTLS + token ──▶ boundary-zt (the boundary's sidecar, same network namespace)
+                              │  signature, issuer, audience, expiry, jti, binding, capability policy (user AND agent)
+                              ▼
+                         boundary loopback listener: verify the forwarded token, check the headers agree,
+                         single use → OPA (person ∩ agent ∩ product) → grant for the agent → read → audit
+   │
+   └─ propose (cites the digest it read) ──▶ boundary: propose grant? parse? SHACL? rate limit?
+                                            cited digest read by this pair? → proposal recorded, statement signed
+                                                         │
+owner ── accept ─────────────────────────────────────────┘  (the owner's own token; never a delegate)
+                         → new snapshot of the product + signed statement (proposal, acceptance, inputs)
+owner ── roll back ──────▶ previous snapshot restored, rollback signed and audited
+```
+
+Every refusal is fail closed: no rows, no proposal, and no change to the product. A proposal whose audit record cannot be
+written is not recorded (the boundary writes the audit, then commits).
+
+## What the boundary trusts
+
+- **Identity for a delegated call** comes only from a token the agent's sidecar signed, which the boundary's sidecar
+  verified and forwarded on the boundary's loopback listener. The boundary checks the token itself, and the forwarded
+  headers must agree with it. On the mTLS listener the `X-ZT-*` headers are never read, so a client cannot make itself
+  a delegated caller by sending them.
+- **Roles** come from the analyst's IdP credential, carried in the signed token (`roles`, from zero-trust-rs v0.4.2).
+  Policy grants by role, so a token without roles gets no access.
+- **Only the sidecars reach the boundary's loopback.** Each sidecar shares its workload's network namespace, so the
+  loopback is that workload's own. The agent's network cannot reach the boundary's loopback port.
+- **The agent's permissions** come from the domain's policy: `allow_agents` names the agent by SPIFFE ID, and
+  `agent_columns` lists what it may ask for. Both default to nothing.
+- **The product's contract** (`require_provenance`, classification, approval) comes from the platform.
+
+## Run the demos
+
+```bash
+make policy-test    # OPA: platform, domain and delegation rules (58 cases)
+make agent-test     # delegation and governed-write tests, against a real OPA
+make agent-demo     # five demos, before and after
+```
+
+| Demo | Shows |
+|---|---|
+| `examples/agent-gaps/demo_agent_is_the_person.py` | D1, D5: before, the agent's read is the analyst's notebook; after, the audit names the person, the agent and the chain |
+| `examples/agent-gaps/demo_actor_must_be_proven.py` | D1: before, claimed headers are ignored; after, a wrong peer, a self-signed `act` and a bare claimed header are each 401 |
+| `examples/agent-gaps/demo_agent_capability.py` | D2: before, the agent reads `kyc_verdict`; after, the analyst can and the agent acting for them cannot, and a notebook grant does not extend to the agent |
+| `examples/agent-gaps/demo_agent_proposes.py` | D3, D4: before, the only write code targets a removed endpoint; after, the scripted agent proposes, bad proposals are refused, the agent cannot accept, and the owner's acceptance is signed |
+| `examples/agent-gaps/demo_undo.py` | Undo: before, a bad change is removed by hand and not recorded; after, the owner rolls back and the rollback is signed and audited |
+
+The demos run on the real clock, use temporary copies of the product state (they never change the repository), and
+assert every claim they print. The scripted agent is `examples/agent-gaps/agent.py`.
+
+## The before state
+
+The frozen "before" code is in `examples/agent-gaps/before/`: the boundary as it was at `agents-before`, its OPA policies
+and its product files. Nothing in the platform imports it. The same state is tagged in git:
+
+```bash
+git checkout agents-before
+```
+
+The frozen boundary runs against the live shared libraries (identity, grants, masking, lineage verification), which
+these changes did not alter in any way the demos depend on.
+
+## The scripted agent, and why it is not an LLM
+
+The agent is deterministic. It reads the shared core's version (it requires `1.0.0`), reads the risk scores through the
+boundary, selects high-risk customers whose scores are older than 90 days, and proposes one review note for each.
+
+This is deliberate. A reproducible demo must produce the same proposals every time, and the claim under test is the
+governance: the boundary refuses what the agent is not allowed to do, whichever way the agent decided. A language model
+in that loop would make the demos vary, and would not make the governance any stronger.
+
+## Known residuals
+
+These are real limits of this change. Each one is either a production decision or work not yet done.
+
+- **The scripted agent is not an LLM.** That is the point of the demo, but it means nothing here tests how a model
+  decides. The governance does not depend on that, and the tests do not claim it does.
+- **The demos and tests use a stand-in sidecar.** `platform/delegation/verify.py` mints tokens with the claim shapes
+  zt-gateway issues, and the harness routes them to the loopback listener. The compose stack runs the real zt-gateway
+  as both sidecars, pinned to tag `v0.4.2` of zero-trust-rs (the roles claim).
+  The compose stack exercises the real path end to end: the agent's read, and its proposals, go through both sidecars.
+- **The sidecar topology is the trust model for the loopback hop.** The boundary trusts `X-ZT-Verified-*` only because
+  nothing but its own sidecar can reach that port. Zero-trust-rs's upstream TLS (Z3) is not used for it.
+- **The analyst's consent is a stand-in.** The agent is given the analyst's IdP token as its input
+  (`agent_runner.py` fetches it from the dev IdP). A real consent flow would give the agent a token the analyst
+  granted, with its own scope and lifetime.
+- **Grants in compose come from a dev script.** `tools/dev-gateway/grant_agent.py` creates the read and propose grants
+  the owner's approval would create. It is run by hand (`make agent-grants`). It is not an approval flow.
+- **Edge mint and exchange trust the local network.** The sidecar's admin listener takes an IdP credential with no
+  bootstrap token of its own, which is correct only because the admin is reachable only from the agent's namespace.
+  The bootstrap tokens in the generated registry are a stand-in for SPIRE node attestation, and the static signing keys
+  need a rotation procedure before production.
+- **The boundary's own replay check is in memory.** A forwarded token is single use at the sidecar and at the boundary.
+  The boundary's check is per process, so a second replica would need a shared store for it.
+- **The writer's keys and state are in the boundary's container.** The governed writer's signing key is mounted as a
+  secret, and its snapshots and attestations are written to the repository's attestation directory, which is gitignored.
+- **zero-trust-rs's own gaps apply.** Delegation to remote backends is open work in the gateway, and delegation is not
+  available under its SPIRE provider. The boundary is reached over its sidecar's loopback, so neither matters here:
+  the sidecar uses token exchange and a plain, non-delegate route. Upstream TLS for remote backends (Z3) is still
+  planned work in zero-trust-rs.
+- **Proposal and ledger state is in process.** The governed writer's proposals, its version history and the read ledger
+  live in the boundary's memory. A restart loses pending proposals and the ledger, so an agent's citations made before a
+  restart cannot be checked after it. Production needs a shared store for both, with the audit store as the source.
+- **Fixture snapshots.** The product data is the fixture files, and their attestations are signed with dev keys
+  (`make trust-keys`). A production snapshot comes from a real producer with its own keys.
+- **Dev IdP, dev CA and dev gateway keys.** As in the trust-gaps page, these are for development. Production uses the
+  company IdP, SPIRE, and the gateway's own KMS-held keys.
+- **Review queues are the bottleneck.** Every agent proposal waits for an owner. That is the control, and it is also the
+  cost: an owner who does not review leaves proposals to expire (after two days by default), and nothing reaches the
+  product in the meantime.
+- **Reviewed note text is masked.** The review notes are confidential, so the platform floor masks their text on read.
+  A domain cannot show it in the clear. Owners who need to read the text need a different decision, which is theirs.
+- **Agents are opted in on every product, not only personal ones.** The brief set the default for products with personal
+  data. This implementation refuses agents everywhere unless the domain names them, which is stricter, and the tests
+  check both cases.
+- **Rate limits and size limits are per process.** They bound an agent that goes through one boundary. A fleet of boundary
+  replicas would need a shared counter.

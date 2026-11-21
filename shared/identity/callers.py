@@ -1,7 +1,7 @@
 """A caller is a verified person (JWT) plus the verified workload (SPIFFE ID) they arrived through."""
 
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Mapping, Optional
 
 from .spiffe import IdentityError, spiffe_id_from_pem
 from .tokens import AuthError, JWKSCache, Principal, verify_token
@@ -11,8 +11,12 @@ CLIENT_CERT_HEADER = "x-client-cert"
 
 @dataclass(frozen=True)
 class Caller:
+    """principal: the person. spiffe_id: the workload making the call. For a delegated call (an agent acting for
+    the person), spiffe_id is the agent and `delegation` is the verified delegation; otherwise it is None."""
+
     principal: Principal
     spiffe_id: str
+    delegation: Optional[object] = None
 
 
 class CallerVerifier:

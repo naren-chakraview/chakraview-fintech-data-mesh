@@ -29,16 +29,26 @@ from shared.governance.grants import MemoryGrantStore  # noqa: E402
 from shared.governance.products import load_products  # noqa: E402
 from shared.identity import CallerVerifier, JWKSCache  # noqa: E402
 from shared.identity.devtools import generate_rsa_keypair, issue_workload_cert, make_ca, mint_token  # noqa: E402
+from delegation import GatewayTrust, mint_delegated_token  # noqa: E402
 
 PLATFORM_POLICY_DIR = REPO / "platform/governance/opa-policies"
 DOMAIN_POLICY_DIRS = sorted((REPO / "domains").glob("*/policy"))
 IDP_ISSUER = "http://dev-idp"
 AUDIENCE = "data-mesh"
 
+NOTES_PRODUCT = "risk-compliance.risk-review-notes"
+GATEWAY_SPIFFE_ID = "spiffe://chakracommerce.com/ns/gateway/sa/zt-gateway"
+GATEWAY_ISSUER = "http://zt-gateway"
+AGENT_SPIFFE_ID = "spiffe://chakracommerce.com/ns/agents/sa/risk-review-agent"
+BOUNDARY_SPIFFE_ID = "spiffe://chakracommerce.com/ns/boundary/sa/boundary"
+LOOPBACK_PORT = 8080
+
 WORKLOADS = {
     "notebook": "spiffe://chakracommerce.com/ns/analytics/sa/notebook",
     "nightly-batch": "spiffe://chakracommerce.com/ns/batch/sa/nightly",
     "risk-producer": "spiffe://chakracommerce.com/ns/risk/sa/producer",
+    "risk-review-agent": AGENT_SPIFFE_ID,
+    "zt-gateway": GATEWAY_SPIFFE_ID,
 }
 
 
@@ -88,12 +98,49 @@ def platform_policy_dirs() -> List[Path]:
     return [PLATFORM_POLICY_DIR, *DOMAIN_POLICY_DIRS]
 
 
+@contextmanager
+def open_proposal_stack(root: Path):
+    """A boundary with the governed writer for the review-notes product, over copies made under `root`.
+
+    The repo's own fixtures, attestations and trust config are copied, never written, so a proposal or a
+    rollback in a test or demo cannot change the repository. Yields a TrustStack with `.writer` and `.paths`.
+    """
+    from boundary.main import WRITER_KEYID, WRITER_SPIFFE_ID
+    from boundary.proposals import Limits
+    from proposals.writer import GovernedWriter
+
+    root = Path(root)
+    paths = {"fixtures": root / "fixtures", "lineage": root / "lineage", "trust": root / "trust",
+             "state": root / "state"}
+    shutil.copytree(REPO / "platform/boundary/fixtures", paths["fixtures"])
+    shutil.copytree(REPO / "platform/lineage/attestations", paths["lineage"])
+    shutil.copytree(REPO / "platform/lineage/trust-config", paths["trust"])
+
+    holder: dict = {}
+    writer = GovernedWriter(
+        product_id=NOTES_PRODUCT, snapshot_dir=paths["fixtures"], attestation_dir=paths["lineage"],
+        history_dir=paths["state"] / "history",
+        private_key_pem=(REPO / "platform/lineage/keys/governed-writer.key").read_bytes(),
+        keyid=WRITER_KEYID, producer_spiffe_id=WRITER_SPIFFE_ID, clock=lambda: holder["stack"].now,
+    )
+    limits = Limits()
+    with local_opa(platform_policy_dirs()) as opa_url:
+        stack = TrustStack(opa_url, fixtures_dir=paths["fixtures"], lineage_dir=paths["lineage"],
+                           lineage_trust_dir=paths["trust"], proposal_state_dir=paths["state"],
+                           writer=writer, limits=limits)
+        holder["stack"] = stack
+        stack.limits = limits
+        stack.paths = paths
+        yield stack
+
+
 class TrustStack:
     """Boundary and discovery in-process, against one OPA URL. Build with `open_stack`."""
 
     def __init__(self, opa_url: str, *, grants=None, fuseki_endpoints: Optional[Dict[str, str]] = None,
                  lineage_dir: Optional[Path] = None, lineage_trust_dir: Optional[Path] = None,
-                 sparql_transport=None):
+                 sparql_transport=None, fixtures_dir: Optional[Path] = None, writer=None,
+                 proposal_state_dir: Optional[Path] = None, limits=None):
         from boundary.main import Settings, create_app
         import backend.main as discovery
 
@@ -126,10 +173,15 @@ class TrustStack:
             key_pem, cert_pem = issue_workload_cert(self.ca_key, self.ca_cert, spiffe_id)
             self._keys[spiffe_id] = (key_pem, cert_pem)
 
+        # The agent's sidecar signs the delegated tokens with its own key. The boundary trusts only its public half.
+        self._gateway_key, gateway_jwk = generate_rsa_keypair()
+        self.gateway_kid = gateway_jwk["kid"]
+        self.gateway_trusts = [GatewayTrust(issuer=GATEWAY_ISSUER, jwks={"keys": [gateway_jwk]})]
+
         self.products = load_products(REPO / "domains")
         settings = Settings(
             domains_dir=REPO / "domains",
-            fixtures_dir=REPO / "platform/boundary/fixtures",
+            fixtures_dir=Path(fixtures_dir) if fixtures_dir else REPO / "platform/boundary/fixtures",
             lineage_dir=Path(lineage_dir) if lineage_dir else REPO / "platform/lineage/attestations",
             lineage_trust_dir=Path(lineage_trust_dir) if lineage_trust_dir else REPO / "platform/lineage/trust-config",
             policy_root=REPO,
@@ -138,14 +190,21 @@ class TrustStack:
             idp_audience=AUDIENCE,
             fuseki_endpoints=fuseki_endpoints or {},
             grant_store="memory",
+            delegation_trust_dir=REPO / "platform/delegation/trust-config",
+            proposal_state_dir=Path(proposal_state_dir) if proposal_state_dir else REPO / "platform/proposals/state",
+            writer_key_path=REPO / "platform/lineage/keys/governed-writer.key",
+            boundary_spiffe_id=BOUNDARY_SPIFFE_ID,
+            loopback_port=LOOPBACK_PORT,
         )
 
         def record(entry: dict) -> None:
             self.audit_records.append(entry)
 
+        self.writer = writer
         self.boundary_app = create_app(
             settings, grants=self.grants, audit=_async(record), clock=clock,
             sparql_transport=sparql_transport, jwks_fetch=fetch_jwks,
+            gateway_trusts=self.gateway_trusts, writer=writer, limits=limits,
         )
         discovery.configure(
             caller_verifier=CallerVerifier(
@@ -168,14 +227,56 @@ class TrustStack:
     def headers(self, token: str, workload: str = WORKLOADS["notebook"]) -> dict:
         return {"Authorization": f"Bearer {token}", "X-Client-Cert": self._certs[workload]}
 
-    def boundary(self) -> TestClient:
-        return TestClient(self.boundary_app, raise_server_exceptions=False)
+    def delegated_headers(self, user: str, roles: Iterable[str], chain: Iterable[str],
+                          ttl_seconds: int = 60, issued_at: Optional[datetime] = None) -> dict:
+        """What the boundary's sidecar forwards on the loopback listener for a call the agent's sidecar issued.
+
+        `chain` is originator first, current actor last. A fresh token each time: the replay check is single use.
+        """
+        chain = list(chain)
+        # Issued on the stack's clock, the same clock the boundary reads, so the token is never "from the future".
+        token = mint_delegated_token(
+            self._gateway_key, self.gateway_kid, issuer=GATEWAY_ISSUER, audience=BOUNDARY_SPIFFE_ID,
+            user=user, roles=roles, chain=chain, ttl_seconds=ttl_seconds, now=issued_at or self.now,
+        )
+        return {
+            "X-ZT-Verified-Token": token,
+            "X-ZT-Verified-User": user,
+            "X-ZT-Verified-Caller": chain[-1],
+            "X-ZT-Verified-Chain": ",".join(chain),
+        }
+
+    def boundary(self) -> "ListenerRouter":
+        """Calls to the boundary, sent to the listener that matches the caller: loopback for a forwarded call (a
+        request with X-ZT-Verified-Token), mTLS for everything else."""
+        return ListenerRouter(self.boundary_app)
+
+    def boundary_mtls(self) -> TestClient:
+        return TestClient(self.boundary_app, base_url="https://boundary:8443", raise_server_exceptions=False)
 
     def discovery_client(self) -> TestClient:
         return TestClient(self.discovery.app, raise_server_exceptions=False)
 
     def client_cert_pem(self, workload: str = WORKLOADS["notebook"]) -> bytes:
         return self._keys[workload][1]
+
+
+class ListenerRouter:
+    """Sends each call to the boundary's listener that its caller would reach. See `TrustStack.boundary`."""
+
+    def __init__(self, app):
+        self.loopback = TestClient(app, base_url=f"http://127.0.0.1:{LOOPBACK_PORT}", raise_server_exceptions=False)
+        self.mtls = TestClient(app, base_url="https://boundary:8443", raise_server_exceptions=False)
+
+    def _pick(self, headers):
+        forwarded = any(key.lower() == "x-zt-verified-token" for key in (headers or {}))
+        return self.loopback if forwarded else self.mtls
+
+    def get(self, url, headers=None, **kwargs):
+        return self._pick(headers).get(url, headers=headers, **kwargs)
+
+    def post(self, url, headers=None, **kwargs):
+        return self._pick(headers).post(url, headers=headers, **kwargs)
 
 
 def _async(fn):

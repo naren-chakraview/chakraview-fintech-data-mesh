@@ -11,6 +11,8 @@ COPY shared /app/shared
 COPY platform /app/platform
 COPY domains /app/domains
 COPY tools /app/tools
+COPY examples/agent-gaps /app/examples/agent-gaps
+COPY semantics /app/semantics
 
 EXPOSE 8000
 CMD ["uvicorn", "--factory", "boundary.main:get_app", "--app-dir", "platform", "--host", "0.0.0.0", "--port", "8000"]

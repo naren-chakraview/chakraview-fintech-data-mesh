@@ -17,6 +17,7 @@ DOMAIN_SHAPES = {
     "accounts": "accounts-shapes.ttl",
     "risk-compliance": "risk-compliance-shapes.ttl",
     "transactions": "transactions-shapes.ttl",
+    "risk-review-notes": "risk-review-notes-shapes.ttl",
 }
 
 
