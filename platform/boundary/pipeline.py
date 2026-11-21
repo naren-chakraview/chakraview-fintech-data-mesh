@@ -44,7 +44,8 @@ class Services:
     ledger: ReadLedger = field(default_factory=ReadLedger)
 
 
-def _base_input(caller: Caller, product: dict, action: str, columns: Optional[List[str]] = None) -> dict:
+def _base_input(caller: Caller, product: dict, action: str, columns: Optional[List[str]] = None,
+                purpose: Optional[str] = None) -> dict:
     """The policy input. For a delegated call, `workload` is the agent and `principal` is the person it acts for.
 
     The delegation block and the requested columns are present only for delegated calls, so a person's own
@@ -63,6 +64,9 @@ def _base_input(caller: Caller, product: dict, action: str, columns: Optional[Li
     if caller.delegation is not None:
         policy_input["delegation"] = {"actor": caller.delegation.actor, "chain": list(caller.delegation.chain)}
         policy_input["columns"] = list(columns or [])
+    if purpose:
+        # The masking decision may depend on why the data is read (a KYC grant sees more of a personal value).
+        policy_input["purpose"] = purpose
     return policy_input
 
 
@@ -175,7 +179,7 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
                                      lineage_verified=lineage_verified)
     rows = services.reader.read(product_id, columns)
 
-    base = _base_input(caller, product_policy_input(product), "read", columns)
+    base = _base_input(caller, product_policy_input(product), "read", columns, purpose)
     masked = await mask_rows(
         rows,
         product_id,

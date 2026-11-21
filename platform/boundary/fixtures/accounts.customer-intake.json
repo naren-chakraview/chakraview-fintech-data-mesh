@@ -1,0 +1,9 @@
+{
+  "columns": [
+    "customer_iri",
+    "legal_name",
+    "ssn",
+    "address"
+  ],
+  "rows": []
+}

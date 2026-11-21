@@ -1,0 +1,38 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix fintech: <https://chakracommerce.com/ontology/fintech/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Shapes for the direct-write products (addendum W3, W4). Core shapes are loaded with these (core-shapes.ttl).
+
+fintech:CustomerIntakeShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:CustomerIntake ;
+  sh:property [ sh:path fintech:customerIri ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
+    sh:pattern "^https://chakracommerce.com/customer#[0-9a-f]{64}$" ;
+    sh:message "customerIri must be a Customer IRI minted by the identity library." ] ;
+  sh:property [ sh:path fintech:legalName ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:minLength 1 ; sh:maxLength 200 ; sh:message "legalName is required, at most 200 characters." ] ;
+  sh:property [ sh:path fintech:ssn ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:pattern "^[0-9]{3}-[0-9]{2}-[0-9]{4}$" ; sh:message "ssn must be in the form 123-45-6789." ] ;
+  sh:property [ sh:path fintech:address ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:minLength 5 ; sh:maxLength 300 ; sh:message "address is required, at least 5 characters." ] .
+
+fintech:ScoreFreshnessSummaryShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:ScoreFreshnessSummary ;
+  sh:property [ sh:path fintech:summaryId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:pattern "^[0-9]{4}-[0-9]{2}-[0-9]{2}\\|(high|medium|low)$" ; sh:message "summaryId is day|band." ] ;
+  sh:property [ sh:path fintech:day ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:pattern "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ] ;
+  sh:property [ sh:path fintech:riskBand ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "high" "medium" "low" ) ] ;
+  sh:property [ sh:path fintech:staleCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+    sh:minInclusive 0 ; sh:message "staleCount is a whole number, zero or more." ] .
+
+fintech:RiskScoreWriteShape
+  a sh:NodeShape ;
+  sh:targetClass fintech:RiskScoreWrite ;
+  sh:property [ sh:path fintech:accountRef ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    sh:pattern "^ACC-[0-9]+$" ] ;
+  sh:property [ sh:path fintech:fraudScore ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ; sh:maxInclusive 1 ; sh:message "fraudScore is a decimal between 0 and 1." ] ;
+  sh:property [ sh:path fintech:riskBand ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "high" "medium" "low" ) ] .

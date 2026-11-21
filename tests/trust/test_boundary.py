@@ -85,9 +85,9 @@ def test_read_with_grant_returns_masked_rows(stack):
     body = r.json()
     assert body["grant_id"] is not None
     first = body["rows"][0]
-    # account_ref has no classification, so the domain default (full_hash) applies: a 64-char hex digest.
-    assert len(first["account_ref"]) == 64
-    assert first["account_ref"] != "ACC-1001"
+    # account_ref is classified sensitive (addendum W1: every column of a readable product is classified), so the
+    # platform floor applies: partial masking keeps the first and last two characters.
+    assert first["account_ref"] == "AC****01"
     # fraud_score is sensitive; partial_mask fully masks values of four characters or fewer.
     assert first["fraud_score"] == "[MASKED]"
 
@@ -113,7 +113,7 @@ def test_audit_record_names_everything_the_brief_requires(stack):
     assert record["decision"] == "allow"
     assert record["roles"] == ["risk_analyst"]
     assert record["workload_spiffe_id"] == WORKLOADS["notebook"]
-    assert record["strategies"]["account_ref"] == "full_hash"
+    assert record["strategies"]["account_ref"] == "partial_mask"  # sensitive since addendum W1
     assert record["strategies"]["fraud_score"] == "partial_mask"
     assert record["policy_revisions"]["platform"]
     assert record["policy_revisions"]["domains"][RISK]

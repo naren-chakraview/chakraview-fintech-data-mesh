@@ -39,8 +39,9 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def snapshot_bytes(rows: List[dict]) -> bytes:
-    return (json.dumps({"columns": SNAPSHOT_COLUMNS, "rows": rows}, sort_keys=True, indent=2) + "\n").encode()
+def snapshot_bytes(rows: List[dict], columns: Optional[List[str]] = None) -> bytes:
+    return (json.dumps({"columns": list(columns or SNAPSHOT_COLUMNS), "rows": rows}, sort_keys=True, indent=2)
+            + "\n").encode()
 
 
 def _atomic_write(path: Path, data: bytes) -> None:
@@ -64,8 +65,10 @@ class Prepared:
 class GovernedWriter:
     def __init__(self, *, product_id: str, snapshot_dir: Path, attestation_dir: Path, history_dir: Path,
                  private_key_pem: bytes, keyid: str, producer_spiffe_id: str,
-                 clock: Callable[[], datetime], ttl: timedelta = timedelta(days=2), code_commit: str = "unknown"):
+                 clock: Callable[[], datetime], ttl: timedelta = timedelta(days=2), code_commit: str = "unknown",
+                 columns: Optional[List[str]] = None, seed_dir: Optional[Path] = None):
         self.product_id = product_id
+        self.columns = list(columns or SNAPSHOT_COLUMNS)
         self.snapshot_dir = Path(snapshot_dir)
         self.attestation_dir = Path(attestation_dir)
         self.history_dir = Path(history_dir)
@@ -77,12 +80,31 @@ class GovernedWriter:
         self.code_commit = code_commit
         self.proposals: dict = {}
 
-        current = (self.snapshot_dir / f"{product_id}.json").read_bytes()
+        target = self.snapshot_dir / f"{product_id}.json"
+        if not target.exists():
+            # The first version: the seed (for a product that starts from a fixture), or an empty snapshot. It is signed
+            # like every later version, so the product's lineage starts with the boundary's own statement.
+            seed = Path(seed_dir) / f"{product_id}.json" if seed_dir else None
+            data = seed.read_bytes() if seed is not None and seed.exists() else snapshot_bytes([], self.columns)
+            self._publish_initial(data, now=clock())
+        current = target.read_bytes()
         self._versions: List[dict] = [{
             "digest": _sha256(current),
             "rows": json.loads(current)["rows"],
             "action": "initial",
         }]
+
+    def _publish_initial(self, data: bytes, now: datetime) -> None:
+        statement = build_statement(self.product_id, data, self.producer, self.code_commit, [], now)
+        statement["predicate"].update({"action": "initial"})
+        envelope = sign_envelope(statement, self._key, self.keyid)
+        _atomic_write(self.snapshot_dir / f"{self.product_id}.json", data)
+        _atomic_write(self.attestation_dir / f"{self.product_id}.dsse.json",
+                      (json.dumps(envelope, indent=2, sort_keys=True) + "\n").encode())
+        _atomic_write(self.history_dir / f"{_sha256(data)}.json", data)
+
+    def current_rows(self) -> List[dict]:
+        return [dict(row) for row in self._versions[-1]["rows"]]
 
     # ---- reads -------------------------------------------------------------------------------------------
 
@@ -252,9 +274,26 @@ class GovernedWriter:
             raise ProposalConflict("proposal has expired")
         return record
 
+    def prepare_write(self, *, rows: List[dict], written_by: str, on_behalf_of: Optional[str],
+                      actor_chain: List[str], derived_from: List[str], write_kind: str, outcome: str,
+                      policy_revision: str, now: datetime) -> Prepared:
+        """A direct write: the new snapshot is published when the write is decided, not after an owner's review. The
+        statement names the writer, the person and agent when there are any, the inputs it was derived from, the kind
+        of write, and the policy revision that allowed it. `rows` is the complete new state of the product."""
+        extra = {
+            "written_by": written_by,
+            "on_behalf_of": on_behalf_of,
+            "actor_chain": list(actor_chain),
+            "write_kind": write_kind,
+            "outcome": outcome,
+            "accepted_by": f"policy:{policy_revision}",
+            "derived_from": [{"sha256": d} for d in derived_from],
+        }
+        return self._prepare_publish(rows, "write", now, f"policy:{policy_revision}", extra, lambda: None)
+
     def _prepare_publish(self, rows: List[dict], action: str, now: datetime, decided_by: str, extra: dict,
                          after: Callable[[], None]) -> Prepared:
-        data = snapshot_bytes(rows)
+        data = snapshot_bytes(rows, self.columns)
         digest = _sha256(data)
         inputs = list(extra.get("derived_from", []))
         statement = build_statement(self.product_id, data, self.producer, self.code_commit, inputs, now)

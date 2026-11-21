@@ -50,6 +50,38 @@ allow if {
 	agent_opted_in
 }
 
+# Writes (addendum W2): the person, the agent and the product must all allow the write. The grant is checked by
+# the boundary (write needs a grant when the product requires approval), and the outcome by write_outcome below.
+allow if {
+	input.action == "write"
+	data.data_mesh.guardrails.platform_write_allow
+	domain_policy.allow_write
+	agent_write_permitted
+}
+
+agent_write_permitted if not input.delegation
+
+agent_write_permitted if {
+	input.delegation
+	agent_opted_in
+	every column in object.get(input, "columns", []) {
+		column in object.get(domain_policy, "agent_write_columns", [])
+	}
+}
+
+# The outcome of a write: the platform's, or the domain's if the domain is stricter. A domain can only tighten it.
+write_severity := {"direct": 0, "requires_owner_review": 1, "forbidden": 2, "refused_pii": 3}
+
+write_outcome := data.data_mesh.guardrails.write_platform if {
+	write_severity[data.data_mesh.guardrails.write_platform] >= write_severity[domain_write]
+}
+
+write_outcome := domain_write if {
+	write_severity[domain_write] > write_severity[data.data_mesh.guardrails.write_platform]
+}
+
+domain_write := object.get(domain_policy, "write_outcome", "direct")
+
 # Owner actions: the owner's own token, no delegation, and the domain grants owner actions.
 allow if {
 	data.data_mesh.guardrails.platform_owner_allow
@@ -103,7 +135,20 @@ strictness := {
 # Unlisted columns are masked by the domain default. A domain shows a column only by listing it.
 default domain_strategy := "full_hash"
 
+# A KYC read (purpose "kyc") may use the domain's kyc_column_strategy for the columns it lists: the value is shown at
+# the platform floor, never in the clear for a column the floor masks.
+kyc_override if {
+	input.purpose == "kyc"
+	domain_policy.kyc_column_strategy[input.column]
+}
+
 domain_strategy := s if {
+	kyc_override
+	s := domain_policy.kyc_column_strategy[input.column]
+}
+
+domain_strategy := s if {
+	not kyc_override
 	s := domain_policy.column_strategy[input.column]
 }
 

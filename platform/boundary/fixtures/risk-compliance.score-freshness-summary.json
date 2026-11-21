@@ -1,0 +1,10 @@
+{
+  "columns": [
+    "summary_id",
+    "day",
+    "risk_band",
+    "stale_count",
+    "customer_label"
+  ],
+  "rows": []
+}

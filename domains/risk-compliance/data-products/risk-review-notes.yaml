@@ -5,8 +5,10 @@ owner_email: risk@chakra.fintech
 domain: risk-compliance
 
 description: |
-  Review notes on high-risk customers. Authoritative, owned by Risk. Agents propose notes; a Risk owner
-  accepts, rejects or rolls back each change. Nothing reaches this product without an owner's acceptance.
+  Review notes on high-risk customers. Authoritative, owned by Risk. The write kind is derived and the note is
+  confidential, so an agent's note is a proposal that a Risk owner accepts, rejects or rolls back. The rule that
+  requires the proposal is the write-tier rule (confidential derived output from an agent), not a per-product opt-in.
+  A listed producer writes directly.
 
 tables:
   - name: review_notes
@@ -21,6 +23,13 @@ sla:
   availability:
     value: 99.9
     unit: percent
+
+# Write contract (addendum W1, W2): derived and confidential, so an agent's write is a proposal and a listed producer
+# writes directly. Append: a note id is written once.
+write_kind: derived
+write_key: note_id
+write_mode: append
+producers: []
 
 access_policy:
   default: deny

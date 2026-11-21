@@ -62,6 +62,9 @@ class Delegation:
     issued_at: dt.datetime
     expires_at: dt.datetime
     token_id: str
+    # The human's attributes the gateway verified from their IdP credential (e.g. kyc_id), from the token's
+    # user_attributes. Empty when none were configured.
+    attributes: Mapping[str, str] = field(default_factory=dict)
 
 
 def load_gateway_trusts(path: Path) -> List[GatewayTrust]:
@@ -151,6 +154,10 @@ def verify_forwarded(token: str, trusts: Iterable[GatewayTrust], *, audience: st
     jti = claims.get("jti")
     if not isinstance(jti, str) or not jti:
         raise DelegationError("delegated token has no jti")
+    attributes = claims.get("user_attributes", {})
+    if not isinstance(attributes, dict) or not all(isinstance(k, str) and isinstance(v, str)
+                                                   for k, v in attributes.items()):
+        raise DelegationError("user_attributes claim is malformed")
 
     # The headers must say what the token says. A mismatch means something between the sidecar and here changed the
     # call, so it is refused, not reconciled.
@@ -169,6 +176,7 @@ def verify_forwarded(token: str, trusts: Iterable[GatewayTrust], *, audience: st
         issued_at=dt.datetime.fromtimestamp(claims["iat"], dt.timezone.utc),
         expires_at=expires,
         token_id=jti,
+        attributes=dict(attributes),
     )
 
 
@@ -196,6 +204,7 @@ def mint_delegated_token(
     chain: Iterable[str],
     ttl_seconds: int = 60,
     now: Optional[dt.datetime] = None,
+    attributes: Optional[Mapping[str, str]] = None,
 ) -> str:
     """Mint the token the sidecar would issue for `chain` (originator first, current actor last). Dev stand-in."""
     actors = list(chain)
@@ -219,4 +228,6 @@ def mint_delegated_token(
     }
     if act is None:
         del claims["act"]
+    if attributes:
+        claims["user_attributes"] = dict(attributes)
     return jwt.encode(claims, private_pem, algorithm="RS256", headers={"kid": kid})

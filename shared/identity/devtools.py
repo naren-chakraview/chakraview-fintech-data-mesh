@@ -39,6 +39,7 @@ def mint_token(
     owns: Iterable[str] = (),
     ttl_seconds: int = 3600,
     now: Optional[dt.datetime] = None,
+    extra_claims: Optional[dict] = None,
 ) -> str:
     issued = now or dt.datetime.now(dt.timezone.utc)
     claims = {
@@ -51,6 +52,7 @@ def mint_token(
         "roles": list(roles),
         "owns": list(owns),
     }
+    claims.update(extra_claims or {})
     return jwt.encode(claims, private_pem, algorithm="RS256", headers={"kid": kid})
 
 

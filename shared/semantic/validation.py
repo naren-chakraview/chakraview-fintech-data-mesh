@@ -18,6 +18,10 @@ DOMAIN_SHAPES = {
     "risk-compliance": "risk-compliance-shapes.ttl",
     "transactions": "transactions-shapes.ttl",
     "risk-review-notes": "risk-review-notes-shapes.ttl",
+    # The direct-write products (addendum W3, W4), one shapes file for the three.
+    "write-customer-intake": "write-products-shapes.ttl",
+    "write-score-freshness-summary": "write-products-shapes.ttl",
+    "write-risk-scores": "write-products-shapes.ttl",
 }
 
 
