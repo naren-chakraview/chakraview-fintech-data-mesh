@@ -255,7 +255,7 @@ services:
   # docs/case-study/fintech-governance/agent-gaps.md (the sidecar topology).
   boundary-zt:
     build:
-      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.3
+      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.4
     container_name: chakra-boundary-zt
     network_mode: "service:boundary"
     command: ["/config/gateway.yaml"]
@@ -291,7 +291,7 @@ services:
 
   agent-zt:
     build:
-      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.3
+      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.4
     container_name: chakra-agent-zt
     network_mode: "service:agent"
     command: ["/config/gateway.yaml"]

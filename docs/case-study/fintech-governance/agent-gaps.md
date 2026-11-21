@@ -153,8 +153,8 @@ These are real limits of this change. Each one is either a production decision o
   decides. The governance does not depend on that, and the tests do not claim it does.
 - **The demos and tests use a stand-in sidecar.** `platform/delegation/verify.py` mints tokens with the claim shapes
   zt-gateway issues, and the harness routes them to the loopback listener. The compose stack runs the real zt-gateway
-  as both sidecars, pinned to tag `v0.4.3` of zero-trust-rs (the Z5 fix). The customer-intake check needs the
-  `user_attributes` claim of zero-trust-rs v0.4.4; the pin moves to it once that PR merges and is tagged.
+  as both sidecars, pinned to tag `v0.4.4` of zero-trust-rs (the Z5 fix and the `user_attributes` claim that the customer-intake check needs).
+
   The compose stack exercises the real path end to end: the agent's read, and its proposals, go through both sidecars.
 - **The sidecar topology is the trust model for the loopback hop.** The boundary trusts `X-ZT-Verified-*` only because
   nothing but its own sidecar can reach that port. Zero-trust-rs's upstream TLS (Z3) is not used for it.
