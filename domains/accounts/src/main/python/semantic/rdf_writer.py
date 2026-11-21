@@ -1,51 +1,15 @@
-import requests
 from rdflib import Graph
 
 from shared.semantic.validation import assert_conforms
 
 
 class RdfWriter:
-    """Write RDF triples to Jena TDB2 and Iceberg"""
+    """Validate and write RDF to a local file.
 
-    def __init__(self, jena_endpoint_url: str):
-        """
-        Args:
-            jena_endpoint_url: HTTP endpoint for Jena SPARQL (e.g., http://localhost:3030/accounts/sparql)
-        """
-        self.jena_endpoint = jena_endpoint_url
-
-    def write_to_jena(self, rdf_graph: Graph) -> bool:
-        """
-        Write RDF triples to Jena TDB2 via SPARQL Update endpoint.
-
-        Returns:
-            True if successful, False otherwise
-        """
-        assert_conforms(rdf_graph, "accounts")  # validate before writing
-        # Serialize graph to N-Triples for SPARQL INSERT
-        ntriples = rdf_graph.serialize(format='nt')
-
-        # Build SPARQL UPDATE query
-        sparql_update = f"""
-        INSERT DATA {{
-            {ntriples}
-        }}
-        """
-
-        # POST to Jena update endpoint
-        update_endpoint = self.jena_endpoint.replace('/sparql', '/update')
-
-        try:
-            response = requests.post(
-                update_endpoint,
-                data=sparql_update,
-                headers={'Content-Type': 'application/sparql-update'},
-                timeout=10
-            )
-            return response.status_code == 200
-        except Exception as e:
-            print(f"Error writing to Jena: {e}")
-            return False
+    There is no runtime write to Jena. The Fuseki service runs read-only (no /update), so RDF reaches its store
+    at deploy time, with an offline load into TDB2 (tdb2.tdbloader), from a snapshot that passed these shapes.
+    Product data reaches consumers only through the governed boundary (see docs/case-study/fintech-governance/agent-gaps.md).
+    """
 
     def write_to_file(self, rdf_graph: Graph, output_path: str, format_: str = 'turtle') -> bool:
         """

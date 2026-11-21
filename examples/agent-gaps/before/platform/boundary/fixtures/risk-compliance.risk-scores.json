@@ -1,0 +1,8 @@
+{
+  "columns": ["account_ref", "fraud_score", "kyc_verdict"],
+  "rows": [
+    {"account_ref": "ACC-1001", "fraud_score": "0.82", "kyc_verdict": "clear"},
+    {"account_ref": "ACC-1002", "fraud_score": "0.07", "kyc_verdict": "review"},
+    {"account_ref": "ACC-1003", "fraud_score": "0.44", "kyc_verdict": "clear"}
+  ]
+}

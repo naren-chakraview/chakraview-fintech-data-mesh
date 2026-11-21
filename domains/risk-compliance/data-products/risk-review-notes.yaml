@@ -1,0 +1,44 @@
+name: risk-review-notes
+version: "1.0"
+owner: risk-compliance-domain
+owner_email: risk@chakra.fintech
+domain: risk-compliance
+
+description: |
+  Review notes on high-risk customers. Authoritative, owned by Risk. Agents propose notes; a Risk owner
+  accepts, rejects or rolls back each change. Nothing reaches this product without an owner's acceptance.
+
+tables:
+  - name: review_notes
+    iceberg_table: risk_compliance.review_notes
+    schema_version: "1.0"
+    doc: "Accepted review notes, one row per note"
+
+sla:
+  freshness:
+    value: 1
+    unit: day
+  availability:
+    value: 99.9
+    unit: percent
+
+access_policy:
+  default: deny
+  approval_required: true
+  approval_sla_hours: 2
+  require_provenance: true
+  columns:
+    - name: note_id
+      classification: public
+    - name: customer_iri
+      classification: public
+    - name: risk_band
+      classification: public
+    - name: reviewed_note
+      classification: confidential
+
+tags: [compliance-critical, human-in-the-loop]
+retention_policy:
+  value: 10
+  unit: years
+  rationale: "AML and SOX long-term audit requirements"

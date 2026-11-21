@@ -26,6 +26,8 @@ WORKLOADS = {
     "notebook": "spiffe://chakracommerce.com/ns/analytics/sa/notebook",
     "nightly-batch": "spiffe://chakracommerce.com/ns/batch/sa/nightly",
     "risk-producer": "spiffe://chakracommerce.com/ns/risk/sa/producer",
+    # The risk-review agent's client certificate. Its sidecar binds delegated tokens to it.
+    "risk-review-agent": "spiffe://chakracommerce.com/ns/agents/sa/risk-review-agent",
 }
 GATEWAY_SPIFFE = "spiffe://chakracommerce.com/ns/edge/sa/gateway"
 
@@ -70,6 +72,16 @@ def main() -> None:
     _write(gateway / "client.pem", client_cert)
     _write(gateway / "ca.pem", _pem_cert(dev_cert))
     _write(gateway / "internal-ca.pem", _pem_cert(internal_cert))
+
+    # The delegation sidecars (zt-gateway, one per delegating workload). Each serves TLS with a dev CA certificate
+    # that clients on the same network trust. Development only.
+    for sidecar, names in (("agent-zt", ["localhost", "agent-zt"]), ("boundary-zt", ["boundary", "localhost"])):
+        key, cert = issue_server_cert(dev_key, dev_cert, names)
+        target = OUT / "services" / sidecar
+        _write(target / "server.key", key)
+        _write(target / "server.pem", cert)
+        _write(target / "ca.pem", _pem_cert(dev_cert))
+        print(f"issued {sidecar} server certificate (dev CA)")
 
     for service in ("boundary", "discovery"):
         key, cert = issue_server_cert(internal_key, internal_cert, [service])

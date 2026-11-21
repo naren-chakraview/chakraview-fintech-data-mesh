@@ -1,0 +1,9 @@
+{
+  "columns": [
+    "note_id",
+    "customer_iri",
+    "risk_band",
+    "reviewed_note"
+  ],
+  "rows": []
+}

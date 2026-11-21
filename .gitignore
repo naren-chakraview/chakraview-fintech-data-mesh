@@ -27,3 +27,9 @@ platform/lineage/attestations/
 .env
 .venv*/
 platform/lineage/trust-config/
+
+# Agents fix: the proposal writer's local state (its history of published snapshots). Never committed.
+platform/proposals/state/
+
+# zt-gateway dev material (signing key, registry, config). Never committed.
+tools/dev-gateway/out/

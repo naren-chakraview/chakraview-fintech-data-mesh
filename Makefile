@@ -1,4 +1,4 @@
-.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke
+.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke agent-test agent-demo agent-up agent-grants agent-run
 
 help:
 	@echo "Available commands:"
@@ -15,6 +15,11 @@ help:
 	@echo "  make trust-test     Run the trust unit and integration tests (needs the opa binary)"
 	@echo "  make trust-demo     Run the before/after trust demos (needs Docker for the side-door demo)"
 	@echo "  make trust-smoke    Smoke-test the running stack through the mTLS gateway (run docker compose up first)"
+	@echo "  make agent-test     Delegation and governed-write tests (needs the opa binary; run make policy-test too)"
+	@echo "  make agent-demo     Before and after demos for agents as governed participants (needs the opa binary)"
+	@echo "  make agent-up       Start the compose stack for the agent path (needs make trust-keys and a .env)"
+	@echo "  make agent-grants   DEV ONLY: create the agent's read and propose grants (the approval stand-in)"
+	@echo "  make agent-run      Run the scripted agent once through the two sidecars, then show its output"
 
 install:
 	pip install -r requirements.txt
@@ -43,6 +48,7 @@ trust-keys:
 	python3 tools/dev-ca/make_ca.py
 	python3 tools/dev-keys/make_signing_key.py
 	python3 tools/dev-keys/publish_attestations.py
+	python3 tools/dev-gateway/make_config.py
 
 trust-test:
 	python3 -m pytest tests/unit tests/trust -q
@@ -52,6 +58,23 @@ trust-demo:
 
 trust-smoke:
 	bash tools/smoke/gateway_smoke.sh
+
+agent-test:
+	python3 -m pytest tests/trust/test_delegation.py tests/trust/test_proposals.py -q
+
+agent-demo:
+	for d in examples/agent-gaps/demo_*.py; do python3 $$d || exit 1; done
+
+agent-up:
+	docker compose up -d --build postgres opa dev-idp elasticsearch boundary boundary-zt agent-zt
+
+agent-grants:
+	docker compose exec -T boundary python - < tools/dev-gateway/grant_agent.py
+
+agent-run:
+	docker compose up -d --force-recreate --no-deps agent agent-zt
+	docker wait chakra-agent
+	docker logs chakra-agent
 
 lint:
 	flake8 domains platform shared

@@ -82,11 +82,27 @@ def _command(service):
 
 
 def test_boundary_and_discovery_require_a_client_certificate_from_the_internal_ca():
-    for service in ("boundary", "discovery"):
-        cmd = _command(service)
-        assert "--ssl-cert-reqs" in cmd and cmd[cmd.index("--ssl-cert-reqs") + 1] == "2", service
-        assert "--ssl-ca-certs" in cmd and cmd[cmd.index("--ssl-ca-certs") + 1] == "/certs/ca.pem", service
-        assert "--ssl-certfile" in cmd, service
+    cmd = _command("discovery")
+    assert "--ssl-cert-reqs" in cmd and cmd[cmd.index("--ssl-cert-reqs") + 1] == "2"
+    assert "--ssl-ca-certs" in cmd and cmd[cmd.index("--ssl-ca-certs") + 1] == "/certs/ca.pem"
+    assert "--ssl-certfile" in cmd
+    # The boundary serves its mTLS listener from boundary/serve.py, which passes the same settings in code.
+    serve = (REPO / "platform/boundary/serve.py").read_text()
+    assert '"ssl_cert_reqs": 2' in serve and '"ssl_ca_certs": "/certs/ca.pem"' in serve
+
+
+def test_each_delegation_sidecar_shares_the_namespace_of_the_one_workload_it_serves():
+    services = compose()["services"]
+    assert services["boundary-zt"]["network_mode"] == "service:boundary"
+    assert services["agent-zt"]["network_mode"] == "service:agent"
+    for sidecar in ("boundary-zt", "agent-zt"):
+        assert "ports" not in services[sidecar] and "networks" not in services[sidecar], sidecar
+
+
+def test_the_boundary_loopback_listener_is_never_published():
+    services = compose()["services"]
+    assert not any("8080" in str(port) for port in services["boundary"].get("ports", []))
+    assert "ports" not in services["agent"]
 
 
 def test_no_service_mounts_a_ca_private_key():

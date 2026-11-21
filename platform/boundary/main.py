@@ -7,7 +7,7 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
@@ -18,7 +18,13 @@ from governance.enforce import elasticsearch_write_audit
 from shared.governance.grants import GrantStore, MemoryGrantStore, PostgresGrantStore, utc_now
 from shared.governance.products import load_products
 from shared.identity import AuthError, Caller, CallerVerifier, JWKSCache
+from shared.identity import IdentityError, Principal, spiffe_id_from_pem
+from delegation import DelegationError, GatewayTrust, JtiCache, load_gateway_trusts, verify_forwarded
+from proposals.payload import PayloadError
+from proposals.writer import GovernedWriter, ProposalConflict, ProposalNotFound
 
+from . import proposals as governed
+from .ledger import ReadLedger
 from .lineage_check import make_lineage_check
 from .pipeline import Denied, Services, read_rows, read_sparql
 from .policy import OPAError, decide, policy_revisions
@@ -26,6 +32,10 @@ from .reader import FixtureReader
 from .sparql import UpstreamError
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+LOOPBACK_HOST = "127.0.0.1"
+PRODUCT_WITH_PROPOSALS = "risk-compliance.risk-review-notes"
+WRITER_SPIFFE_ID = "spiffe://chakracommerce.com/ns/boundary/sa/governed-writer"
+WRITER_KEYID = "governed-writer"
 
 
 @dataclass(frozen=True)
@@ -40,6 +50,11 @@ class Settings:
     idp_audience: str
     fuseki_endpoints: dict
     grant_store: str
+    delegation_trust_dir: Path
+    proposal_state_dir: Path
+    writer_key_path: Path
+    boundary_spiffe_id: str
+    loopback_port: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -57,6 +72,11 @@ class Settings:
                 '{"risk-compliance": "http://risk-compliance-fuseki:3030/risk_compliance/sparql"}',
             )),
             grant_store=os.getenv("GRANT_STORE", "postgres"),
+            delegation_trust_dir=Path(os.getenv("DELEGATION_TRUST_DIR", REPO_ROOT / "platform/delegation/trust-config")),
+            proposal_state_dir=Path(os.getenv("PROPOSAL_STATE_DIR", REPO_ROOT / "platform/proposals/state")),
+            writer_key_path=Path(os.getenv("PROPOSAL_SIGNING_KEY", REPO_ROOT / "platform/lineage/keys/governed-writer.key")),
+            boundary_spiffe_id=os.getenv("BOUNDARY_SPIFFE_ID", "spiffe://chakracommerce.com/ns/boundary/sa/boundary"),
+            loopback_port=int(os.getenv("LOOPBACK_PORT", "8080")),
         )
 
 
@@ -64,22 +84,63 @@ class ReadBody(BaseModel):
     query: str
 
 
+class ProposalBody(BaseModel):
+    format: str = "turtle"
+    payload: str
+    derived_from: List[str] = []
+
+
+class DecisionBody(BaseModel):
+    reason: str = ""
+
+
+def build_writer(settings: Settings, clock, *, product_id: str = PRODUCT_WITH_PROPOSALS) -> Optional[GovernedWriter]:
+    """The governed writer for the review-notes product, or None when its signing key is not provisioned."""
+    if not settings.writer_key_path.exists():
+        return None
+    return GovernedWriter(
+        product_id=product_id,
+        snapshot_dir=settings.fixtures_dir,
+        attestation_dir=settings.lineage_dir,
+        history_dir=settings.proposal_state_dir / "history",
+        private_key_pem=settings.writer_key_path.read_bytes(),
+        keyid=WRITER_KEYID,
+        producer_spiffe_id=WRITER_SPIFFE_ID,
+        clock=clock,
+    )
+
+
 def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
                decide_fn=decide, audit=elasticsearch_write_audit,
-               clock=utc_now, sparql_transport=None, jwks_fetch=None) -> FastAPI:
+               clock=utc_now, sparql_transport=None, jwks_fetch=None,
+               gateway_trusts: Optional[List[GatewayTrust]] = None, writer: Optional[GovernedWriter] = None,
+               limits: Optional[governed.Limits] = None) -> FastAPI:
     products = load_products(settings.domains_dir)
+    if gateway_trusts is None:
+        gateways_file = settings.delegation_trust_dir / "gateways.json"
+        gateway_trusts = load_gateway_trusts(gateways_file) if gateways_file.exists() else []
+    jti_cache = JtiCache()
+    if writer is None:
+        writer = build_writer(settings, clock)
+    limits = limits or governed.Limits()
+    ledger = ReadLedger()
     if grants is None:
         if settings.grant_store == "memory":
             grants = MemoryGrantStore()  # development only: grants do not survive a restart
         else:
             grants = PostgresGrantStore()
 
+    async def audited(record: dict) -> None:
+        # The boundary's own ledger learns a read only after its audit record is durably written.
+        await audit(record)
+        ledger.observe(record)
+
     services = Services(
         products=products,
         reader=FixtureReader(settings.fixtures_dir),
         grants=grants,
         decide=decide_fn,
-        audit=audit,
+        audit=audited,
         lineage_check=make_lineage_check(settings.lineage_dir, settings.lineage_trust_dir),
         revisions=policy_revisions(
             settings.policy_root,
@@ -89,6 +150,7 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
         clock=clock,
         sparql_endpoints=settings.fuseki_endpoints,
         sparql_transport=sparql_transport,
+        ledger=ledger,
     )
     cache_args = {"fetch": jwks_fetch} if jwks_fetch is not None else {}
     verifier = CallerVerifier(
@@ -101,7 +163,30 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
     app.state.services = services
     app.state.verifier = verifier
 
+    def _on_loopback(request: Request) -> bool:
+        server = request.scope.get("server")
+        return bool(server) and server[0] == LOOPBACK_HOST and server[1] == settings.loopback_port
+
+    def _forwarded_caller(request: Request) -> Caller:
+        """A delegated call from the boundary's own sidecar, on the loopback listener only."""
+        token = request.headers.get("x-zt-verified-token", "")
+        if not token:
+            raise HTTPException(status_code=401, detail="no delegated token on the loopback listener")
+        try:
+            delegation = verify_forwarded(token, gateway_trusts, audience=settings.boundary_spiffe_id,
+                                          now=clock(), headers=request.headers)
+            jti_cache.record(delegation.token_id, delegation.expires_at, clock())
+        except DelegationError as exc:
+            raise HTTPException(status_code=401, detail=str(exc)) from exc
+        principal = Principal(subject=delegation.user, roles=delegation.roles, claims={})
+        return Caller(principal=principal, spiffe_id=delegation.actor, delegation=delegation)
+
     async def get_caller(request: Request) -> Caller:
+        # The two listeners are different kinds of caller. Only the loopback listener, which only the boundary's own
+        # sidecar can reach, takes delegated calls. On the mTLS listener the X-ZT-* headers are never read, so a
+        # client cannot make a call look delegated by sending them.
+        if _on_loopback(request):
+            return _forwarded_caller(request)
         try:
             return await verifier.verify(request.headers)
         except AuthError as exc:
@@ -121,9 +206,61 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
             return HTTPException(status_code=503, detail="dependency unavailable; no data returned")
         return HTTPException(status_code=503, detail="audit or grant store unavailable; no data returned")
 
+    async def _governed(coro):
+        try:
+            return await coro
+        except (Denied, PayloadError) as exc:
+            raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
+        except ProposalConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ProposalNotFound as exc:
+            raise HTTPException(status_code=404, detail="proposal not found") from exc
+        except Exception as exc:  # any failure leaves the product unchanged and says so
+            raise handle(exc) from exc
+
+    def _writer_for(product_id: str) -> GovernedWriter:
+        if writer is None or product_id != writer.product_id:
+            raise HTTPException(status_code=404, detail="this product takes no proposals")
+        return writer
+
     @app.get("/health")
     async def health():
         return {"status": "healthy", "products_loaded": len(products)}
+
+    @app.post("/products/{product_id}/proposals", status_code=201)
+    async def post_proposal(product_id: str, body: ProposalBody, caller: Caller = Depends(get_caller)):
+        target = _writer_for(product_id)
+        return await _governed(governed.propose(services, target, limits, caller, product_id,
+                                                body.payload.encode("utf-8"), body.format, body.derived_from))
+
+    @app.get("/products/{product_id}/proposals/{proposal_id}")
+    async def get_proposal(product_id: str, proposal_id: str, caller: Caller = Depends(get_caller)):
+        target = _writer_for(product_id)
+        try:
+            record = target.get(proposal_id)
+        except ProposalNotFound as exc:
+            raise HTTPException(status_code=404, detail="proposal not found") from exc
+        owner = caller.delegation is None and "data_owner" in caller.principal.roles
+        if caller.principal.subject != record["on_behalf_of"] and not owner:
+            raise HTTPException(status_code=403, detail="only the person it acts for, or the owner, may read a proposal")
+        return target.view(record)
+
+    @app.post("/products/{product_id}/proposals/{proposal_id}/accept")
+    async def accept_proposal(product_id: str, proposal_id: str, caller: Caller = Depends(get_caller)):
+        target = _writer_for(product_id)
+        return await _governed(governed.decide(services, target, caller, product_id, proposal_id, "accept"))
+
+    @app.post("/products/{product_id}/proposals/{proposal_id}/reject")
+    async def reject_proposal(product_id: str, proposal_id: str, body: DecisionBody,
+                              caller: Caller = Depends(get_caller)):
+        target = _writer_for(product_id)
+        return await _governed(governed.decide(services, target, caller, product_id, proposal_id, "reject",
+                                               body.reason))
+
+    @app.post("/products/{product_id}/rollback")
+    async def rollback_product(product_id: str, body: DecisionBody, caller: Caller = Depends(get_caller)):
+        target = _writer_for(product_id)
+        return await _governed(governed.rollback(services, target, caller, product_id, body.reason))
 
     @app.get("/products/{product_id}/rows")
     async def get_rows(

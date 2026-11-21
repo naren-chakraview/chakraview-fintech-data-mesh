@@ -1,6 +1,9 @@
-"""Write RDF triples to Jena TDB2 and Iceberg for Transactions domain."""
+"""Validate RDF for the Transactions domain before it is written to a file.
 
-import requests
+There is no runtime write to Jena: Fuseki runs read-only, and RDF is loaded offline at deploy time (see the
+accounts RdfWriter for the full reasoning).
+"""
+
 from rdflib import Graph
 
 from typing import Optional
@@ -9,7 +12,7 @@ from shared.semantic.validation import assert_conforms
 
 
 class RdfWriter:
-    """Write RDF triples to persistent storage."""
+    """Validate RDF and write it to a file."""
 
     def __init__(self, jena_endpoint_url: str = None):
         """Initialize RDF writer.
@@ -18,46 +21,6 @@ class RdfWriter:
             jena_endpoint_url: Jena Fuseki SPARQL endpoint URL
         """
         self.jena_endpoint = jena_endpoint_url
-
-    def write_to_jena(self, rdf_graph: Graph) -> bool:
-        """Write RDF to Jena TDB2 via SPARQL Update endpoint.
-
-        Args:
-            rdf_graph: RDF graph to write
-
-        Returns:
-            True if successful, False otherwise
-        """
-        assert_conforms(rdf_graph, "transactions")  # validate before writing
-        if not self.jena_endpoint:
-            return False
-
-        try:
-            # Serialize to N-Triples
-            ntriples = rdf_graph.serialize(format='nt')
-
-            # Build SPARQL UPDATE query
-            sparql_update = f"""
-            INSERT DATA {{
-                {ntriples}
-            }}
-            """
-
-            # Update endpoint from query endpoint
-            update_endpoint = self.jena_endpoint.replace('/sparql', '/update')
-
-            # POST to Jena SPARQL Update endpoint
-            response = requests.post(
-                update_endpoint,
-                data=sparql_update,
-                headers={'Content-Type': 'application/sparql-update'},
-                timeout=10
-            )
-
-            return response.status_code == 200
-        except Exception as e:
-            print(f"Error writing to Jena: {e}")
-            return False
 
     def write_to_file(self, rdf_graph: Graph, output_path: str, format_: str = 'turtle') -> bool:
         """Write RDF to file for testing/audit.

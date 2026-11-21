@@ -1,8 +1,10 @@
 {
-  "columns": ["account_ref", "fraud_score", "kyc_verdict"],
+  "columns": ["account_ref", "fraud_score", "kyc_verdict", "customer_iri", "risk_band", "scored_at"],
   "rows": [
-    {"account_ref": "ACC-1001", "fraud_score": "0.82", "kyc_verdict": "clear"},
-    {"account_ref": "ACC-1002", "fraud_score": "0.07", "kyc_verdict": "review"},
-    {"account_ref": "ACC-1003", "fraud_score": "0.44", "kyc_verdict": "clear"}
+    {"account_ref": "ACC-1001", "fraud_score": "0.82", "kyc_verdict": "clear", "customer_iri": "https://chakracommerce.com/customer#3abeb7cf412441374745636798f093065058f418684c2111513f21b86e73d6ca", "risk_band": "high", "scored_at": "2026-01-15T09:00:00Z"},
+    {"account_ref": "ACC-1002", "fraud_score": "0.07", "kyc_verdict": "review", "customer_iri": "https://chakracommerce.com/customer#ea0e69cab3e6b4855421223ddec2b1bdc9ae6f8b6a2e7c51d21e96b3211ade9b", "risk_band": "low", "scored_at": "2026-01-15T09:00:00Z"},
+    {"account_ref": "ACC-1003", "fraud_score": "0.44", "kyc_verdict": "clear", "customer_iri": "https://chakracommerce.com/customer#ee4ab99c662dd11a295d1f0b77471164243880397ed420eb5bcfb58bb7495032", "risk_band": "medium", "scored_at": "2026-11-01T09:00:00Z"},
+    {"account_ref": "ACC-1004", "fraud_score": "0.91", "kyc_verdict": "review", "customer_iri": "https://chakracommerce.com/customer#48b31b90c7a67e7c08b6ddbb4265d2987aef9c19dbbb1aa3171880347b282339", "risk_band": "high", "scored_at": "2026-11-10T09:00:00Z"},
+    {"account_ref": "ACC-1005", "fraud_score": "0.88", "kyc_verdict": "clear", "customer_iri": "https://chakracommerce.com/customer#944df43a9377f4a057d039c4ccb8f26053024b7de7cb778e1880781f86154cd8", "risk_band": "high", "scored_at": "2026-02-02T09:00:00Z"}
   ]
 }
