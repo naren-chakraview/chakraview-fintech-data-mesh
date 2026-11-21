@@ -29,8 +29,11 @@ jobs:
         run: |
           for f in tools/dev-gateway/out/agent-zt/gateway.yaml tools/dev-gateway/out/boundary-zt/gateway.yaml; do
             grep -qx "strict: true" "$f" || { echo "$f is not strict"; exit 1; }
+            # Every proxy listener requires a client certificate (zero-trust-rs v0.4.3, Z5).
+            grep -qx "  client_auth: required" "$f" || { echo "$f proxy does not require client certificates"; exit 1; }
+            if grep -q "allow_unbound_obo: true" "$f"; then echo "$f allows bearer use"; exit 1; fi
           done
-          echo "both sidecar configs are strict"
+          echo "both sidecar configs are strict, and every proxy requires a client certificate"
 
       - name: Unit and trust tests
         run: make trust-test
