@@ -32,11 +32,14 @@ TRUST_DOMAIN = "chakracommerce.com"
 IDP_ISSUER = "http://dev-idp:8090"
 AUDIENCE = "data-mesh"
 AGENT = f"spiffe://{TRUST_DOMAIN}/ns/agents/sa/risk-review-agent"
+ONBOARD = f"spiffe://{TRUST_DOMAIN}/ns/agents/sa/onboarding-agent"
 BOUNDARY = f"spiffe://{TRUST_DOMAIN}/ns/boundary/sa/boundary"
 ANALYSTS = ["risk.analyst@chakra.fintech"]
+CUSTOMERS = ["ada@customer.test"]
 
 SIDECARS = {
     "agent-zt": {"kid": "agent-zt-1", "protected": AGENT},
+    "onboarding-zt": {"kid": "onboarding-zt-1", "protected": ONBOARD},
     "boundary-zt": {"kid": "boundary-zt-1", "protected": BOUNDARY},
 }
 
@@ -64,7 +67,8 @@ def registry() -> dict:
                 "allowed_callers": callers, "bootstrap_token": secrets.token_urlsafe(24)}
     return {"trust_domain": TRUST_DOMAIN,
             "workloads": [workload("risk-review-agent", AGENT, []),
-                          workload("boundary", BOUNDARY, [AGENT])]}
+                          workload("onboarding-agent", ONBOARD, []),
+                          workload("boundary", BOUNDARY, [AGENT, ONBOARD])]}
 
 
 def sidecar_config(name: str, cfg: dict, *, admin_port: int, proxy: str, upstream: str, client_auth: str,
@@ -132,8 +136,22 @@ def main() -> None:
             {"method": method, "path": path, "users": ANALYSTS, "workloads": [AGENT]}
             for method, path in (("GET", "/products/*/rows"), ("POST", "/products/*/sparql"),
                                  ("POST", "/products/*/proposals"))
+        ] + [
+            # The customer's onboarding agent writes the customer's own intake, and nothing else of theirs.
+            {"method": "POST", "path": "/products/*/writes", "users": CUSTOMERS, "workloads": [ONBOARD]},
         ],
     }
+
+    # The onboarding sidecar: the same role as agent-zt, for the onboarding agent (the customer-intake path).
+    onboard_dir = OUT / "onboarding-zt"
+    write(onboard_dir / "signing.pem", keys["onboarding-zt"][0], private=True)
+    write(onboard_dir / "jwks.json", public["onboarding-zt"])
+    write(onboard_dir / "registry.yaml", reg)
+    copy_ca(onboard_dir, "onboarding-zt")
+    write(onboard_dir / "gateway.yaml", sidecar_config(
+        "onboarding-zt", SIDECARS["onboarding-zt"], admin_port=6443, proxy="127.0.0.1:8445",
+        upstream="http://127.0.0.1:9", client_auth="required",
+        trusted=[gateway_iss("onboarding-zt-1")], extra={"gateway_id": ONBOARD}))
 
     # agent-zt: edge mint and token exchange, on loopback. The proxy is unused: its port is loopback-only.
     agent_dir = OUT / "agent-zt"
@@ -150,20 +168,21 @@ def main() -> None:
     # forwards the verified token to the boundary's loopback listener, and enforces the capability policy.
     bz_dir = OUT / "boundary-zt"
     write(bz_dir / "signing.pem", keys["boundary-zt"][0], private=True)
-    write(bz_dir / "jwks.json", {"keys": [keys["boundary-zt"][1], keys["agent-zt"][1]]})
+    write(bz_dir / "jwks.json", {"keys": [keys["boundary-zt"][1], keys["agent-zt"][1], keys["onboarding-zt"][1]]})
     write(bz_dir / "registry.yaml", reg)
     write(bz_dir / "capability.yaml", capability)
     copy_ca(bz_dir, "boundary-zt")
     write(bz_dir / "gateway.yaml", sidecar_config(
         "boundary-zt", SIDECARS["boundary-zt"], admin_port=6445, proxy="0.0.0.0:8444",
         upstream="http://127.0.0.1:8080", client_auth="required",
-        trusted=[gateway_iss("agent-zt-1")],
+        trusted=[gateway_iss("agent-zt-1"), gateway_iss("onboarding-zt-1")],
         extra={"capability_policy_path": "/config/capability.yaml", "jti_cache_enabled": True,
                "forward_verified_token": True}))
 
     # The boundary's own check of the forwarded token: the gateways it trusts, with their public keys.
     write(OUT / "boundary" / "gateways.json", {"gateways": [
         {"issuer": gateway_iss("agent-zt-1"), "jwks": public["agent-zt"]},
+        {"issuer": gateway_iss("onboarding-zt-1"), "jwks": public["onboarding-zt"]},
         {"issuer": gateway_iss("boundary-zt-1"), "jwks": public["boundary-zt"]},
     ]})
 
@@ -173,6 +192,11 @@ def main() -> None:
         (agent_certs / name).parent.mkdir(parents=True, exist_ok=True)
         (agent_certs / name).write_bytes((CA_OUT / name).read_bytes())
     (agent_certs / "ca.pem").write_bytes((CA_OUT / "ca" / "ca.pem").read_bytes())
+
+    onboard_certs = OUT / "onboarding"
+    for name in ("onboarding-agent.pem", "onboarding-agent.key"):
+        write(onboard_certs / name, (CA_OUT / name).read_bytes())
+    write(onboard_certs / "ca.pem", (CA_OUT / "ca" / "ca.pem").read_bytes())
 
     print(f"wrote {OUT}")
 

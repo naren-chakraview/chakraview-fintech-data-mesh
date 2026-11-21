@@ -104,6 +104,24 @@ agent. The risk-scores service writes its sensitive output directly, as a listed
 text names a customer is confidential by its column, and goes to an owner for that reason, not because the gate detects the
 name.
 
+## The customer intake, live
+
+`make onboarding-check` runs a deterministic mock onboarding agent (`examples/agent-gaps/onboarding_mock.py`) against the
+compose stack, through its own sidecar and the boundary's. The mock is scripted, not an LLM, so its outcomes are the
+same every run. It acts for one customer and makes three writes:
+
+1. the customer's own record: direct, signed, `201`
+2. the same record again: refused as a duplicate, `409`
+3. another customer's record: refused, because a customer writes only their own record, `403`
+
+The script exits non-zero if any step differs, and names the step. The target starts the boundary and its sidecar fresh
+first, because the writes live in the boundary's memory: a second run without a restart would see the first record.
+The customer's `kyc_id` reaches the boundary in the token the sidecar issued (zero-trust-rs v0.4.4, `user_attributes`).
+
+**Operational note.** OPA loads its policies when it starts and does not watch the mounted directories. After a change to a
+Rego file, restart the `opa` service (`docker compose up -d --force-recreate --no-deps opa`). A stale OPA refuses writes
+with `policy unavailable`, which is the fail-closed behaviour, not a bug in the write path.
+
 ## Run the demos
 
 ```bash
@@ -167,6 +185,11 @@ These are real limits of this change. Each one is either a production decision o
   the owner's approval would create. It is run by hand (`make agent-grants`). It is not an approval flow.
 - **`make agent-check` restarts the agent afterwards,** which runs the scripted agent once more. Its proposals are
   pending, not accepted, so the product is unchanged.
+- **The onboarding mock is not a model of onboarding.** It is a fixed script with one customer. It shows that the
+  identity rule and the write tiers hold through real sidecars; it does not show how an onboarding agent decides what to
+  ask a customer.
+- **Writes live in the boundary's memory.** A restart resets the intake records; the state directory holds the snapshots
+  while the process runs. Production needs a shared store, with personal data under the deployment's encryption.
 - **Edge mint and exchange trust the local network.** The sidecar's admin listener takes an IdP credential with no
   bootstrap token of its own, which is correct only because the admin is reachable only from the agent's namespace.
   The bootstrap tokens in the generated registry are a stand-in for SPIRE node attestation, and the static signing keys

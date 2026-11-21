@@ -21,3 +21,11 @@ users:
     subject: owner@accounts.chakra.fintech
     roles: [data_owner]
     owns: [accounts-domain]
+  # A customer. `attributes` are extra claims on the credential: the KYC identifier the customer-intake identity check
+  # mints the customer's IRI from (addendum W3). Dev only.
+  ada-customer:
+    subject: ada@customer.test
+    roles: [customer]
+    owns: []
+    attributes:
+      kyc_id: K-1001

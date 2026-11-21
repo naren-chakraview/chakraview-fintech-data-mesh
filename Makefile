@@ -1,4 +1,4 @@
-.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke agent-test agent-demo agent-up agent-grants agent-run agent-check
+.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke agent-test agent-demo agent-up agent-grants agent-run agent-check onboarding-check
 
 help:
 	@echo "Available commands:"
@@ -21,6 +21,7 @@ help:
 	@echo "  make agent-grants   DEV ONLY: create the agent's read and propose grants (the approval stand-in)"
 	@echo "  make agent-run      Run the scripted agent once through the two sidecars, then show its output"
 	@echo "  make agent-check    LIVE: a token bound to the agent's certificate is refused for another workload's"
+	@echo "  make onboarding-check  LIVE: the deterministic onboarding agent on the customer-intake path (after agent-up)"
 
 install:
 	pip install -r requirements.txt
@@ -101,3 +102,8 @@ agent-check:
 	docker exec -i chakra-agent python - < tools/dev-gateway/check_binding.py; rc=$$?; \
 	docker compose up -d --force-recreate --no-deps agent agent-zt >/dev/null 2>&1; exit $$rc
 
+onboarding-check:
+	docker compose up -d --force-recreate --no-deps onboarding-agent onboarding-zt
+	docker wait chakra-onboarding-agent
+	docker logs chakra-onboarding-agent
+	docker inspect -f '{{.State.ExitCode}}' chakra-onboarding-agent | grep -qx 0
