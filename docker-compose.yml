@@ -289,6 +289,44 @@ services:
       - dev-idp
       - boundary-zt
 
+  # The onboarding agent (the customer-intake path, addendum W3). Deterministic: see examples/agent-gaps/onboarding_mock.py.
+  onboarding-agent:
+    build:
+      context: .
+      dockerfile: platform/Dockerfile
+    container_name: chakra-onboarding-agent
+    command: ["python", "/app/examples/agent-gaps/onboarding_mock.py"]
+    environment:
+      IDP_TOKEN_URL: http://dev-idp:8090/token/ada-customer
+      IDP_ISSUER: http://dev-idp:8090
+      ADMIN_URL: https://localhost:6443
+      BOUNDARY_URL: https://boundary:8444
+      AGENT_SPIFFE_ID: spiffe://chakracommerce.com/ns/agents/sa/onboarding-agent
+      BOUNDARY_SPIFFE_ID: spiffe://chakracommerce.com/ns/boundary/sa/boundary
+      CLIENT_CERT: /certs/onboarding-agent.pem
+      CLIENT_KEY: /certs/onboarding-agent.key
+      CA_CERT: /certs/ca.pem
+      # The mock mints the customer's IRI with the same key the boundary uses (dev default; production sets it).
+      FINTECH_IRI_KEY: ${FINTECH_IRI_KEY:-demo-only-key-not-for-production}
+    volumes:
+      - ./tools/dev-gateway/out/onboarding:/certs:ro
+    networks: [internal]
+    restart: "no"
+    depends_on:
+      - dev-idp
+      - boundary-zt
+
+  onboarding-zt:
+    build:
+      context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.4
+    container_name: chakra-onboarding-zt
+    network_mode: "service:onboarding-agent"
+    command: ["/config/gateway.yaml"]
+    volumes:
+      - ./tools/dev-gateway/out/onboarding-zt:/config:ro
+    depends_on:
+      - onboarding-agent
+
   agent-zt:
     build:
       context: https://github.com/naren-chakraview/zero-trust-rs.git#v0.4.4

@@ -47,6 +47,7 @@ def token(user: str):
         private_pem, kid,
         issuer=ISSUER, audience=AUDIENCE,
         subject=spec["subject"], roles=spec["roles"], owns=spec["owns"],
+        extra_claims=spec.get("attributes"),
     ), "token_type": "Bearer"}
 
 

@@ -11,15 +11,18 @@ from typing import Iterable, Optional
 
 
 class StackChannel:
-    def __init__(self, stack, user: str, roles: Iterable[str], chain: Iterable[str], ttl_seconds: int = 60):
+    def __init__(self, stack, user: str, roles: Iterable[str], chain: Iterable[str], ttl_seconds: int = 60,
+                 attributes: Optional[dict] = None):
         self.stack = stack
         self.user = user
         self.roles = list(roles)
         self.chain = list(chain)
         self.ttl_seconds = ttl_seconds
+        self.attributes = attributes
 
     def _headers(self) -> dict:
-        return self.stack.delegated_headers(self.user, self.roles, self.chain, ttl_seconds=self.ttl_seconds)
+        return self.stack.delegated_headers(self.user, self.roles, self.chain, ttl_seconds=self.ttl_seconds,
+                                            attributes=self.attributes)
 
     def get(self, path: str):
         return self.stack.boundary().get(path, headers=self._headers())

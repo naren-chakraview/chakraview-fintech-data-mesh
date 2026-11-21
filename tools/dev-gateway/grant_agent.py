@@ -13,6 +13,7 @@ from shared.governance.grants import PostgresGrantStore, utc_now
 
 ANALYST = "risk.analyst@chakra.fintech"
 AGENT = "spiffe://chakracommerce.com/ns/agents/sa/risk-review-agent"
+ONBOARD = "spiffe://chakracommerce.com/ns/agents/sa/onboarding-agent"
 HOURS = 8
 
 
@@ -24,7 +25,12 @@ def main() -> None:
                           expires_at=expires)
     notes = store.create(subject=ANALYST, workload_spiffe_id=AGENT, product_id="risk-compliance.risk-review-notes",
                          columns=[], purpose="propose", expires_at=expires)
-    print(f"read grant {scores.id} and propose grant {notes.id}, valid {HOURS}h, for the agent only")
+    # The customer's own intake, written by the onboarding agent for that customer only (addendum W3).
+    intake = store.create(subject="ada@customer.test", workload_spiffe_id=ONBOARD,
+                          product_id="accounts.customer-intake",
+                          columns=["customer_iri", "legal_name", "ssn", "address"], purpose="write",
+                          expires_at=expires)
+    print(f"read grant {scores.id}, propose grant {notes.id}, intake grant {intake.id}, valid {HOURS}h")
 
 
 if __name__ == "__main__":
