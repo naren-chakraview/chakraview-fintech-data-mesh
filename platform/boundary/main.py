@@ -26,7 +26,7 @@ from proposals.writer import GovernedWriter, ProposalConflict, ProposalNotFound
 from . import proposals as governed
 from .ledger import ReadLedger
 from .lineage_check import make_lineage_check
-from .pipeline import Denied, Services, read_rows, read_sparql
+from .pipeline import Denied, Services, read_aggregate, read_rows, read_sparql
 from .policy import OPAError, decide, policy_revisions
 from .reader import FixtureReader
 from .sparql import UpstreamError
@@ -276,6 +276,21 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
         except Denied as exc:
             raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
         except Exception as exc:  # any failure on the read path denies; never return partial rows
+            raise handle(exc) from exc
+
+    @app.get("/products/{product_id}/aggregates")
+    async def get_aggregates(
+        product_id: str,
+        caller: Caller = Depends(get_caller),
+        group_by: str = Query(..., description="one public column"),
+        purpose: str = Query(""),
+    ):
+        purpose_or_400(purpose)
+        try:
+            return await read_aggregate(services, caller, product_id, group_by, purpose)
+        except Denied as exc:
+            raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
+        except Exception as exc:
             raise handle(exc) from exc
 
     @app.post("/products/{product_id}/sparql")

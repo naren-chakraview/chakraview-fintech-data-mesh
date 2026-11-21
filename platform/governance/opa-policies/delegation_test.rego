@@ -156,3 +156,37 @@ test_owner_of_another_domain_cannot_accept if {
 test_delegation_with_a_non_spiffe_actor_is_refused if {
 	not guardrails.delegation_ok with input as {"delegation": {"actor": "analyst", "chain": ["analyst"]}}
 }
+
+# --- Aggregates: counts per group, which an agent may get for the columns the domain lists for aggregates ---
+
+aggregate(product, columns) := {
+	"action": "aggregate",
+	"principal": analyst,
+	"workload": {"spiffe_id": AGENT},
+	"product": product,
+	"delegation": delegation,
+	"columns": columns,
+}
+
+test_agent_may_aggregate_a_listed_column if {
+	access.allow with input as aggregate(risk_scores, ["risk_band"])
+}
+
+test_agent_may_not_aggregate_an_unlisted_column if {
+	not access.allow with input as aggregate(risk_scores, ["fraud_score"])
+}
+
+test_agent_may_not_read_a_column_it_may_aggregate if {
+	not access.allow with input as object.union(delegated_read(risk_scores, ["risk_band"]), {"action": "read", "columns": ["risk_band"]})
+		with data.data_mesh.domain["risk-compliance"]["risk-scores"].agent_columns as []
+}
+
+test_person_may_aggregate_without_delegation if {
+	access.allow with input as {"action": "aggregate", "principal": analyst, "workload": {"spiffe_id": NOTEBOOK},
+		"product": risk_scores, "columns": ["fraud_score"]}
+}
+
+test_agent_not_named_may_not_aggregate if {
+	not access.allow with input as object.union(aggregate(risk_scores, ["risk_band"]),
+		{"delegation": {"actor": OTHER_AGENT, "chain": [OTHER_AGENT]}, "workload": {"spiffe_id": OTHER_AGENT}})
+}

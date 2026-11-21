@@ -1,4 +1,4 @@
-.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke agent-test agent-demo agent-up agent-grants agent-run
+.PHONY: help install test lint format clean docker-up docker-down policy-test trust-keys trust-test trust-demo trust-smoke agent-test agent-demo agent-up agent-grants agent-run agent-check
 
 help:
 	@echo "Available commands:"
@@ -20,6 +20,7 @@ help:
 	@echo "  make agent-up       Start the compose stack for the agent path (needs make trust-keys and a .env)"
 	@echo "  make agent-grants   DEV ONLY: create the agent's read and propose grants (the approval stand-in)"
 	@echo "  make agent-run      Run the scripted agent once through the two sidecars, then show its output"
+	@echo "  make agent-check    LIVE: a token bound to the agent's certificate is refused for another workload's"
 
 install:
 	pip install -r requirements.txt
@@ -93,3 +94,10 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	rm -rf .pytest_cache/ build/ dist/ *.egg-info/
+
+agent-check:
+	docker compose -f docker-compose.yml -f tools/dev-gateway/check.override.yml up -d --force-recreate --no-deps agent agent-zt
+	sleep 5
+	docker exec -i chakra-agent python - < tools/dev-gateway/check_binding.py; rc=$$?; \
+	docker compose up -d --force-recreate --no-deps agent agent-zt >/dev/null 2>&1; exit $$rc
+

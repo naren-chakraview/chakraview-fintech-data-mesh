@@ -6,7 +6,7 @@
 #   input.principal.roles          verified role claims (for a delegated call: the person's roles)
 #   input.principal.owns           verified domain ownership claims (owner actions only)
 #   input.workload.spiffe_id       verified SPIFFE ID of the workload (for a delegated call: the agent)
-#   input.action                   "read" | "request_access" | "propose" | "accept" | "reject" | "rollback"
+#   input.action                   "read" | "aggregate" | "request_access" | "propose" | "accept" | "reject" | "rollback"
 #   input.delegation               present only for a delegated call: {actor, chain}, verified from a gateway token
 #   input.product.classification   highest column classification of the product
 #   input.column_classification    classification of one column (masking only)
@@ -33,7 +33,7 @@ default platform_allow := false
 platform_allow if {
 	input.principal.subject != ""
 	startswith(input.workload.spiffe_id, "spiffe://")
-	input.action in {"read", "request_access"}
+	input.action in {"read", "aggregate", "request_access"}
 	provenance_ok
 	delegation_ok
 }

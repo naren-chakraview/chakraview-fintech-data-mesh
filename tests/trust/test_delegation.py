@@ -205,3 +205,52 @@ def test_a_delegated_read_without_roles_in_the_token_is_denied_by_policy(stack):
     r = _loopback_get(stack, stack.delegated_headers(SUBJECT, [], [AGENT_SPIFFE_ID]))
 
     assert r.status_code == 403, "the person's roles come from the token; none means no access"
+
+
+# --- aggregates: counts per group, through the forwarded-call path ---
+
+def _aggregate(stack, group_by, headers):
+    return stack.boundary().get(f"/products/{RISK}/aggregates?group_by={group_by}&purpose={PURPOSE}", headers=headers)
+
+
+def test_agent_gets_counts_per_group_with_small_groups_suppressed(stack):
+    agent_grant(stack, columns=["risk_band"])
+
+    r = _aggregate(stack, "risk_band", stack.delegated_headers(SUBJECT, ROLES, [AGENT_SPIFFE_ID]))
+
+    assert r.status_code == 200, r.text
+    body = r.json()
+    # The fixture has three "high" rows; "low" and "medium" have one each, below the minimum of 3.
+    assert body["groups"] == [{"value": "high", "count": 3}]
+    assert body["suppressed_groups"] == 2
+    assert body["min_group_size"] == 3
+    assert "rows" not in body, "a count never carries a row"
+    record = stack.audit_records[-1]
+    assert record["action"] == "aggregate" and record["on_behalf_of"] == SUBJECT
+    assert record["suppressed_groups"] == 2
+
+
+def test_agent_may_not_aggregate_by_a_column_it_may_not_read_as_rows(stack):
+    agent_grant(stack, columns=["fraud_score"])
+
+    r = _aggregate(stack, "fraud_score", stack.delegated_headers(SUBJECT, ROLES, [AGENT_SPIFFE_ID]))
+
+    assert r.status_code == 403
+
+
+def test_a_non_public_column_is_never_a_group_even_for_a_person(stack):
+    stack.grants.create(subject=SUBJECT, workload_spiffe_id=WORKLOADS["notebook"], product_id=RISK,
+                        columns=["fraud_score"], purpose=PURPOSE, expires_at=stack.now + timedelta(hours=1))
+
+    r = stack.boundary().get(f"/products/{RISK}/aggregates?group_by=fraud_score&purpose={PURPOSE}",
+                             headers=stack.headers(stack.token(SUBJECT, roles=ROLES)))
+
+    assert r.status_code == 403, "a group key reveals the value, so only public columns group"
+
+
+def test_a_grouping_the_agent_was_never_granted_is_refused_by_the_grant(stack):
+    agent_grant(stack, columns=["customer_iri"])  # a grant, but not for the band
+
+    r = _aggregate(stack, "risk_band", stack.delegated_headers(SUBJECT, ROLES, [AGENT_SPIFFE_ID]))
+
+    assert r.status_code == 403

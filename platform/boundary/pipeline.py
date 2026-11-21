@@ -1,6 +1,7 @@
 """The read path. Every step fails closed: no verified caller, no decision, no grant, no audit means no data."""
 
 import hashlib
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Awaitable, Callable, Dict, List, Optional
@@ -203,6 +204,51 @@ async def read_rows(services: Services, caller: Caller, product_id: str,
     return {"product_id": product_id, "columns": columns, "rows": masked,
             "lineage_verified": lineage_verified, "grant_id": grant.id if grant else None,
             "snapshot_sha256": snapshot_sha256}
+
+
+DEFAULT_MIN_GROUP = 5
+
+
+async def read_aggregate(services: Services, caller: Caller, product_id: str, group_by: str,
+                         purpose: str) -> dict:
+    """Counts per value of one public column. Groups below the product's minimum size are suppressed, and the
+    number of suppressed groups is reported, never their values. No row leaves the boundary."""
+    product = services.products.get(product_id)
+    if product is None:
+        raise Denied(404, "product not found")
+    try:
+        known = set(services.reader.columns(product_id))
+    except LookupError as exc:
+        raise Denied(404, "no data for product") from exc
+    if group_by not in known:
+        raise Denied(400, f"unknown column: {group_by}")
+    if column_classifications(product).get(group_by) != "public":
+        raise Denied(403, "counts may only be grouped by a public column")
+
+    product, grant = await authorize(services, caller, product_id, "aggregate", [group_by], purpose)
+    minimum = int(product.get("access_policy", {}).get("aggregate_min_group", DEFAULT_MIN_GROUP))
+    counts = Counter(str(row[group_by]) for row in services.reader.read(product_id, [group_by]))
+    groups = [{"value": value, "count": count} for value, count in sorted(counts.items()) if count >= minimum]
+    suppressed = sum(1 for count in counts.values() if count < minimum)
+    await services.audit({
+        "action": "aggregate",
+        "decision": "allow",
+        "subject": caller.principal.subject,
+        "roles": sorted(caller.principal.roles),
+        "workload_spiffe_id": caller.spiffe_id,
+        "product": product_id,
+        "purpose": purpose,
+        "group_by": group_by,
+        "min_group_size": minimum,
+        "suppressed_groups": suppressed,
+        "grant_id": grant.id if grant else None,
+        "policy_revisions": services.revisions,
+        "timestamp": services.clock().isoformat(),
+        **delegation_audit(caller),
+    })
+    return {"product_id": product_id, "group_by": group_by, "groups": groups,
+            "suppressed_groups": suppressed, "min_group_size": minimum,
+            "grant_id": grant.id if grant else None}
 
 
 def predicate_classes(product: dict) -> Dict[str, str]:

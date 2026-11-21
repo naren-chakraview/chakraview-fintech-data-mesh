@@ -16,11 +16,31 @@ domain_policy := data.data_mesh.domain[input.product.domain][input.product.name]
 
 default allow := false
 
-# Reads, by a person or by an agent acting for one.
+# Reads, by a person or by an agent acting for one. A read may ask only for the columns the domain lists for agents.
 allow if {
+	input.action == "read"
 	data.data_mesh.guardrails.platform_allow
 	domain_policy.allow
 	agent_permitted
+}
+
+# Aggregates (counts per group), by a person, or by an agent for the columns the domain lists for aggregates. A
+# group is a count, not a row, so an agent may be allowed counts that it may not read as rows.
+allow if {
+	input.action == "aggregate"
+	data.data_mesh.guardrails.platform_allow
+	domain_policy.allow
+	agent_aggregate_permitted
+}
+
+agent_aggregate_permitted if not input.delegation
+
+agent_aggregate_permitted if {
+	input.delegation
+	agent_opted_in
+	every column in object.get(input, "columns", []) {
+		column in object.get(domain_policy, "agent_aggregate_columns", [])
+	}
 }
 
 # Proposals: only an agent proposes, and only where the domain opts that agent in.

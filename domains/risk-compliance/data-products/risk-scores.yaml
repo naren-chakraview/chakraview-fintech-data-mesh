@@ -37,6 +37,9 @@ access_policy:
   default: deny
   approval_required: true
   approval_sla_hours: 2
+  # A count is published only for groups of at least this many rows. The fixture is small, so this is 3; production
+  # uses a larger number set by the domain.
+  aggregate_min_group: 3
   columns:
     - name: fraud_score
       classification: sensitive
