@@ -14,6 +14,15 @@ allow if {
 	input.principal.roles[_] in {"kyc_officer"}
 }
 
+# An agent acting for the customer reads only the identifier of her record, to cite the snapshot a derived value came
+# from (read-before-write). Its columns are limited by agent_columns below, and a direct read by the customer is not
+# allowed here.
+allow if {
+	input.action == "read"
+	input.delegation
+	input.principal.roles[_] == "customer"
+}
+
 # Writes: a customer writes their own intake. The record must be theirs; the boundary checks that, not this file.
 default allow_write := false
 
@@ -27,6 +36,30 @@ allow_agents := ["spiffe://chakracommerce.com/ns/agents/sa/onboarding-agent"]
 agent_write_columns := ["customer_iri", "legal_name", "ssn", "address"]
 
 requires_approval if input.product.approval_required == true
+
+# Subject consent (addendum 2, W7). An agent acting for the customer may propose a value she decides on (the canonical
+# address, say). Only the customer may accept it: the platform checks her identity; this file says she is a customer.
+default allow_propose := false
+
+allow_propose if {
+	input.action == "propose"
+	input.principal.roles[_] == "customer"
+	subject_consent_on
+}
+
+default allow_consent := false
+
+allow_consent if {
+	input.action == "accept_consent"
+	input.principal.roles[_] == "customer"
+	subject_consent_on
+}
+
+# A domain may switch subject consent off (addendum 2: stricter, never looser). Off, the proposal and the acceptance are
+# refused, and the platform refuses the agent's derived personal write.
+subject_consent_on if not data.data_mesh.domain["accounts"]["customer-intake"].subject_consent == false
+
+agent_columns := ["customer_iri"]
 
 column_strategy := {
 	"customer_iri": "no_mask",

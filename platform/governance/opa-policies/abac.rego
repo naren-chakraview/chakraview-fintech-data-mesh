@@ -70,14 +70,25 @@ agent_write_permitted if {
 }
 
 # The outcome of a write: the platform's, or the domain's if the domain is stricter. A domain can only tighten it.
-write_severity := {"direct": 0, "requires_owner_review": 1, "forbidden": 2, "refused_pii": 3}
+write_severity := {"direct": 0, "requires_owner_review": 1, "requires_subject_consent": 1, "forbidden": 2,
+	"refused_pii": 3}
 
-write_outcome := data.data_mesh.guardrails.write_platform if {
-	write_severity[data.data_mesh.guardrails.write_platform] >= write_severity[domain_write]
+# A domain that disables subject consent turns the consent outcome into a refusal.
+subject_consent_disabled if {
+	data.data_mesh.guardrails.write_platform == "requires_subject_consent"
+	domain_policy.subject_consent == false
+}
+
+platform_write_outcome := "refused_pii" if subject_consent_disabled
+
+platform_write_outcome := data.data_mesh.guardrails.write_platform if not subject_consent_disabled
+
+write_outcome := platform_write_outcome if {
+	write_severity[platform_write_outcome] >= write_severity[domain_write]
 }
 
 write_outcome := domain_write if {
-	write_severity[domain_write] > write_severity[data.data_mesh.guardrails.write_platform]
+	write_severity[domain_write] > write_severity[platform_write_outcome]
 }
 
 domain_write := object.get(domain_policy, "write_outcome", "direct")
@@ -120,7 +131,15 @@ requires_approval if {
 	domain_policy.requires_approval
 }
 
-owner_action if input.action in {"accept", "reject", "rollback"}
+owner_action if input.action in {"accept", "reject", "rollback", "accept_consent"}
+
+# Subject consent (W7). The subject accepts; the domain may disable the mechanism (then the value is refused), and
+# cannot send these proposals to anyone but the subject.
+allow if {
+	data.data_mesh.guardrails.platform_consent_allow
+	domain_policy.allow_consent
+	object.get(domain_policy, "subject_consent", true) != false
+}
 
 # Masking strategies ordered from least to most strict. The stricter of the platform
 # floor and the domain's strategy wins, so a domain cannot loosen the floor.

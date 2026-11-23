@@ -49,6 +49,11 @@ class WriteConflict(Exception):
     """The write is valid, but it duplicates a key the product already holds (append). The caller answers 409."""
 
 
+def subjects(rows: List[dict], key: str = "customer_iri") -> set:
+    """The data subjects the rows describe: the distinct customer identifiers. A row with none adds nothing."""
+    return {row.get(key) for row in rows if row.get(key)}
+
+
 def contract(product: dict) -> dict:
     kind = product.get("write_kind")
     if kind not in ("captured", "derived"):
@@ -59,7 +64,8 @@ def contract(product: dict) -> dict:
     key = product.get("write_key")
     if not key:
         raise WriteContractError("product declares no write_key")
-    return {"kind": kind, "key": key, "mode": mode, "producers": list(product.get("producers") or [])}
+    return {"kind": kind, "key": key, "mode": mode, "producers": list(product.get("producers") or []),
+            "subject_consent": bool(product.get("subject_consent", False))}
 
 
 def effective_classification(product: dict, columns: Iterable[str]) -> str:

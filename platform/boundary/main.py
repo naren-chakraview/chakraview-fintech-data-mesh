@@ -23,6 +23,7 @@ from delegation import DelegationError, GatewayTrust, JtiCache, load_gateway_tru
 from proposals.payload import PayloadError
 from proposals.writer import GovernedWriter, ProposalConflict, ProposalNotFound
 
+from . import consent
 from . import direct_writes
 from . import writes as write_contracts
 
@@ -100,6 +101,7 @@ class DecisionBody(BaseModel):
 class WriteBody(BaseModel):
     rows: List[dict]
     derived_from: List[str] = []
+    kind: Optional[str] = None  # captured | derived; defaults to the product's kind
 
 
 def build_writer(settings: Settings, clock, *, product_id: str = PRODUCT_WITH_PROPOSALS) -> Optional[GovernedWriter]:
@@ -318,7 +320,37 @@ def create_app(settings: Settings, *, grants: Optional[GrantStore] = None,
     async def post_write(product_id: str, body: WriteBody, caller: Caller = Depends(get_caller)):
         target = _any_writer_for(product_id)
         return await _governed(direct_writes.direct_write(services, target, limits, caller, product_id,
-                                                          body.rows, body.derived_from))
+                                                          body.rows, body.derived_from, body.kind))
+
+    # Subject consent (addendum 2, W7): an agent proposes a value the customer decides on; only she accepts or declines.
+    @app.post("/products/{product_id}/consent-proposals", status_code=201)
+    async def post_consent_proposal(product_id: str, body: WriteBody, caller: Caller = Depends(get_caller)):
+        target = _any_writer_for(product_id)
+        return await _governed(consent.propose_consent(services, target, limits, caller, product_id,
+                                                       body.rows, body.derived_from))
+
+    @app.get("/products/{product_id}/consent-proposals/{proposal_id}")
+    async def get_consent_proposal(product_id: str, proposal_id: str, caller: Caller = Depends(get_caller)):
+        target = _any_writer_for(product_id)
+        try:
+            record = target.get(proposal_id)
+        except ProposalNotFound as exc:
+            raise HTTPException(status_code=404, detail="proposal not found") from exc
+        if caller.delegation is not None or consent._subject_of(caller) != record.get("subject"):
+            raise HTTPException(status_code=403, detail="only the data subject sees her own consent proposal")
+        return consent._view(record)
+
+    @app.post("/products/{product_id}/consent-proposals/{proposal_id}/accept")
+    async def accept_consent_proposal(product_id: str, proposal_id: str, caller: Caller = Depends(get_caller)):
+        target = _any_writer_for(product_id)
+        return await _governed(consent.decide_consent(services, target, caller, product_id, proposal_id, "accept"))
+
+    @app.post("/products/{product_id}/consent-proposals/{proposal_id}/decline")
+    async def decline_consent_proposal(product_id: str, proposal_id: str, body: DecisionBody,
+                                       caller: Caller = Depends(get_caller)):
+        target = _any_writer_for(product_id)
+        return await _governed(consent.decide_consent(services, target, caller, product_id, proposal_id, "decline",
+                                                      body.reason))
 
     @app.get("/products/{product_id}/rows")
     async def get_rows(

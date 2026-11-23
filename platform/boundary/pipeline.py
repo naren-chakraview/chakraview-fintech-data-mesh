@@ -103,7 +103,8 @@ async def _deny(services: Services, caller: Caller, product_id: str, columns: Li
 async def authorize(services: Services, caller: Caller, product_id: str, action: str,
                     columns: List[str], purpose: str,
                     lineage_verified: Optional[bool] = None,
-                    audit_extra: Optional[dict] = None) -> tuple:
+                    audit_extra: Optional[dict] = None,
+                    extra_input: Optional[dict] = None) -> tuple:
     """Return (product, grant or None). Raises Denied for a refusal and OPAError/other errors for a broken dependency.
 
     lineage_verified is the snapshot's provenance result for a row read. It is left out for SPARQL, which has no
@@ -114,6 +115,8 @@ async def authorize(services: Services, caller: Caller, product_id: str, action:
         raise Denied(404, "product not found")
 
     policy_input = _base_input(caller, product_policy_input(product), action, columns)
+    if extra_input:
+        policy_input.update(extra_input)
     if lineage_verified is not None:
         policy_input["lineage_verified"] = lineage_verified
     decision = await services.decide(policy_input)

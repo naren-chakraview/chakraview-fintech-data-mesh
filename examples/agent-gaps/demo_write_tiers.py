@@ -11,6 +11,10 @@ from _common import (AGENT, ANALYST, ANALYST_ROLES, DEMO_NOW, NOTEBOOK, OWNER, O
                      ok, section, show)
 from agent import RiskReviewAgent, review_note_turtle
 from channels import StackChannel
+import json
+
+from lineage.trust import load_trust
+from lineage.verify import verify_envelope
 from shared.semantic.identity import mint_customer_iri
 from shared.testing.harness import WORKLOADS
 
@@ -21,12 +25,15 @@ NOTES = "risk-compliance.risk-review-notes"
 ONBOARD = "spiffe://chakracommerce.com/ns/agents/sa/onboarding-agent"
 CUSTOMER = "ada@customer.test"
 KYC = "K-1001"
+OTHER_CUSTOMER = "grace@customer.test"
+OTHER_KYC = "K-2002"
+CANONICAL_ADDRESS = "1 ANALYTICAL WAY, LONDON"  # the deterministic stand-in standardizer (no external call)
 COLUMNS = ["customer_iri", "legal_name", "ssn", "address"]
 SUMMARY_COLUMNS = ["summary_id", "day", "risk_band", "stale_count", "customer_label"]
 
 
 def line(caller: str, kind: str, classification: str, outcome: str, accepted_by: str) -> None:
-    short = accepted_by if accepted_by in ("-", "owner") else "policy:" + accepted_by.split(":", 1)[1][:12]
+    short = "policy:" + accepted_by.split(":", 1)[1][:12] if accepted_by.startswith("policy:") else accepted_by
     print(f"  {caller:<24} {kind:<9} {classification:<12} {outcome:<30} accepted_by={short}")
 
 
@@ -102,6 +109,74 @@ def main() -> None:
         assert r.status_code == 201, r.text
         line("scores service", "derived", "sensitive", r.json()["outcome"], r.json()["accepted_by"])
 
+        section("SUBJECT CONSENT: THE CANONICAL ADDRESS IS HERS TO BLESS")
+        # The agent reads its own record (its customer_iri) to cite the snapshot its derived address comes from.
+        grant(stack, CUSTOMER, ONBOARD, INTAKE, ["customer_iri"], "intake-check")
+        grant(stack, CUSTOMER, ONBOARD, INTAKE, COLUMNS, "propose")
+        read = stack.boundary().get(f"/products/{INTAKE}/rows?columns=customer_iri&purpose=intake-check",
+                                    headers=stack.delegated_headers(CUSTOMER, ["customer"], [ONBOARD],
+                                                                    attributes={"kyc_id": KYC}))
+        assert read.status_code == 200, read.text
+        cited = read.json()["snapshot_sha256"]
+        canonical = [{"customer_iri": intake[0]["customer_iri"], "legal_name": "Ada Lovelace",
+                      "ssn": "123-45-6789", "address": CANONICAL_ADDRESS}]
+        agent_headers = stack.delegated_headers(CUSTOMER, ["customer"], [ONBOARD], attributes={"kyc_id": KYC})
+        derived_write = stack.boundary().post(f"/products/{INTAKE}/writes",
+                                              json={"rows": canonical, "derived_from": [cited], "kind": "derived"},
+                                              headers=agent_headers)
+        assert derived_write.status_code == 409, derived_write.text
+        line("onboarding agent (direct)", "derived", "pii", "requires_subject_consent", "-")
+
+        proposal = stack.boundary().post(f"/products/{INTAKE}/consent-proposals",
+                                         json={"rows": canonical, "derived_from": [cited]},
+                                         headers=stack.delegated_headers(CUSTOMER, ["customer"], [ONBOARD],
+                                                                         attributes={"kyc_id": KYC}))
+        assert proposal.status_code == 201, proposal.text
+        pid = proposal.json()["id"]
+        line("onboarding agent (consent)", "derived", "pii", "proposal to the customer", "-")
+        show("  replaces", proposal.json()["replaces"]["address"])
+        show("  proposed", proposal.json()["proposed"]["address"])
+
+        agent_accepts = stack.boundary().post(f"/products/{INTAKE}/consent-proposals/{pid}/accept",
+                                              headers=stack.delegated_headers(CUSTOMER, ["customer"], [ONBOARD],
+                                                                              attributes={"kyc_id": KYC}))
+        assert agent_accepts.status_code == 403, agent_accepts.text
+        line("the agent, for her", "accept", "pii", "refused: 403", "-")
+
+        owner = stack.headers(stack.token("owner@accounts.chakra.fintech", OWNER_ROLES, owns=["accounts-domain"]), workload=NOTEBOOK)
+        owner_accepts = stack.boundary().post(f"/products/{INTAKE}/consent-proposals/{pid}/accept", headers=owner)
+        assert owner_accepts.status_code == 403, owner_accepts.text
+        line("domain owner", "accept", "pii", "refused: 403", "-")
+
+        other = stack.headers(stack.token(OTHER_CUSTOMER, ["customer"], attributes={"kyc_id": OTHER_KYC}),
+                              workload=NOTEBOOK)
+        other_accepts = stack.boundary().post(f"/products/{INTAKE}/consent-proposals/{pid}/accept", headers=other)
+        assert other_accepts.status_code == 403, other_accepts.text
+        line("another customer", "accept", "pii", "refused: 403", "-")
+
+        hers = stack.headers(stack.token(CUSTOMER, ["customer"], attributes={"kyc_id": KYC}), workload=NOTEBOOK)
+        accepted = stack.boundary().post(f"/products/{INTAKE}/consent-proposals/{pid}/accept", headers=hers)
+        assert accepted.status_code == 200, accepted.text
+        line("the customer herself", "accept", "pii", "accepted", "customer")
+
+        envelope = json.loads((stack.paths["lineage"] / f"{INTAKE}.dsse.json").read_text())
+        predicate = verify_envelope(envelope, load_trust(stack.paths["trust"])[INTAKE].public_key)["predicate"]
+        show("snapshot accepted_by", predicate["accepted_by"])
+        show("snapshot consent", predicate["consent"])
+        assert predicate["accepted_by"] == CUSTOMER and predicate["consent"] == "subject"
+
+        # The risk agent's derived write naming several customers' personal data stays refused.
+        risk = stack.delegated_headers(ANALYST, ANALYST_ROLES, [AGENT])
+        several = [{"customer_iri": intake[0]["customer_iri"], "legal_name": "Ada Lovelace", "ssn": "123-45-6789",
+                    "address": "x"},
+                   {"customer_iri": mint_customer_iri(OTHER_CUSTOMER, OTHER_KYC), "legal_name": "Grace Hopper",
+                    "ssn": "987-65-4321", "address": "y"}]
+        several_write = stack.boundary().post(f"/products/{INTAKE}/writes",
+                                               json={"rows": several, "derived_from": [cited], "kind": "derived"},
+                                               headers=risk)
+        assert several_write.status_code == 422, several_write.text
+        line("risk agent (several people)", "derived", "pii", "refused: agent_cannot_create_pii", "-")
+
         section("THE OWNER ROLLS ONE WRITE BACK")
         owner_summary = stack.headers(stack.token(OWNER, OWNER_ROLES, owns=OWNER_DOMAINS), workload=NOTEBOOK)
         rolled = stack.boundary().post(f"/products/{SUMMARY}/rollback", json={"reason": "wrong band"},
@@ -115,6 +190,7 @@ def main() -> None:
         ok("the agent's confidential note waited for the owner; the agent's personal write was refused")
         ok("the scores service wrote its sensitive output directly, as a listed producer")
         ok("the owner's rollback is signed and audited, like the write it reverses")
+        ok("a personal value the agent derived was blessed by the one person it describes, and no one else could")
 
 
 if __name__ == "__main__":
