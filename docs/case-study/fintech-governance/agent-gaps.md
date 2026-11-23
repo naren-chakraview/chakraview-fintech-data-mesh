@@ -219,6 +219,9 @@ These are real limits of this change. Each one is either a production decision o
   (`make trust-keys`). A production snapshot comes from a real producer with its own keys.
 - **Dev IdP, dev CA and dev gateway keys.** As in the trust-gaps page, these are for development. Production uses the
   company IdP, SPIRE, and the gateway's own KMS-held keys.
+- **The intake read returns every customer's identifier to a customer's agent.** The agent reads `customer_iri` to cite
+  the snapshot a derived value came from. The identifiers are classified public, and the demo's grant is given in the test,
+  so this is not a leak in the demo. A production intake read should be filtered to the caller's own record.
 - **A column labelled less sensitive than it is skips review.** Write tiers depend on the classification label. A column
   labelled internal that holds confidential content takes the direct path. The contract checks require a label on every
   column, but they cannot judge whether the label is right.

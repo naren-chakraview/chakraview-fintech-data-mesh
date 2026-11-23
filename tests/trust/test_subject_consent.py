@@ -253,3 +253,26 @@ def test_a_domain_that_switches_subject_consent_off_refuses_the_value(tmp_path):
     assert proposal.status_code == 403, "the domain turned consent proposals off"
     assert intake_rows(stack)[0]["address"] == TYPED
 
+
+def test_an_agent_for_another_customer_cannot_propose_a_change_to_this_record(stack):
+    """C1: Grace's agent proposes the canonical address for Ada's record. Refused when it is proposed, and no proposal
+    exists, so Ada never receives a request that someone else started."""
+    digest = setup_customer(stack)
+    grant(stack, OTHER, ONBOARD, COLUMNS, "propose")
+    grant(stack, OTHER, ONBOARD, ["customer_iri"], "intake-check")
+    grace_read = stack.boundary().get(f"/products/{INTAKE}/rows?columns=customer_iri&purpose=intake-check",
+                                      headers=stack.delegated_headers(OTHER, ["customer"], [ONBOARD],
+                                                                      attributes={"kyc_id": OTHER_KYC}))
+    assert grace_read.status_code == 200, grace_read.text
+    grace = stack.delegated_headers(OTHER, ["customer"], [ONBOARD], attributes={"kyc_id": OTHER_KYC})
+
+    r = stack.boundary().post(f"/products/{INTAKE}/consent-proposals",
+                              json={"rows": [record(CANONICAL)], "derived_from": [grace_read.json()["snapshot_sha256"]]},
+                              headers=grace)
+
+    assert r.status_code == 403, r.text
+    assert r.json()["detail"] == "an agent proposes consent only for the person it acts for"
+    assert stack.writer is not None
+    assert [p for p in stack.writer.proposals.values() if p.get("kind") == "consent"] == []
+    assert intake_rows(stack)[0]["address"] == TYPED
+

@@ -33,6 +33,18 @@ def _subject_of(caller) -> Optional[str]:
         return None
 
 
+def _delegator_subject(caller) -> Optional[str]:
+    """The customer identifier of the person this agent acts for, minted from the kyc_id the gateway carried in the
+    delegated token (user_attributes, v0.4.4). None when it is absent."""
+    kyc = caller.delegation.attributes.get("kyc_id") if caller.delegation is not None else None
+    if not isinstance(kyc, str) or not kyc:
+        return None
+    try:
+        return mint_customer_iri(caller.principal.subject, kyc)
+    except IriKeyMissingError:
+        return None
+
+
 def _view(record: dict) -> dict:
     return {
         "id": record["id"],
@@ -72,6 +84,17 @@ async def propose_consent(services: Services, writer: GovernedWriter, limits: Li
     subject = row.get("customer_iri")
     if not isinstance(subject, str) or not subject:
         raise PayloadError(422, "the row must name its data subject (customer_iri)")
+
+    # C1: an agent proposes consent only for the person it acts for. Her identifier, minted from the kyc_id her
+    # gateway-signed token carries, must be the record's customer_iri. The one exception is staff holding the intake
+    # grant, who onboard a customer on her behalf. Checked before anything is recorded: no proposal exists otherwise.
+    if _delegator_subject(caller) != subject:
+        staff = services.grants.find_valid(
+            subject=caller.principal.subject, workload_spiffe_id=caller.spiffe_id, product_id=product_id,
+            columns=writer.columns, purpose="intake", now=services.clock(),
+        )
+        if staff is None:
+            raise Denied(403, "an agent proposes consent only for the person it acts for")
     current = next((r for r in writer.current_rows() if r.get("customer_iri") == subject), None)
     if current is None:
         raise PayloadError(422, "there is no record of this customer to replace")
