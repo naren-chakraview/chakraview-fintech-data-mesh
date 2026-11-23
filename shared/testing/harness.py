@@ -101,7 +101,7 @@ def platform_policy_dirs() -> List[Path]:
 
 
 @contextmanager
-def open_proposal_stack(root: Path):
+def open_proposal_stack(root: Path, extra_intake_rego: str = ""):
     """A boundary with the governed writer for the review-notes product, over copies made under `root`.
 
     The repo's own fixtures, attestations and trust config are copied, never written, so a proposal or a
@@ -126,7 +126,17 @@ def open_proposal_stack(root: Path):
         keyid=WRITER_KEYID, producer_spiffe_id=WRITER_SPIFFE_ID, clock=lambda: holder["stack"].now,
     )
     limits = Limits()
-    with local_opa(platform_policy_dirs()) as opa_url:
+    policy_dirs = platform_policy_dirs()
+    if extra_intake_rego:
+        # The accounts domain's policy with extra rules appended to the customer-intake file, for a test that changes a
+        # domain's rule (for example, switching subject consent off). The repository's policy is not changed.
+        overrides = root / "policy-overrides"
+        shutil.copytree(REPO / "domains/accounts/policy", overrides)
+        (overrides / "customer-intake.rego").write_text(
+            (REPO / "domains/accounts/policy/customer-intake.rego").read_text() + "\n" + extra_intake_rego)
+        policy_dirs = [PLATFORM_POLICY_DIR] + [d for d in DOMAIN_POLICY_DIRS
+                                               if d.parent.name != "accounts"] + [overrides]
+    with local_opa(policy_dirs) as opa_url:
         stack = TrustStack(opa_url, fixtures_dir=paths["fixtures"], lineage_dir=paths["lineage"],
                            lineage_trust_dir=paths["trust"], proposal_state_dir=paths["state"],
                            writer=writer, limits=limits)

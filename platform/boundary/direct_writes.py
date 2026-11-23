@@ -52,7 +52,8 @@ def _record_is_theirs(caller, rows: List[dict]) -> bool:
 
 
 async def direct_write(services: Services, writer: Optional[GovernedWriter], limits: Limits, caller,
-                       product_id: str, rows: List[dict], derived_from: List[str]) -> Dict:
+                       product_id: str, rows: List[dict], derived_from: List[str],
+                       requested_kind: Optional[str] = None) -> Dict:
     product = services.products.get(product_id)
     if product is None:
         raise Denied(404, "product not found")
@@ -63,6 +64,13 @@ async def direct_write(services: Services, writer: Optional[GovernedWriter], lim
         contract = w.contract(product)
     except w.WriteContractError as exc:
         raise PayloadError(422, str(exc)) from exc
+    # The write declares its kind (addendum 2). A derived write is accepted only where the product's contract takes
+    # derived writes at all: a captured product with subject consent, where the gate sends it to the customer.
+    kind = requested_kind or contract["kind"]
+    if kind not in ("captured", "derived"):
+        raise PayloadError(422, "kind must be captured or derived")
+    if kind != contract["kind"] and not (kind == "derived" and contract["subject_consent"]):
+        raise PayloadError(422, f"this product does not take {kind} writes")
     if not isinstance(rows, list) or not rows:
         raise PayloadError(400, "rows must be a non-empty list")
     if len(rows) > MAX_ROWS:
@@ -84,7 +92,7 @@ async def direct_write(services: Services, writer: Optional[GovernedWriter], lim
     # 3. identity: a record that names a customer is written only for that customer.
     subject_match = False
     intake_grant = False
-    if contract["kind"] == "captured":
+    if kind == "captured":
         if _kyc_id(caller) is not None:
             subject_match = _record_is_theirs(caller, rows)
         if caller.delegation is not None:
@@ -97,12 +105,15 @@ async def direct_write(services: Services, writer: Optional[GovernedWriter], lim
 
     # 4. the outcome (platform, then the domain may only be stricter)
     base = _base_input(caller, product_policy_input(product), "write", columns)
+    single_subject = len(w.subjects(rows)) == 1 and all(row.get("customer_iri") for row in rows)
     base["write"] = {
-        "kind": contract["kind"],
+        "kind": kind,
         "classification": effective,
         "caller": caller_kind,
         "producer": producer,
         "subject_or_grant": bool(subject_match or intake_grant),
+        "single_subject": single_subject,
+        "subject_consent": contract["subject_consent"],
     }
     try:
         outcome = await decide_write_outcome(base)
@@ -110,6 +121,8 @@ async def direct_write(services: Services, writer: Optional[GovernedWriter], lim
         raise Denied(503, "policy unavailable; nothing written") from exc
     if outcome == "refused_pii":
         raise PayloadError(422, "agent_cannot_create_pii")
+    if outcome == "requires_subject_consent":
+        raise Denied(409, f"requires_subject_consent: propose at /products/{product_id}/consent-proposals")
     if outcome == "requires_owner_review":
         raise Denied(409, f"requires_owner_review: propose at /products/{product_id}/proposals")
     if outcome == "forbidden":
@@ -120,7 +133,7 @@ async def direct_write(services: Services, writer: Optional[GovernedWriter], lim
 
     # 6. read-before-write, for an agent's derived write
     cited: List[str] = []
-    if caller.delegation is not None and contract["kind"] == "derived":
+    if caller.delegation is not None and kind == "derived":
         cited = list(dict.fromkeys(derived_from or []))
         if not cited:
             raise PayloadError(422, "a derived write by an agent must cite the snapshots it was derived from")
@@ -151,7 +164,7 @@ async def direct_write(services: Services, writer: Optional[GovernedWriter], lim
         rows=merged, written_by=caller.spiffe_id,
         on_behalf_of=principal if delegated else None,
         actor_chain=list(caller.delegation.chain) if delegated else [],
-        derived_from=cited, write_kind=contract["kind"], outcome="direct",
+        derived_from=cited, write_kind=kind, outcome="direct",
         policy_revision=policy_rev, now=now,
     )
     await services.audit({**prepared.audit_record, "subject": principal,

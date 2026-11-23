@@ -77,7 +77,7 @@ gate for a write follows the kind of write, the classification of what is writte
 | captured, any classification incl. `pii` | direct | direct, only when the delegating person is the data subject (their minted `customer_iri`), or holds an intake grant |
 | derived, `public` / `internal` | direct | direct |
 | derived, `confidential` / `sensitive` | direct, only if the workload is a listed producer | **proposal**: an owner accepts (`409 requires_owner_review` for a direct attempt) |
-| derived, `pii` | direct, only if a listed producer | **refused**: agents do not create personal data (`422 agent_cannot_create_pii`) |
+| derived, `pii` | direct, only if a listed producer | **a proposal the person it describes accepts**, if the value describes exactly one person (`409 requires_subject_consent`); **refused** if it describes several people or none (`422 agent_cannot_create_pii`) |
 
 Every direct write passes the same automated gates as a proposal, fail closed and in the same order: verified identity
 (and delegation for agents), a write grant separate from read and propose, person ∩ agent ∩ product policy, the contract's
@@ -99,6 +99,16 @@ on read. Field-level encryption is a deployment choice outside this repo.
 **Derived data, three outcomes.** `risk-compliance.score-freshness-summary` (internal) is written directly by the risk
 agent. The review note (confidential) is a proposal an owner accepts. A personal column in the summary is refused for the
 agent. The risk-scores service writes its sensitive output directly, as a listed producer.
+
+**Subject consent (addendum 2).** A personal value an agent derives is not refused when one person could bless it. The
+canonical form of a customer's address is an example: the onboarding agent proposes it, the proposal carries the value
+being replaced and the value proposed, and the customer accepts or declines. Only she can. An agent acting for her cannot
+accept what it proposed, another customer cannot, and the domain owner cannot (each is a 403). The boundary takes her
+identifier from her own IdP-attested identity (the `kyc_id` claim) and requires it to mint the record's `customer_iri`. On
+acceptance the snapshot is signed with `consent: subject` and her identity as `accepted_by`; a decline or the two-day
+expiry leaves the original in place, audited. The owner can still roll the record back. A domain can switch the mechanism
+off, and then the value is refused as before. The standardizer that produces the canonical address is a fixed mapping in
+the demo, not an external service.
 
 **A residual the gate cannot close.** Column classification cannot see personal data inside free text. A review note whose
 text names a customer is confidential by its column, and goes to an owner for that reason, not because the gate detects the
@@ -209,6 +219,9 @@ These are real limits of this change. Each one is either a production decision o
   (`make trust-keys`). A production snapshot comes from a real producer with its own keys.
 - **Dev IdP, dev CA and dev gateway keys.** As in the trust-gaps page, these are for development. Production uses the
   company IdP, SPIRE, and the gateway's own KMS-held keys.
+- **A column labelled less sensitive than it is skips review.** Write tiers depend on the classification label. A column
+  labelled internal that holds confidential content takes the direct path. The contract checks require a label on every
+  column, but they cannot judge whether the label is right.
 - **Review queues are the bottleneck.** Every agent proposal waits for an owner. That is the control, and it is also the
   cost: an owner who does not review leaves proposals to expire (after two days by default), and nothing reaches the
   product in the meantime.

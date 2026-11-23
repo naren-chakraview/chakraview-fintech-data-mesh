@@ -71,7 +71,19 @@ platform_owner_allow if {
 	not input.delegation
 }
 
-owner_action if input.action in {"accept", "reject", "rollback"}
+owner_action if input.action in {"accept", "reject", "rollback", "accept_consent"}
+
+# Subject consent (W7): the person a personal value describes is the only one who may accept it. The boundary sets
+# consent.subject_match from her IdP-attested identity; an agent (any delegation) and the domain owner never match.
+default platform_consent_allow := false
+
+platform_consent_allow if {
+	input.action == "accept_consent"
+	input.principal.subject != ""
+	startswith(input.workload.spiffe_id, "spiffe://")
+	not input.delegation
+	input.consent.subject_match == true
+}
 
 # Products with personal, confidential or restricted data always need approval, and a
 # domain cannot switch that off. Owner actions are not reads, so they need no grant.
@@ -162,8 +174,24 @@ write_platform := "direct" if {
 	input.write.producer == true
 }
 
+# Addendum 2 (W7): an agent's personal derived value that describes exactly one data subject, on a product whose
+# contract opts in, is blessed by that subject, not refused. Only the subject can accept it.
+subject_consent_possible if {
+	input.write.single_subject == true
+	input.write.subject_consent == true
+}
+
+write_platform := "requires_subject_consent" if {
+	input.write.kind == "derived"
+	input.write.classification in {"pii", "restricted"}
+	input.write.caller == "agent"
+	subject_consent_possible
+}
+
+# Several subjects, or no identifiable subject: no single person could bless it, so it is refused.
 write_platform := "refused_pii" if {
 	input.write.kind == "derived"
 	input.write.classification in {"pii", "restricted"}
 	input.write.caller == "agent"
+	not subject_consent_possible
 }

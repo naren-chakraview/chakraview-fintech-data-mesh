@@ -223,6 +223,37 @@ class GovernedWriter:
             record["decided_at"] = now
         return self._prepare_publish(rows, "accept", now, accepted_by, extra, after_publish)
 
+    def prepare_consent_accept(self, proposal_id: str, *, accepted_by: str, now: datetime) -> Prepared:
+        """The data subject accepts a consent proposal: her proposed row replaces the row it was proposed against. The
+        snapshot's statement names the subject as acceptor, the agent in the chain, and the snapshot the agent read."""
+        record = self._open_record(proposal_id, now)
+        if record.get("kind") != "consent":
+            raise ProposalConflict("not a subject-consent proposal")
+        current = self._versions[-1]["rows"]
+        subject = record["subject"]
+        existing = next((r for r in current if r.get("customer_iri") == subject), None)
+        if existing != record["replaces"]:
+            raise ProposalConflict("the value changed since it was proposed")
+        proposed = dict(record["proposed"])
+        rows = sorted([r for r in current if r.get("customer_iri") != subject] + [proposed],
+                      key=lambda r: str(r["customer_iri"]))
+        extra = {
+            "proposal_id": proposal_id,
+            "proposal_statement_sha256": record["statement_sha256"],
+            "on_behalf_of": record["on_behalf_of"],
+            "actor_chain": record["actor_chain"],
+            "derived_from": [{"sha256": d} for d in record["derived_from"]],
+            "accepted_by": accepted_by,
+            "write_kind": "captured",
+            "consent": "subject",
+        }
+
+        def after_publish() -> None:
+            record["status"] = "accepted"
+            record["decided_by"] = accepted_by
+            record["decided_at"] = now
+        return self._prepare_publish(rows, "accept_consent", now, accepted_by, extra, after_publish)
+
     def prepare_reject(self, proposal_id: str, *, rejected_by: str, reason: str, now: datetime) -> Prepared:
         record = self._open_record(proposal_id, now)
         if not reason:

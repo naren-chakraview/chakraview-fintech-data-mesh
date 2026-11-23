@@ -11,6 +11,9 @@ description: |
   deployment choice outside this repo).
 
 write_kind: captured
+# Personal values an agent derives (a canonical address, say) go to the customer as a consent proposal; she accepts or
+# declines (addendum 2). A domain may switch this off.
+subject_consent: true
 write_key: customer_iri
 write_mode: append
 producers: []

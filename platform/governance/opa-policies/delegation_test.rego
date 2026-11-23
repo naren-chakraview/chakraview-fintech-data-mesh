@@ -274,3 +274,77 @@ test_the_default_purpose_keeps_the_full_mask if {
 		with data.data_mesh.domain["accounts"]["customer-intake"].kyc_column_strategy as {"ssn": "partial_mask"}
 		with data.data_mesh.domain["accounts"]["customer-intake"].column_strategy as {"ssn": "full_mask"}
 }
+
+# --- Subject consent (addendum 2, W7) ---
+
+write7(classification, caller, single_subject, subject_consent) := {
+	"action": "write",
+	"principal": analyst,
+	"workload": {"spiffe_id": AGENT},
+	"product": review_notes,
+	"write": {"kind": "derived", "classification": classification, "caller": caller, "producer": false,
+		"subject_or_grant": false, "single_subject": single_subject, "subject_consent": subject_consent},
+}
+
+test_a_personal_derived_value_for_one_subject_needs_her_consent if {
+	data.data_mesh.access.write_outcome == "requires_subject_consent"
+		with input as write7("pii", "agent", true, true)
+}
+
+test_several_subjects_are_still_refused if {
+	data.data_mesh.access.write_outcome == "refused_pii" with input as write7("pii", "agent", false, true)
+}
+
+test_no_identifiable_subject_is_refused if {
+	data.data_mesh.access.write_outcome == "refused_pii" with input as write7("pii", "agent", false, false)
+}
+
+test_a_product_without_the_consent_contract_refuses_one_subject if {
+	data.data_mesh.access.write_outcome == "refused_pii" with input as write7("restricted", "agent", true, false)
+}
+
+test_a_domain_can_disable_subject_consent if {
+	data.data_mesh.access.write_outcome == "refused_pii"
+		with input as write7("pii", "agent", true, true)
+		with data.data_mesh.domain["risk-compliance"]["risk-review-notes"].subject_consent as false
+}
+
+consent(subject_match, principal) := {
+	"action": "accept_consent",
+	"principal": principal,
+	"workload": {"spiffe_id": NOTEBOOK},
+	"product": intake,
+	"consent": {"subject_match": subject_match},
+}
+
+customer := {"subject": "ada@customer.test", "roles": ["customer"], "owns": []}
+
+test_the_subject_may_accept_her_own_consent if {
+	access.allow with input as consent(true, customer)
+}
+
+test_another_customer_may_not_accept if {
+	not access.allow with input as consent(false, customer)
+}
+
+test_the_domain_owner_may_not_accept if {
+	not access.allow with input as consent(false, owner)
+}
+
+test_an_agent_may_not_accept_even_for_the_subject if {
+	not access.allow with input as object.union(consent(true, customer), {"delegation": delegation, "workload": {"spiffe_id": AGENT}})
+}
+
+test_an_analyst_may_not_accept_for_the_subject if {
+	not access.allow with input as consent(false, analyst)
+}
+
+test_the_subject_acceptance_needs_no_grant if {
+	not access.requires_approval with input as consent(true, customer)
+}
+
+test_a_domain_that_disables_consent_refuses_the_subject_too if {
+	not access.allow with input as consent(true, customer)
+		with data.data_mesh.domain["accounts"]["customer-intake"].subject_consent as false
+}
+

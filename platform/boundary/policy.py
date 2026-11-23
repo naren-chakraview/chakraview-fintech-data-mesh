@@ -79,7 +79,7 @@ def policy_revisions(policy_root: Path, product_policy_files: dict) -> dict:
     }
 
 
-WRITE_OUTCOMES = ("direct", "requires_owner_review", "forbidden", "refused_pii")
+WRITE_OUTCOMES = ("direct", "requires_owner_review", "requires_subject_consent", "forbidden", "refused_pii")
 DEFAULT_OPA_WRITE_URL = "http://opa:8181/v1/data/data_mesh/access/write_outcome"
 
 
